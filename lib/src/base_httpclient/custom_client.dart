@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:base/src/widgets/custom_dialog.dart';
 import 'package:http_interceptor/models/models.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -102,7 +103,7 @@ class CustomInterceptedClient extends BaseClient {
 
   CustomInterceptedClient._internal({
     required this.interceptors,
-    this.requestTimeout ,
+    this.requestTimeout,
     this.retryPolicy,
     this.findProxy,
     Client? client,
@@ -111,7 +112,7 @@ class CustomInterceptedClient extends BaseClient {
 
   factory CustomInterceptedClient.build({
     required List<InterceptorContract> interceptors,
-    Duration requestTimeout= const Duration(seconds: REQUEST_TIME_OUT),
+    Duration requestTimeout = const Duration(seconds: REQUEST_TIME_OUT),
     RetryPolicy? retryPolicy,
     String Function(Uri)? findProxy,
     Client? client,
@@ -134,7 +135,7 @@ class CustomInterceptedClient extends BaseClient {
         url: url,
         headers: headers,
       );
-
+  @override
   Future<Response> get(
     Uri url, {
     Map<String, String>? headers,
@@ -254,7 +255,7 @@ class CustomInterceptedClient extends BaseClient {
   }) async {
     url = url.addParameters(params);
 
-    Request request = new Request(methodToString(method), url);
+    Request request = Request(methodToString(method), url);
     if (headers != null) request.headers.addAll(headers);
     if (encoding != null) request.encoding = encoding;
     if (body != null) {
@@ -265,7 +266,7 @@ class CustomInterceptedClient extends BaseClient {
       } else if (body is Map) {
         request.bodyFields = body.cast<String, String>();
       } else {
-        throw new ArgumentError('Invalid request body "$body".');
+        throw ArgumentError('Invalid request body "$body".');
       }
     }
 
@@ -283,13 +284,13 @@ class CustomInterceptedClient extends BaseClient {
     if (response.reasonPhrase != null) {
       message = "$message: ${response.reasonPhrase}";
     }
-    throw new ClientException("$message.", url);
+    throw ClientException("$message.", url);
   }
 
   /// Attempts to perform the request and intercept the data
   /// of the response
   Future<Response> _attemptRequest(Request request) async {
-    var response;
+    Response response;
     try {
       // Intercept request
       final interceptedRequest = await _interceptRequest(request);
@@ -313,8 +314,7 @@ class CustomInterceptedClient extends BaseClient {
         _retryCount += 1;
         return _attemptRequest(request);
       } else {
-        //TODO:
-        // AppDialog.closeLoading();
+        AppLoading.closeLoading();
         if (onError != null) {
           onError!(error);
         } else {
@@ -368,6 +368,7 @@ class CustomInterceptedClient extends BaseClient {
     }
   }
 
+  @override
   void close() {
     _inner.close();
   }

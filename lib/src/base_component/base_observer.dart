@@ -1,16 +1,30 @@
+import 'package:base/base_component.dart';
+import 'package:base/base_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-
-
 
 class Observer<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
-  Observer({required T initValue}) {
+  late String _initRoute;
+  DefaultController? controller;
+  Observer({required T initValue, bool autoClose = true, this.controller}) {
     _object = initValue;
     _streamController.sink.add(_object);
+
+    if (AppRouter.listActiveRouter.isEmpty) {
+      _initRoute = AppRouter.initRoute;
+    } else {
+      _initRoute = AppRouter.listActiveRouter.last;
+    }
+    if (autoClose) {
+      AppRouter.listObserver.add(this);
+    } else {
+      controller?.listObs.add(this);
+    }
   }
   // set obs(T _value) => _object = _value;
+  String get route => _initRoute;
 
   T get value => _object;
   set value(T valueSet) {
@@ -24,6 +38,7 @@ class Observer<T> {
   Stream<T> get stream => _streamController.stream;
 
   dispose() {
+    debugPrint('${this} disposing');
     _streamController.close();
   }
 }
@@ -31,13 +46,16 @@ class Observer<T> {
 class ObserWidget<T> extends StatelessWidget {
   const ObserWidget({super.key, required this.value, required this.child});
   final Observer<T> value;
-  final Widget Function(T? value) child;
+  final Widget Function(T value) child;
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<T>(
         stream: value.stream,
         builder: (context, snapshot) {
-          return child(snapshot.data);
+          if (snapshot.hasData) {
+            return child(snapshot.data as T);
+          }
+          return const Center(child: CircularProgressIndicator());
         });
   }
 }
@@ -64,7 +82,10 @@ class ObserListWidget extends StatelessWidget {
     return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {
-          return child(snapshot.data);
+          if (snapshot.hasData) {
+            return child(snapshot.data);
+          }
+          return const Center(child: CircularProgressIndicator());
         });
   }
 }

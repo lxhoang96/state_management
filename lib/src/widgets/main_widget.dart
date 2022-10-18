@@ -1,16 +1,20 @@
-import 'package:base/src/base_component/base_observer.dart';
-import 'package:base/src/widgets/custom_dialog.dart';
-import 'package:base/src/widgets/custom_snackbar.dart';
-import 'package:base/src/state_management/main_state.dart';
+import 'package:base/base_component.dart';
+import 'package:base/base_navigation.dart';
+import 'package:base/base_widget.dart';
 import 'package:flutter/material.dart';
 
 class GlobalState extends StatefulWidget {
   const GlobalState(
-      {Key? key, required this.child, this.init, required this.appIcon})
+      {Key? key,
+      required this.child,
+      this.init,
+      required this.appIcon,
+      this.swipeToBack = false})
       : super(key: key);
   final Widget child;
   final InitBinding? init;
   final String appIcon;
+  final bool swipeToBack;
   @override
   State<GlobalState> createState() => _GlobalStateState();
 }
@@ -46,10 +50,10 @@ class _GlobalStateState extends State<GlobalState> {
         buildChild(),
         Positioned.fill(
           child: ObserWidget(
-            value: AppDialog.showing,
+            value: AppLoading.showing,
             child: (value) {
               if (value == true) {
-                return AppDialog.showDialog(widget.appIcon);
+                return AppLoading.loadingWidget(widget.appIcon);
               }
               return const SizedBox();
             },
