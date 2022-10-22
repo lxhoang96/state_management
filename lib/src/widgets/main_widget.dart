@@ -9,12 +9,12 @@ class GlobalState extends StatefulWidget {
       required this.child,
       this.init,
       required this.appIcon,
-      this.swipeToBack = false})
+      required this.initialRoute})
       : super(key: key);
   final Widget child;
   final InitBinding? init;
   final String appIcon;
-  final bool swipeToBack;
+  final String? initialRoute;
   @override
   State<GlobalState> createState() => _GlobalStateState();
 }
@@ -23,9 +23,21 @@ class _GlobalStateState extends State<GlobalState> {
   bool init = false;
   @override
   void initState() {
-    widget.init?.dependencies().then((value) => setState(() {
-          init = true;
-        }));
+    AppLoading.showing.value = false;
+    AppSnackBar.showSnackBar.value = false;
+
+    if (widget.init == null) {
+      setState(() {
+        init = true;
+      });
+    } else {
+      widget.init?.dependencies().then((value) => setState(() {
+            init = true;
+          }));
+    }
+    if (widget.initialRoute != null) {
+      AppRouter.listActiveRouter.add(widget.initialRoute!);
+    }
 
     super.initState();
   }

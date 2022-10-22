@@ -1,4 +1,3 @@
-import 'package:base/base_component.dart';
 import 'package:base/base_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -7,8 +6,7 @@ class Observer<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
   late String _initRoute;
-  DefaultController? controller;
-  Observer({required T initValue, bool autoClose = true, this.controller}) {
+  Observer({required T initValue, bool autoClose = false}) {
     _object = initValue;
     _streamController.sink.add(_object);
 
@@ -19,11 +17,8 @@ class Observer<T> {
     }
     if (autoClose) {
       AppRouter.listObserver.add(this);
-    } else {
-      controller?.listObs.add(this);
     }
   }
-  // set obs(T _value) => _object = _value;
   String get route => _initRoute;
 
   T get value => _object;
@@ -68,17 +63,8 @@ class ObserListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final Stream<List<AsyncSnapshot>> _stream = StreamZip(listStream);
     final stream = Rx.combineLatestList(listStream);
-    // .map((event) {
-    //   event.forEach((element) {
-    //     print(element);
-    //   });
-    //   return event;
-    // });
 
-    // Rx.ra
-    // final _stream = StreamGroup.merge(listStream);
     return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {

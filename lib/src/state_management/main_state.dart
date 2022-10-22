@@ -15,6 +15,8 @@ abstract class MainStateRepo {
   T addNew<T>(T instance);
 
   void disposeAll();
+
+  getLast();
 }
 
 class MainState extends MainStateRepo {
@@ -26,11 +28,15 @@ class MainState extends MainStateRepo {
     if (controller != null) {
       return controller as T;
     } else {
+      final DefaultController controller;
       if (instance is BaseController) {
+        controller = instance as DefaultController;
         instance.init();
+      } else {
+        controller = DefaultController(instance: instance);
       }
       _listCtrl[T] =
-          InstanceRoute(route: _getCurrentRoute(), controller: instance);
+          InstanceRoute(route: _getCurrentRoute(), controller: controller);
       debugPrint("Added Controller Type:$T");
     }
 
@@ -41,16 +47,18 @@ class MainState extends MainStateRepo {
   addNew<T>(instance) {
     final controller = _listCtrl[T]?.controller;
     if (controller != null) {
-      if (controller is BaseController) {
-        controller.dispose();
-      }
+      controller.dispose();
       _listCtrl.remove(T);
     }
+    final DefaultController newController;
     if (instance is BaseController) {
+      newController = instance as DefaultController;
       instance.init();
+    } else {
+      newController = DefaultController(instance: instance);
     }
     _listCtrl[T] =
-        InstanceRoute(route: _getCurrentRoute(), controller: instance);
+        InstanceRoute(route: _getCurrentRoute(), controller: newController);
     debugPrint("Added New Controller Type:$T");
 
     return instance;
@@ -65,9 +73,7 @@ class MainState extends MainStateRepo {
   remove<T>() {
     final controller = _listCtrl[T]?.controller;
     if (controller != null) {
-      if (controller is BaseController) {
-        controller.dispose();
-      }
+      controller.dispose();
       _listCtrl.remove(T);
       debugPrint("Removed Controller Type:$T");
     }
@@ -76,17 +82,8 @@ class MainState extends MainStateRepo {
   @override
   void disposeAll() {
     _listCtrl.forEach((key, element) {
-      if (element.controller is BaseController) {
-        element.controller.dispose();
-      }
+      element.controller.dispose();
     });
-  }
-
-  String _getCurrentRoute() {
-    if (AppRouter.listActiveRouter.isEmpty) {
-      return AppRouter.initRoute;
-    }
-    return AppRouter.listActiveRouter.last;
   }
 
   @override
@@ -95,14 +92,24 @@ class MainState extends MainStateRepo {
       final result = !AppRouter.listActiveRouter.contains(value.route) &&
           value.route != AppRouter.initRoute;
       if (result) {
-        if (value.controller is BaseController) {
-          value.controller.dispose();
-        }
+        value.controller.dispose();
         debugPrint("Removed Controller Type:$key");
       }
       return result;
     });
     debugPrint('After deleted: ${_listCtrl.length}');
+  }
+
+  @override
+  getLast() {
+    return _listCtrl.values.last.controller;
+  }
+
+  String _getCurrentRoute() {
+    if (AppRouter.listActiveRouter.isEmpty) {
+      return AppRouter.initRoute;
+    }
+    return AppRouter.listActiveRouter.last;
   }
 }
 
@@ -118,11 +125,13 @@ extension GlobalExtension on MainStateRepo {
   void disposeAll() => MainState().disposeAll();
 
   void autoRemove() => MainState().autoRemove();
+
+  dynamic getLast() => MainState().getLast();
 }
 
 class InstanceRoute {
   final String route;
-  final dynamic controller;
+  final DefaultController controller;
 
   InstanceRoute({required this.route, required this.controller});
 }

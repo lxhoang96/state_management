@@ -3,7 +3,7 @@ import 'package:base/src/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 class AppSnackBar {
-  static final showSnackBar = Observer(initValue: false, autoClose: false);
+  static final showSnackBar = Observer(initValue: false, autoClose: true);
   static Widget snackbar = const SizedBox();
 
   static defaultSnackBar(

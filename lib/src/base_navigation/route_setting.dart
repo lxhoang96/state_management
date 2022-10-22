@@ -21,27 +21,28 @@ class AppRouter {
     navigatorKey.currentState?.pushNamed(name, arguments: argument);
   }
 
-  static offAndPushNamed(String name, {Object? argument}) {
+  static popAndPushNamed(String name, {Object? argument}) {
     // if (navigatorKey.currentState?.canPop() ?? false) {
-    listActiveRouter.removeLast();
-    listActiveRouter.add(name);
-    navigatorKey.currentState?.popAndPushNamed(name, arguments: argument);
-    Global.autoRemove();
-    autoRemoveObserver();
+      if (listActiveRouter.isNotEmpty) listActiveRouter.removeLast();
+      listActiveRouter.add(name);
+      navigatorKey.currentState?.popAndPushNamed(name, arguments: argument);
+      Global.autoRemove();
+      autoRemoveObserver();
     // }
   }
 
   static pop({Object? argument}) {
     debugPrint(navigatorKey.currentState?.canPop().toString());
-    if (navigatorKey.currentState?.canPop() ?? false) {
-      listActiveRouter.removeLast();
+    // if (navigatorKey.currentState?.canPop() ?? false) {
+      if (listActiveRouter.isNotEmpty) listActiveRouter.removeLast();
+
       navigatorKey.currentState?.pop(argument);
       Global.autoRemove();
       autoRemoveObserver();
-    }
+    // }
   }
 
-  static offAllandPushNamed(String name, {Object? argument}) {
+  static popAllandPushNamed(String name, {Object? argument}) {
     listActiveRouter.clear();
     listActiveRouter.add(name);
     navigatorKey.currentState
@@ -65,17 +66,14 @@ class AppRouter {
   }
 
   static autoRemoveObserver() {
-    int willDeleteObs = 0;
     listObserver.removeWhere((element) {
       final result = listActiveRouter.contains(element.route) ||
           element.route == initRoute;
       if (!result) {
-        willDeleteObs += 1;
+        debugPrint('Closing $element obs!');
         element.dispose();
       }
       return result;
     });
-
-    debugPrint('Closed $willDeleteObs obs!');
   }
 }

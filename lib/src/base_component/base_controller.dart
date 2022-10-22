@@ -8,10 +8,8 @@ abstract class BaseController {
 }
 
 class DefaultController extends BaseController {
-  DefaultController();
-  // {
-  //    init();
-  // }
+  DefaultController({this.instance});
+  final dynamic instance;
   final List<Observer> listObs = [];
   @override
   void dispose() {
