@@ -9,12 +9,16 @@ class GlobalState extends StatefulWidget {
       required this.child,
       this.init,
       required this.appIcon,
-      required this.initialRoute})
+      required this.initialRoute,
+      this.useLoading = true,
+      this.useSnackbar = true})
       : super(key: key);
   final Widget child;
   final InitBinding? init;
   final String appIcon;
   final String? initialRoute;
+  final bool useLoading;
+  final bool useSnackbar;
   @override
   State<GlobalState> createState() => _GlobalStateState();
 }
@@ -60,28 +64,32 @@ class _GlobalStateState extends State<GlobalState> {
     return Stack(
       children: [
         buildChild(),
-        Positioned.fill(
-          child: ObserWidget(
-            value: AppLoading.showing,
-            child: (value) {
-              if (value == true) {
-                return AppLoading.loadingWidget(widget.appIcon);
-              }
-              return const SizedBox();
-            },
-          ),
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: ObserWidget(
-              value: AppSnackBar.showSnackBar,
-              child: (value) {
-                if (value == true) {
-                  return AppSnackBar.snackbar;
-                }
-                return const SizedBox();
-              }),
-        )
+        widget.useLoading
+            ? Positioned.fill(
+                child: ObserWidget(
+                  value: AppLoading.showing,
+                  child: (value) {
+                    if (value == true) {
+                      return AppLoading.loadingWidget(widget.appIcon);
+                    }
+                    return const SizedBox();
+                  },
+                ),
+              )
+            : const SizedBox(),
+        widget.useSnackbar
+            ? Align(
+                alignment: Alignment.topRight,
+                child: ObserWidget(
+                    value: AppSnackBar.showSnackBar,
+                    child: (value) {
+                      if (value == true) {
+                        return AppSnackBar.snackbar;
+                      }
+                      return const SizedBox();
+                    }),
+              )
+            : const SizedBox(),
       ],
     );
   }

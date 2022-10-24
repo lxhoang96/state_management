@@ -1,3 +1,4 @@
+import 'package:base/base_component.dart';
 import 'package:base/base_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -16,16 +17,17 @@ class Observer<T> {
       _initRoute = AppRouter.listActiveRouter.last;
     }
     if (autoClose) {
-      AppRouter.listObserver.add(this);
+      Global.addObs(this);
     }
   }
   String get route => _initRoute;
 
   T get value => _object;
   set value(T valueSet) {
-    _object = valueSet;
-
-    _streamController.sink.add(_object);
+    if (valueSet != _object) {
+      _object = valueSet;
+      _streamController.sink.add(_object);
+    }
   }
 
   void update() => _streamController.sink.add(_object);

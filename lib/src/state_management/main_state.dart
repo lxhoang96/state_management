@@ -16,11 +16,14 @@ abstract class MainStateRepo {
 
   void disposeAll();
 
-  getLast();
+  void addObs(Observer observer);
+
+  void autoRemoveObs();
 }
 
 class MainState extends MainStateRepo {
   final Map<Type, InstanceRoute> _listCtrl = {};
+  static final List<Observer> _listObserver = [];
 
   @override
   T add<T>(T instance) {
@@ -100,34 +103,32 @@ class MainState extends MainStateRepo {
     debugPrint('After deleted: ${_listCtrl.length}');
   }
 
-  @override
-  getLast() {
-    return _listCtrl.values.last.controller;
-  }
-
   String _getCurrentRoute() {
     if (AppRouter.listActiveRouter.isEmpty) {
       return AppRouter.initRoute;
     }
     return AppRouter.listActiveRouter.last;
   }
+
+  @override
+  autoRemoveObs() {
+    _listObserver.removeWhere((element) {
+      final result = AppRouter.listActiveRouter.contains(element.route) ||
+          element.route == AppRouter.initRoute;
+      if (!result) {
+        debugPrint('Closing $element obs!');
+        element.dispose();
+      }
+      return result;
+    });
+  }
+
+  @override
+  void addObs(Observer observer) {
+    _listObserver.add(observer);
+  }
 }
 
-extension GlobalExtension on MainStateRepo {
-  add(instance) => MainState().add(instance);
-
-  void remove<T>() => MainState().remove<T>();
-
-  T? find<T>() => MainState().find<T>();
-
-  void addNew<T>(T newController) => MainState().addNew<T>(newController);
-
-  void disposeAll() => MainState().disposeAll();
-
-  void autoRemove() => MainState().autoRemove();
-
-  dynamic getLast() => MainState().getLast();
-}
 
 class InstanceRoute {
   final String route;

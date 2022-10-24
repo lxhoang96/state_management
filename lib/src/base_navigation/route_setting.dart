@@ -5,12 +5,6 @@ class AppRouter {
   static const initRoute = '/';
   static final navigatorKey = GlobalKey<NavigatorState>();
   static final List<String> listActiveRouter = [];
-  static final List<Observer> listObserver = [];
-  // static push(Widget page) {
-  //   navigatorKey.currentState?.push(
-  //     MaterialPageRoute(builder: (_) => page),
-  //   );
-  // }
 
   static pushRoute(Route route) {
     navigatorKey.currentState?.push(route);
@@ -27,7 +21,7 @@ class AppRouter {
       listActiveRouter.add(name);
       navigatorKey.currentState?.popAndPushNamed(name, arguments: argument);
       Global.autoRemove();
-      autoRemoveObserver();
+      Global.autoRemoveObs();
     // }
   }
 
@@ -38,7 +32,7 @@ class AppRouter {
 
       navigatorKey.currentState?.pop(argument);
       Global.autoRemove();
-      autoRemoveObserver();
+      Global.autoRemoveObs();
     // }
   }
 
@@ -48,7 +42,7 @@ class AppRouter {
     navigatorKey.currentState
         ?.pushNamedAndRemoveUntil(name, (Route<dynamic> route) => false);
     Global.autoRemove();
-    autoRemoveObserver();
+    Global.autoRemoveObs();
   }
 
   static popUntilNamed(String name) {
@@ -56,7 +50,7 @@ class AppRouter {
         listActiveRouter.indexOf(name) + 1, listActiveRouter.length);
     navigatorKey.currentState?.popUntil(ModalRoute.withName(name));
     Global.autoRemove();
-    autoRemoveObserver();
+    Global.autoRemoveObs();
   }
 
   static removeRoute(Route route) {
@@ -65,15 +59,5 @@ class AppRouter {
     }
   }
 
-  static autoRemoveObserver() {
-    listObserver.removeWhere((element) {
-      final result = listActiveRouter.contains(element.route) ||
-          element.route == initRoute;
-      if (!result) {
-        debugPrint('Closing $element obs!');
-        element.dispose();
-      }
-      return result;
-    });
-  }
+  
 }
