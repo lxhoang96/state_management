@@ -11,7 +11,8 @@ class GlobalState extends StatefulWidget {
       required this.appIcon,
       required this.initialRoute,
       this.useLoading = true,
-      this.useSnackbar = true})
+      this.useSnackbar = true,
+      this.backgroundImage})
       : super(key: key);
   final Widget child;
   final InitBinding? init;
@@ -19,6 +20,7 @@ class GlobalState extends StatefulWidget {
   final String? initialRoute;
   final bool useLoading;
   final bool useSnackbar;
+  final DecorationImage? backgroundImage;
   @override
   State<GlobalState> createState() => _GlobalStateState();
 }
@@ -54,7 +56,9 @@ class _GlobalStateState extends State<GlobalState> {
 
   Widget buildChild() {
     if (init) {
-      return SizedBox.expand(child: widget.child);
+      return Container(
+          decoration: BoxDecoration(image: widget.backgroundImage),
+          child: widget.child);
     }
     return Container();
   }

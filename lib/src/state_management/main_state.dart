@@ -69,6 +69,9 @@ class MainState extends MainStateRepo {
 
   @override
   T find<T>() {
+    if (_listCtrl[T]?.controller.instance != null) {
+      return _listCtrl[T]?.controller.instance as T;
+    }
     return _listCtrl[T]?.controller as T;
   }
 
@@ -128,7 +131,6 @@ class MainState extends MainStateRepo {
     _listObserver.add(observer);
   }
 }
-
 
 class InstanceRoute {
   final String route;
