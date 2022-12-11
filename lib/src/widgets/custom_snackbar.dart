@@ -19,7 +19,6 @@ class AppSnackBar {
       color: Colors.transparent,
       child: Container(
         height: 60,
-        width: 240,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(

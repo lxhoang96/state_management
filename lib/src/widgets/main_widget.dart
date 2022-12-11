@@ -7,42 +7,39 @@ class GlobalState extends StatefulWidget {
   const GlobalState(
       {Key? key,
       required this.child,
-      this.init,
+      this.initBinding,
       required this.appIcon,
-      required this.initialRoute,
       this.useLoading = true,
       this.useSnackbar = true,
+      this.isDesktop = true,
       this.backgroundImage})
       : super(key: key);
   final Widget child;
-  final InitBinding? init;
+  final InitBinding? initBinding;
   final String appIcon;
-  final String? initialRoute;
   final bool useLoading;
   final bool useSnackbar;
+  final bool isDesktop;
   final DecorationImage? backgroundImage;
   @override
   State<GlobalState> createState() => _GlobalStateState();
 }
 
 class _GlobalStateState extends State<GlobalState> {
-  bool init = false;
+  bool didInit = false;
   @override
   void initState() {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
 
-    if (widget.init == null) {
+    if (widget.initBinding == null) {
       setState(() {
-        init = true;
+        didInit = true;
       });
     } else {
-      widget.init?.dependencies().then((value) => setState(() {
-            init = true;
+      widget.initBinding?.dependencies().then((value) => setState(() {
+            didInit = true;
           }));
-    }
-    if (widget.initialRoute != null) {
-      AppRouter.listActiveRouter.add(widget.initialRoute!);
     }
 
     super.initState();
@@ -50,12 +47,11 @@ class _GlobalStateState extends State<GlobalState> {
 
   @override
   void dispose() {
-    Global.disposeAll();
     super.dispose();
   }
 
   Widget buildChild() {
-    if (init) {
+    if (didInit) {
       return Container(
           decoration: BoxDecoration(image: widget.backgroundImage),
           child: widget.child);
@@ -82,17 +78,20 @@ class _GlobalStateState extends State<GlobalState> {
               )
             : const SizedBox(),
         widget.useSnackbar
-            ? Align(
-                alignment: Alignment.topRight,
-                child: ObserWidget(
-                    value: AppSnackBar.showSnackBar,
-                    child: (value) {
-                      if (value == true) {
-                        return AppSnackBar.snackbar;
-                      }
-                      return const SizedBox();
-                    }),
-              )
+            ? ObserWidget(
+                value: AppSnackBar.showSnackBar,
+                child: (value) {
+                  if (value == true) {
+                    return Align(
+                        alignment: widget.isDesktop
+                            ? Alignment.topRight
+                            : Alignment.topCenter,
+                        child: SizedBox(
+                            width: widget.isDesktop ? 240 : double.infinity,
+                            child: AppSnackBar.snackbar));
+                  }
+                  return const SizedBox();
+                })
             : const SizedBox(),
       ],
     );

@@ -21,7 +21,6 @@ class AppRouter {
       listActiveRouter.add(name);
       navigatorKey.currentState?.popAndPushNamed(name, arguments: argument);
       Global.autoRemove();
-      Global.autoRemoveObs();
     // }
   }
 
@@ -32,7 +31,6 @@ class AppRouter {
 
       navigatorKey.currentState?.pop(argument);
       Global.autoRemove();
-      Global.autoRemoveObs();
     // }
   }
 
@@ -42,7 +40,6 @@ class AppRouter {
     navigatorKey.currentState
         ?.pushNamedAndRemoveUntil(name, (Route<dynamic> route) => false);
     Global.autoRemove();
-    Global.autoRemoveObs();
   }
 
   static popUntilNamed(String name) {
@@ -50,7 +47,6 @@ class AppRouter {
         listActiveRouter.indexOf(name) + 1, listActiveRouter.length);
     navigatorKey.currentState?.popUntil(ModalRoute.withName(name));
     Global.autoRemove();
-    Global.autoRemoveObs();
   }
 
   static removeRoute(Route route) {
