@@ -5,6 +5,8 @@ class AppRouter {
   static const initRoute = '/';
   static final navigatorKey = GlobalKey<NavigatorState>();
   static final List<String> listActiveRouter = [];
+  static String? get currentRouter =>
+      listActiveRouter.isNotEmpty ? listActiveRouter.last : null;
 
   static pushRoute(Route route) {
     navigatorKey.currentState?.push(route);
@@ -17,22 +19,22 @@ class AppRouter {
 
   static popAndPushNamed(String name, {Object? argument}) {
     // if (navigatorKey.currentState?.canPop() ?? false) {
-      if (listActiveRouter.isNotEmpty) listActiveRouter.removeLast();
-      listActiveRouter.add(name);
-      navigatorKey.currentState?.popAndPushNamed(name, arguments: argument);
-      Global.autoRemove();
-      Global.autoRemoveObs();
+    if (listActiveRouter.isNotEmpty) listActiveRouter.removeLast();
+    listActiveRouter.add(name);
+    navigatorKey.currentState?.popAndPushNamed(name, arguments: argument);
+    Global.autoRemove();
+    Global.autoRemoveObs();
     // }
   }
 
   static pop({Object? argument}) {
     debugPrint(navigatorKey.currentState?.canPop().toString());
     // if (navigatorKey.currentState?.canPop() ?? false) {
-      if (listActiveRouter.isNotEmpty) listActiveRouter.removeLast();
+    if (listActiveRouter.isNotEmpty) listActiveRouter.removeLast();
 
-      navigatorKey.currentState?.pop(argument);
-      Global.autoRemove();
-      Global.autoRemoveObs();
+    navigatorKey.currentState?.pop(argument);
+    Global.autoRemove();
+    Global.autoRemoveObs();
     // }
   }
 
@@ -58,6 +60,4 @@ class AppRouter {
       navigatorKey.currentState?.removeRoute(route);
     }
   }
-
-  
 }

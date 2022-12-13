@@ -9,7 +9,7 @@ class GlobalState extends StatefulWidget {
       required this.child,
       this.init,
       required this.appIcon,
-      required this.initialRoute,
+      // required this.initialRoute,
       this.useLoading = true,
       this.useSnackbar = true,
       this.backgroundImage})
@@ -17,7 +17,7 @@ class GlobalState extends StatefulWidget {
   final Widget child;
   final InitBinding? init;
   final String appIcon;
-  final String? initialRoute;
+  // final String? initialRoute;
   final bool useLoading;
   final bool useSnackbar;
   final DecorationImage? backgroundImage;
@@ -41,9 +41,9 @@ class _GlobalStateState extends State<GlobalState> {
             init = true;
           }));
     }
-    if (widget.initialRoute != null) {
-      AppRouter.listActiveRouter.add(widget.initialRoute!);
-    }
+    // if (widget.initialRoute != null) {
+    //   AppRouter.listActiveRouter.add(widget.initialRoute!);
+    // }
 
     super.initState();
   }
