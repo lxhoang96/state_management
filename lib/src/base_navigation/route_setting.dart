@@ -5,6 +5,8 @@ class AppRouter {
   static const initRoute = '/';
   static final navigatorKey = GlobalKey<NavigatorState>();
   static final List<String> listActiveRouter = [];
+  static String? get currentRouter =>
+      listActiveRouter.isNotEmpty ? listActiveRouter.last : null;
 
   static pushRoute(Route route, {GlobalKey<NavigatorState>? nestedKey}) {
     if (nestedKey != null) {
