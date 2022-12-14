@@ -16,24 +16,72 @@ know whether this package might be useful for them.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+1. State management
+- Auto dispose controller, observer
 
-## Getting started
+2. Navigation without context
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+3. Custom dialog, snackbar 
+- Dialog, snackbar is not in navigator tree
 
-## Usage
+## Used
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+1. In main.dart, add MainWidget
+```
+GlobalState(
+  initBinding: InitBindingImpl(),
+  useLoading: true,
+  appIcon: AssetImage('app_icon'),
+  // initialRoute: RouterName.landing,
+  backgroundImage: DecorationImage(
+      image: AssetImage('background'),
+      fit: BoxFit.fill),
+  child:  child!,
+),
+```
 
-```dart
-const like = 'sample';
+2. Add app level controllers
+```
+class InitBindingImpl extends InitBinding {
+  @override
+  Future dependencies() async {
+    Global.add(HttpHelper());
+    Global.add<AuthenticationRepository>(AuthenticationUsecases());
+    Preferences.init();
+  }
+}
+```
+
+3. Navigation in App with routers:
+```
+initialRoute: RouterName.appControl,
+routes: routes,
+```
+
+4. Creates controllers for each router
+```
+class HomeController extends DefaultController
+@override
+init(){}
+@override
+dispose(){}
+```
+
+5. Add, find controller with GlobalState
+```
+Global.add(HomeController());
+Global.find<HomeController>();
+```
+
+6. Create Observer to listen value changed
+```
+final index = Observer(initValue: 0);
 ```
 
 ## Additional information
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+Pure Dart package depended on rxdart version
+
+
+## Future planning
+1. Generate code for feature-first & Clean architecture project
