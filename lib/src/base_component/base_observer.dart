@@ -40,6 +40,15 @@ class Observer<T> {
   }
 }
 
+class ObserverCombined {
+  late Stream<List<dynamic>> _combinedStream;
+
+  ObserverCombined(List<Stream> listStream) {
+    _combinedStream = Rx.combineLatestList(listStream);
+  }
+  Stream get value => _combinedStream;
+}
+
 class ObserWidget<T> extends StatelessWidget {
   const ObserWidget({super.key, required this.value, required this.child});
   final Observer<T> value;

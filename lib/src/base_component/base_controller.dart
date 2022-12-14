@@ -7,17 +7,13 @@ abstract class BaseController {
 }
 
 class DefaultController extends BaseController {
-  DefaultController() {
-    init();
-  }
+  DefaultController();
 
   @override
   void dispose() {
     debugPrint('${this} disposing');
-   
   }
 
   @override
   init() {}
-
 }
