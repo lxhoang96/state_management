@@ -7,15 +7,11 @@ abstract class BaseController {
 }
 
 class DefaultController extends BaseController {
-  DefaultController({this.instance});
-  final dynamic instance;
-  // final List<Observer> listObs = [];
+  DefaultController();
+
   @override
   void dispose() {
     debugPrint('${this} disposing');
-    // for (var element in listObs) {
-    //   element.dispose();
-    // }
   }
 
   @override

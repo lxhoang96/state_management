@@ -13,9 +13,8 @@ extension GlobalExtension on MainStateRepo {
 
   void disposeAll() => MainState().disposeAll();
 
-  void autoRemove() => MainState().autoRemove();
 
   void addObs(Observer observer) => MainState().addObs(observer);
 
-  void autoRemoveObs() => MainState().autoRemoveObs();
+  void autoRemove() => MainState().autoRemove();
 }

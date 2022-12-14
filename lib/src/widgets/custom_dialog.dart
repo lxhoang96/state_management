@@ -31,6 +31,13 @@ class AppLoading {
     );
   }
 
+  static Widget customLoading(Widget child, {int autoCloseSec = 3}) {
+    Future.delayed(Duration(seconds: autoCloseSec)).then((value) {
+      closeLoading();
+    });
+    return child;
+  }
+
   static closeLoading() {
     if (showing.value) {
       showing.value = false;
