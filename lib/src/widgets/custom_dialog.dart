@@ -2,7 +2,7 @@ import 'package:base/base_component.dart';
 import 'package:flutter/material.dart';
 
 class AppLoading {
-  static final showing = Observer<bool>(initValue: false, autoClose: true);
+  static final showing = Observer<bool>(initValue: false, autoClose: false);
 
   static Widget loadingWidget(String image, {int autoCloseSec = 3}) {
     Future.delayed(Duration(seconds: autoCloseSec)).then((value) {

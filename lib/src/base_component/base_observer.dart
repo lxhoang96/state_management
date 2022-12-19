@@ -7,7 +7,7 @@ class Observer<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
   late String _initRoute;
-  Observer({required T initValue, bool autoClose = false}) {
+  Observer({required T initValue, bool autoClose = true}) {
     _object = initValue;
     _streamController.sink.add(_object);
 
