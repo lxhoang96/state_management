@@ -41,12 +41,14 @@ class Observer<T> {
 }
 
 class ObserverCombined {
-  late Stream<List<dynamic>> _combinedStream;
+  final _streamController = BehaviorSubject();
 
   ObserverCombined(List<Stream> listStream) {
-    _combinedStream = Rx.combineLatestList(listStream);
+    _streamController.addStream(Rx.combineLatestList(listStream));
   }
-  Stream get value => _combinedStream;
+  Stream get value => _streamController.stream;
+
+  dispose() => _streamController.close();
 }
 
 class ObserWidget<T> extends StatelessWidget {
