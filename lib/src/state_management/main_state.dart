@@ -28,11 +28,11 @@ class MainState extends MainStateRepo {
     if (controller != null) {
       return controller as T;
     } else {
+      _listCtrl[T] =
+          InstanceRoute(route: _getCurrentRoute(), instance: instance);
       if (instance is BaseController) {
         instance.init();
       }
-      _listCtrl[T] =
-          InstanceRoute(route: _getCurrentRoute(), instance: instance);
       debugPrint("Added Controller Type:$T");
     }
 
@@ -42,12 +42,12 @@ class MainState extends MainStateRepo {
   @override
   addNew<T>(instance) {
     remove<T>();
+
+    _listCtrl[T] = InstanceRoute(route: _getCurrentRoute(), instance: instance);
+    debugPrint("Added New Controller Type:$T");
     if (instance is BaseController) {
       instance.init();
     }
-    _listCtrl[T] = InstanceRoute(route: _getCurrentRoute(), instance: instance);
-    debugPrint("Added New Controller Type:$T");
-
     return instance;
   }
 
