@@ -1,5 +1,6 @@
 import 'package:base/base_component.dart';
 import 'package:base/base_navigation.dart';
+import 'package:base/src/nav_2/router_delegate.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -11,10 +12,10 @@ class Observer<T> {
     _object = initValue;
     _streamController.sink.add(_object);
 
-    if (AppRouter.listActiveRouter.isEmpty) {
-      _initRoute = AppRouter.initRoute;
+    if (AppNav.listActiveRouter.isEmpty) {
+      _initRoute = AppNav.initRoute;
     } else {
-      _initRoute = AppRouter.listActiveRouter.last;
+      _initRoute = AppNav.listActiveRouter.last;
     }
     if (autoClose) {
       Global.addObs(this);
