@@ -1,5 +1,4 @@
 import 'package:base/base_component.dart';
-import 'package:base/base_navigation.dart';
 import 'package:base/base_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -8,7 +7,7 @@ class GlobalState extends StatefulWidget {
       {Key? key,
       required this.child,
       this.initBinding,
-      required this.appIcon,
+      this.appIcon,
       this.useLoading = true,
       this.useSnackbar = true,
       this.isDesktop = true,
@@ -16,7 +15,7 @@ class GlobalState extends StatefulWidget {
       : super(key: key);
   final Widget child;
   final InitBinding? initBinding;
-  final String appIcon;
+  final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;
   final bool isDesktop;

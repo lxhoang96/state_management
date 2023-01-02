@@ -1,17 +1,13 @@
-import 'package:base/src/nav_2/router_parse.dart';
+import 'package:base/base_widget.dart';
+import 'package:base/src/nav_2/control_nav.dart';
+import 'package:base/src/state_management/main_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'nav_config.dart';
 
 class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<HomeRoutePath> {
-  // String? pathName;
-  bool isError = false;
-  // String? innerRoot;
-  final RouterList routerList;
-
-  HomeRouterDelegate(this.routerList);
-
   @override
   GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
 
@@ -28,66 +24,62 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
 
   @override
   Widget build(BuildContext context) {
-    final pages = getListRouter();
+    return GlobalState(
+      child: StreamBuilder(
+        stream: Global.navApp.outerStream,
+        builder: (context, value) => Navigator(
+            key: navigatorKey,
+            pages: value.data ?? [],
+            onPopPage: (route, result) {
+              if (!route.didPop(result)) return false;
 
-    return Navigator(
-        key: navigatorKey,
-        pages: pages,
-        onPopPage: (route, result) {
-          if (!route.didPop(result)) return false;
-          if (AppNav.pathName != null) {
-            final listString = Uri.parse(AppNav.pathName!).pathSegments;
-            if (listString.isNotEmpty) listString.removeLast();
-            AppNav.pathName = listString.join();
-          }
-          isError = false;
-          notifyListeners();
+              Global.navApp.pop();
 
-          return true;
-        });
+              return true;
+            }),
+      ),
+    );
   }
 
   @override
   Future<void> setNewRoutePath(HomeRoutePath homeRoutePath) async {
+    if (!kIsWeb) {
+      notifyListeners();
+      return;
+    }
     if (homeRoutePath.isUnknown) {
-      AppNav.pathName = null;
-      isError = true;
+      Global.navApp.showUnknownPage();
+      notifyListeners();
       return;
     }
 
-    if (!homeRoutePath.isHomePage) {
-      if (homeRoutePath.pathName != null) {
-        AppNav.pathName = homeRoutePath.pathName;
-        isError = false;
-        return;
-      } else {
-        isError = true;
-        return;
-      }
-    } else {
-      AppNav.pathName = null;
+    if (homeRoutePath.pathName != null || homeRoutePath.pathName != homePath) {
+      Global.navApp.setOuterPagesForWeb(homeRoutePath.pathName!.split('/'));
+      notifyListeners();
+      return;
     }
-  }
-
-  getListRouter() {
-    if (AppNav.pathName != null &&
-        routerList.innerRoots != null &&
-        routerList.innerPaths != null) {
-      return routerList.innerPaths![AppNav.pathName]!;
-    }
-    return routerList.outerPages;
+    Global.navApp.showHomePage();
+    notifyListeners();
   }
 }
 
 // final examplePage = MaterialPage(child: child);
 
-class AppNav with ChangeNotifier {
-  static String? pathName;
-  static const initRoute = '/';
-  static List<String> listActiveRouter = [];
-  toPage(String name) {
-    pathName = pathName;
-    listActiveRouter = Uri.parse(pathName ?? '').pathSegments;
-    notifyListeners();
-  }
-}
+// class AppNav {
+//   static const initRoute = '/';
+//   static List<String> listActiveRouter = [];
+//   static pushNamed(String page) {
+//     listActiveRouter.add(page);
+//   }
+
+//   static back() {
+//     listActiveRouter.removeLast();
+//   }
+
+//   static backAllandPushNamed(String page) {
+//     listActiveRouter = [];
+//     listActiveRouter.add(page);
+//   }
+
+//   // static
+// }

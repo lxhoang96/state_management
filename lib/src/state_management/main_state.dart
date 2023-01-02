@@ -1,6 +1,5 @@
 import 'package:base/base_component.dart';
-import 'package:base/src/base_navigation/route_setting.dart';
-import 'package:flutter/foundation.dart';
+import 'package:base/src/nav_2/control_nav.dart';
 import 'package:flutter/material.dart';
 
 abstract class MainStateRepo {
@@ -16,11 +15,14 @@ abstract class MainStateRepo {
   T addNew<T>(T instance);
 
   void addObs(Observer observer);
+
+  initNavApp(List<MaterialPage> initPages);
 }
 
 class MainState extends MainStateRepo {
   final Map<Type, InstanceRoute> _listCtrl = {};
   static final List<Observer> _listObserver = [];
+  final navApp = AppNav();
 
   @override
   T add<T>(T instance) {
@@ -29,7 +31,7 @@ class MainState extends MainStateRepo {
       return controller as T;
     } else {
       _listCtrl[T] =
-          InstanceRoute(route: _getCurrentRoute(), instance: instance);
+          InstanceRoute(route: navApp.getCurrentRouter(), instance: instance);
       if (instance is BaseController) {
         instance.init();
       }
@@ -43,7 +45,8 @@ class MainState extends MainStateRepo {
   addNew<T>(instance) {
     remove<T>();
 
-    _listCtrl[T] = InstanceRoute(route: _getCurrentRoute(), instance: instance);
+    _listCtrl[T] =
+        InstanceRoute(route: navApp.getCurrentRouter(), instance: instance);
     debugPrint("Added New Controller Type:$T");
     if (instance is BaseController) {
       instance.init();
@@ -81,16 +84,8 @@ class MainState extends MainStateRepo {
   //   });
   // }
 
-  String _getCurrentRoute() {
-    if (AppRouter.listActiveRouter.isEmpty) {
-      return AppRouter.initRoute;
-    }
-    return AppRouter.listActiveRouter.last;
-  }
-
   _removeByInstance(InstanceRoute instanceInput) {
-    final result = !AppRouter.listActiveRouter.contains(instanceInput.route) &&
-        instanceInput.route != AppRouter.initRoute;
+    final result = !navApp.checkActiveRouter(instanceInput.route);
     if (result) {
       final instance = instanceInput.instance;
       if (instance is BaseController) {
@@ -113,9 +108,9 @@ class MainState extends MainStateRepo {
 
   void _autoRemoveObs() {
     _listObserver.removeWhere((element) {
-      final result = AppRouter.listActiveRouter.contains(element.route) ||
-          element.route == AppRouter.initRoute;
-      if (!result) {
+      if (element.route == null) return false;
+      final result = !navApp.checkActiveRouter(element.route!);
+      if (result) {
         debugPrint('Closing $element obs!');
         element.dispose();
       }
@@ -132,6 +127,11 @@ class MainState extends MainStateRepo {
   void autoRemove() {
     _autoRemoveCtrl();
     _autoRemoveObs();
+  }
+
+  @override
+  initNavApp(List<MaterialPage> initPages) {
+    navApp.setInitPages(initPages);
   }
 }
 

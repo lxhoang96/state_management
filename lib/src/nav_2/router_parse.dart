@@ -1,11 +1,11 @@
+import 'package:base/src/nav_2/control_nav.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'nav_config.dart';
 
 class HomeRouteInformationParser extends RouteInformationParser<HomeRoutePath> {
-  final RouterList routerList;
-  HomeRouteInformationParser(this.routerList);
+  // final RouterList routerList;
+  // HomeRouteInformationParser(this.routerList);
 
   @override
   Future<HomeRoutePath> parseRouteInformation(
@@ -18,24 +18,18 @@ class HomeRouteInformationParser extends RouteInformationParser<HomeRoutePath> {
     if (uri.pathSegments.isEmpty) {
       return HomeRoutePath.home();
     }
-    final listPath = uri.pathSegments;
-    final rootPath = listPath.elementAt(0);
 
-    if (routerList.innerRoots != null &&
-        routerList.innerRoots!.contains(rootPath)) {
-      return HomeRoutePath.innerPage(routeInformation.location);
-    }
 
-    return HomeRoutePath.outerPage(routeInformation.location);
+    return HomeRoutePath.otherPage(routeInformation.location);
   }
 
   @override
   RouteInformation? restoreRouteInformation(HomeRoutePath homeRoutePath) {
     if (homeRoutePath.isUnknown) {
-      return const RouteInformation(location: '/error');
+      return const RouteInformation(location: unknownPath);
     }
-    if (homeRoutePath.isHomePage) return const RouteInformation(location: '/');
-    if (homeRoutePath.isInnerPage || homeRoutePath.isOuterPage) {
+    if (homeRoutePath.isHomePage) return const RouteInformation(location: homePath);
+    if (homeRoutePath.isOtherPage) {
       return RouteInformation(location: homeRoutePath.pathName);
     }
 
