@@ -14,7 +14,7 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
   final bool useSnackbar;
   final DecorationImage? backgroundImage;
   final bool isDesktop;
-  final Widget Function()? Function(String name)  listPages;
+  final Widget Function()? Function(String name) listPages;
   final String homeRouter;
   HomeRouterDelegate(
       {required this.listPages,
@@ -51,18 +51,22 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
       useSnackbar: useSnackbar,
       backgroundImage: backgroundImage,
       child: StreamBuilder(
-        stream: Global.navApp.outerStream,
-        builder: (context, value) => Navigator(
-            key: navigatorKey,
-            pages: value.data ?? [],
-            onPopPage: (route, result) {
-              if (!route.didPop(result)) return false;
+          stream: Global.outerStream,
+          builder: (context, value) {
+            if (value.data != null && value.data!.isNotEmpty) {
+              return Navigator(
+                  key: navigatorKey,
+                  pages: value.data!,
+                  onPopPage: (route, result) {
+                    if (!route.didPop(result)) return false;
 
-              Global.navApp.pop();
+                    Global.pop();
 
-              return true;
-            }),
-      ),
+                    return true;
+                  });
+            }
+            return const SizedBox();
+          }),
     );
   }
 
@@ -73,17 +77,17 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
       return;
     }
     if (homeRoutePath.isUnknown) {
-      Global.navApp.showUnknownPage();
+      Global.showUnknownPage();
       notifyListeners();
       return;
     }
 
     if (homeRoutePath.pathName != null || homeRoutePath.pathName != homePath) {
-      Global.navApp.setOuterPagesForWeb(homeRoutePath.pathName!.split('/'));
+      Global.setOuterPagesForWeb(homeRoutePath.pathName!.split('/'));
       notifyListeners();
       return;
     }
-    Global.navApp.showHomePage();
+    Global.showHomePage();
     notifyListeners();
   }
 }

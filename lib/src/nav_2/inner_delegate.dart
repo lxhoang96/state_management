@@ -10,26 +10,29 @@ class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
   @override
   GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
   final heroC = HeroController();
-  InnerDelegateRouter({required initInner}){
-    Global.navApp.setInitInnerRouter(initInner);
-
+  InnerDelegateRouter({required initInner}) {
+    Global.setInitInnerRouter(initInner);
   }
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: Global.navApp.innerStream,
-      builder: (context, value) => Navigator(
-          key: navigatorKey,
-          observers: [heroC],
-          pages: value.data ?? [],
-          onPopPage: (route, result) {
-            if (!route.didPop(result)) return false;
+        stream: Global.innerStream,
+        builder: (context, value) {
+          if (value.data != null && value.data!.isNotEmpty) {
+            return Navigator(
+                key: navigatorKey,
+                observers: [heroC],
+                pages: value.data!,
+                onPopPage: (route, result) {
+                  if (!route.didPop(result)) return false;
 
-            Global.navApp.pop();
+                  Global.pop();
 
-            return true;
-          }),
-    );
+                  return true;
+                });
+          }
+          return const SizedBox();
+        });
   }
 
   @override
@@ -38,15 +41,15 @@ class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
       return;
     }
     if (homeRoutePath.isUnknown) {
-      Global.navApp.showUnknownPage();
+      Global.showUnknownPage();
       return;
     }
 
     if (homeRoutePath.pathName != null || homeRoutePath.pathName != homePath) {
-      Global.navApp.setInnerPagesForWeb(
+      Global.setInnerPagesForWeb(
           homeRoutePath.pathName!.split('/value:')[1].split('/'));
       return;
     }
-    Global.navApp.showHomePage();
+    Global.showHomePage();
   }
 }

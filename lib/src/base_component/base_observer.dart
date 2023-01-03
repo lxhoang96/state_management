@@ -11,7 +11,7 @@ class Observer<T> {
     _streamController.sink.add(_object);
 
     if (autoClose) {
-      _initRoute = Global.navApp.getCurrentRouter();
+      _initRoute = Global.getCurrentRouter();
       Global.addObs(this);
     }
   }

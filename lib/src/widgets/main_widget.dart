@@ -34,8 +34,8 @@ class _GlobalStateState extends State<GlobalState> {
   void initState() {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
-    Global.navApp.setInitPages(widget.listPages);
-    Global.navApp.setHomeRouter(widget.homeRouter);
+    Global.setInitPages(widget.listPages);
+    Global.setHomeRouter(widget.homeRouter);
     if (widget.initBinding == null) {
       setState(() {
         didInit = true;

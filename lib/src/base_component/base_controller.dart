@@ -17,10 +17,14 @@ class DefaultController extends BaseController {
   }
 
   @override
-  init() {}
+  init() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => {
+      onReady()
+    });
+
+  }
 
   @override
   onReady() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => {});
   }
 }

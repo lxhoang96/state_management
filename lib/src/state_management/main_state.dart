@@ -8,19 +8,63 @@ abstract class MainStateRepo {
 
   void remove<T>();
 
-  void autoRemove();
-
   T find<T>();
 
   T addNew<T>(T instance);
 
   void addObs(Observer observer);
+
+  /// Set pages will display in App
+  void setInitPages(Widget Function()? Function(String name) initPages);
+
+  /// set Homepage
+  void setHomeRouter(String routerName);
+
+  /// set HomePage of nested pages if has any
+  void setInitInnerRouter(String routerName);
+
+  /// set UnknownPage on Web
+  void setUnknownPage(MaterialPage page);
+
+  /// show UnknownPage
+  void showUnknownPage();
+
+  /// show HomePage
+  void showHomePage();
+
+  /// push a page
+  void pushNamed(String routerName, {bool isInner = false});
+
+  /// remove last page
+  void pop();
+
+  /// remove several pages until page with routerName
+  void popUntil(String routerName);
+
+  /// remove last page and replace this with new one
+  void popAndReplaceNamed(String routerName);
+
+  /// remove all and add a page
+  void popAllAndPushNamed(String routerName);
+
+  /// only for web with path on browser
+  void setOuterPagesForWeb(List<String> listRouter);
+
+  /// only for web with path on browser
+  void setInnerPagesForWeb(List<String> listRouter);
+
+  String getCurrentRouter();
 }
 
 class MainState extends MainStateRepo {
   final Map<Type, InstanceRoute> _listCtrl = {};
   static final List<Observer> _listObserver = [];
-  final navApp = AppNav();
+  final _navApp = AppNav();
+
+  Stream<List<MaterialPage<dynamic>>> get outerStream =>
+      _navApp.outerStream;
+  Stream<List<MaterialPage<dynamic>>> get innerStream =>
+      _navApp.innerStream;
 
   @override
   T add<T>(T instance) {
@@ -29,7 +73,7 @@ class MainState extends MainStateRepo {
       return controller as T;
     } else {
       _listCtrl[T] =
-          InstanceRoute(route: navApp.getCurrentRouter(), instance: instance);
+          InstanceRoute(route: _navApp.getCurrentRouter(), instance: instance);
       if (instance is BaseController) {
         instance.init();
       }
@@ -44,7 +88,7 @@ class MainState extends MainStateRepo {
     remove<T>();
 
     _listCtrl[T] =
-        InstanceRoute(route: navApp.getCurrentRouter(), instance: instance);
+        InstanceRoute(route: _navApp.getCurrentRouter(), instance: instance);
     debugPrint("Added New Controller Type:$T");
     if (instance is BaseController) {
       instance.init();
@@ -72,18 +116,8 @@ class MainState extends MainStateRepo {
     }
   }
 
-  // @override
-  // void disposeAll() {
-  //   _listCtrl.forEach((key, element) {
-  //     final instance = element.instance;
-  //     if (instance is BaseController) {
-  //       instance.dispose();
-  //     }
-  //   });
-  // }
-
   _removeByInstance(InstanceRoute instanceInput) {
-    final result = !navApp.checkActiveRouter(instanceInput.route);
+    final result = !_navApp.checkActiveRouter(instanceInput.route);
     if (result) {
       final instance = instanceInput.instance;
       if (instance is BaseController) {
@@ -107,7 +141,7 @@ class MainState extends MainStateRepo {
   void _autoRemoveObs() {
     _listObserver.removeWhere((element) {
       if (element.route == null) return false;
-      final result = !navApp.checkActiveRouter(element.route!);
+      final result = !_navApp.checkActiveRouter(element.route!);
       if (result) {
         debugPrint('Closing $element obs!');
         element.dispose();
@@ -121,11 +155,69 @@ class MainState extends MainStateRepo {
     _listObserver.add(observer);
   }
 
-  @override
-  void autoRemove() {
+  void _autoRemove() {
     _autoRemoveCtrl();
     _autoRemoveObs();
   }
+
+  @override
+  void pop() {
+    _navApp.pop();
+    _autoRemove();
+  }
+
+  @override
+  void popAllAndPushNamed(String routerName) {
+    _navApp.popAllAndPushNamed(routerName);
+    _autoRemove();
+  }
+
+  @override
+  void popAndReplaceNamed(String routerName) {
+    _navApp.popAndReplaceNamed(routerName);
+    _autoRemove();
+  }
+
+  @override
+  void popUntil(String routerName) {
+    _navApp.popUntil(routerName);
+    _autoRemove();
+  }
+
+  @override
+  void pushNamed(String routerName, {bool isInner = false}) =>
+      _navApp.pushNamed(routerName, isInner: isInner);
+
+  @override
+  void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
+
+  @override
+  void setInitInnerRouter(String routerName) =>
+      _navApp.setInitInnerRouter(routerName);
+
+  @override
+  void setInitPages(Widget Function()? Function(String name) initPages) =>
+      _navApp.setInitPages(initPages);
+
+  @override
+  void setInnerPagesForWeb(List<String> listRouter) =>
+      _navApp.setInnerPagesForWeb(listRouter);
+
+  @override
+  void setOuterPagesForWeb(List<String> listRouter) =>
+      _navApp.setOuterPagesForWeb(listRouter);
+
+  @override
+  void setUnknownPage(MaterialPage page) => _navApp.setUnknownPage(page);
+
+  @override
+  void showHomePage() => _navApp.showHomePage();
+
+  @override
+  void showUnknownPage() => _navApp.showUnknownPage();
+
+  @override
+  getCurrentRouter() => _navApp.getCurrentRouter();
 }
 
 class InstanceRoute<T> {
