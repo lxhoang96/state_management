@@ -1,7 +1,9 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 abstract class BaseController {
   init();
+
+  onReady();
 
   void dispose();
 }
@@ -16,4 +18,9 @@ class DefaultController extends BaseController {
 
   @override
   init() {}
+
+  @override
+  onReady() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => {});
+  }
 }

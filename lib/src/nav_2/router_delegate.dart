@@ -8,6 +8,23 @@ import 'nav_config.dart';
 
 class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<HomeRoutePath> {
+  final InitBinding? initBinding;
+  final String? appIcon;
+  final bool useLoading;
+  final bool useSnackbar;
+  final DecorationImage? backgroundImage;
+  final bool isDesktop;
+  final Widget Function()? Function(String name)  listPages;
+  final String homeRouter;
+  HomeRouterDelegate(
+      {required this.listPages,
+      required this.homeRouter,
+      this.initBinding,
+      this.appIcon,
+      this.useLoading = true,
+      this.useSnackbar = true,
+      this.backgroundImage,
+      this.isDesktop = true});
   @override
   GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
 
@@ -25,6 +42,14 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
   @override
   Widget build(BuildContext context) {
     return GlobalState(
+      listPages: listPages,
+      homeRouter: homeRouter,
+      initBinding: initBinding,
+      appIcon: appIcon,
+      isDesktop: isDesktop,
+      useLoading: useLoading,
+      useSnackbar: useSnackbar,
+      backgroundImage: backgroundImage,
       child: StreamBuilder(
         stream: Global.navApp.outerStream,
         builder: (context, value) => Navigator(

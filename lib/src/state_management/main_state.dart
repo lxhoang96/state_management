@@ -15,8 +15,6 @@ abstract class MainStateRepo {
   T addNew<T>(T instance);
 
   void addObs(Observer observer);
-
-  initNavApp(List<MaterialPage> initPages);
 }
 
 class MainState extends MainStateRepo {
@@ -127,11 +125,6 @@ class MainState extends MainStateRepo {
   void autoRemove() {
     _autoRemoveCtrl();
     _autoRemoveObs();
-  }
-
-  @override
-  initNavApp(List<MaterialPage> initPages) {
-    navApp.setInitPages(initPages);
   }
 }
 

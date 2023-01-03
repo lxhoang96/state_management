@@ -11,15 +11,19 @@ class GlobalState extends StatefulWidget {
       this.useLoading = true,
       this.useSnackbar = true,
       this.isDesktop = true,
-      this.backgroundImage})
+      this.backgroundImage,
+      required this.listPages,
+      required this.homeRouter})
       : super(key: key);
   final Widget child;
   final InitBinding? initBinding;
+  final Widget Function()? Function(String name) listPages;
   final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;
   final bool isDesktop;
   final DecorationImage? backgroundImage;
+  final String homeRouter;
   @override
   State<GlobalState> createState() => _GlobalStateState();
 }
@@ -30,7 +34,8 @@ class _GlobalStateState extends State<GlobalState> {
   void initState() {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
-
+    Global.navApp.setInitPages(widget.listPages);
+    Global.navApp.setHomeRouter(widget.homeRouter);
     if (widget.initBinding == null) {
       setState(() {
         didInit = true;
@@ -51,9 +56,11 @@ class _GlobalStateState extends State<GlobalState> {
 
   Widget buildChild() {
     if (didInit) {
-      return Container(
-          decoration: BoxDecoration(image: widget.backgroundImage),
-          child: widget.child);
+      return Scaffold(
+        body: Container(
+            decoration: BoxDecoration(image: widget.backgroundImage),
+            child: widget.child),
+      );
     }
     return Container();
   }

@@ -9,13 +9,18 @@ class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<HomeRoutePath> {
   @override
   GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
+  final heroC = HeroController();
+  InnerDelegateRouter({required initInner}){
+    Global.navApp.setInitInnerRouter(initInner);
 
+  }
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: Global.navApp.innerStream,
       builder: (context, value) => Navigator(
           key: navigatorKey,
+          observers: [heroC],
           pages: value.data ?? [],
           onPopPage: (route, result) {
             if (!route.didPop(result)) return false;
