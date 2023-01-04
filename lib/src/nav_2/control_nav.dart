@@ -38,6 +38,23 @@ class AppNav {
   Stream<List<MaterialPage<dynamic>>> get innerStream =>
       _streamInnerController.stream;
 
+  bool _checkDuplicated(String routerName) {
+    return _navTree
+            .firstWhereOrNull((element) => element.routerName == routerName) !=
+        null;
+  }
+
+  _updatePages(String routerName) {
+    if (!_checkDuplicated(routerName)) {
+      return;
+    }
+    _navTree.removeWhere((element) => element.routerName == routerName);
+    _outerPages.removeWhere((element) => element.name == routerName);
+    _innerPages.removeWhere((element) => element.name == routerName);
+    _streamOuterController.add(_outerPages);
+    _streamInnerController.add(_innerPages);
+  }
+
   /// Set pages will display in App
   void setInitPages(Widget Function()? Function(String name) initPages) {
     _initPages = initPages;
@@ -108,6 +125,7 @@ class AppNav {
       return;
     }
     if (_navTree.isNotEmpty) {
+      _updatePages(routerName);
       _navTree.add(NavNote(
           routerName: routerName,
           level: _navTree.last.level + 1,
@@ -170,12 +188,13 @@ class AppNav {
     if (_navTree.isEmpty) {
       _navTree.add(NavNote(routerName: routerName));
     } else {
-      _navTree.removeLast();
+      final note = _navTree.removeLast();
+      _updatePages(routerName);
       _navTree.add(NavNote(
           routerName: routerName,
-          level: _navTree.last.level + 1,
-          parentRouter: _navTree.last.routerName,
-          isInner: _innerPages.isNotEmpty));
+          level: note.level ,
+          parentRouter: note.routerName ,
+          isInner: note.isInner));
     }
     final router = MaterialPage(child: page(), name: routerName);
     if (_navTree.last.isInner) {
@@ -183,7 +202,7 @@ class AppNav {
       _innerPages.add(router);
       _streamInnerController.add(_innerPages);
     } else {
-      _outerPages.removeLast();
+      _outerPages.isNotEmpty ? _outerPages.removeLast() : null;
       _outerPages.add(router);
       _streamOuterController.add(_outerPages);
     }
@@ -218,9 +237,10 @@ class AppNav {
 
   /// check a page is active or not
   bool checkActiveRouter(String routerName) {
-    return _navTree
-            .firstWhereOrNull((element) => element.routerName == routerName) !=
-        null;
+    return _navTree.firstWhereOrNull(
+                (element) => element.routerName == routerName) !=
+            null ||
+        routerName == homePath;
   }
 
   /// only for web with path on browser

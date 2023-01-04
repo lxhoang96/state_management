@@ -16,6 +16,7 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
   final bool isDesktop;
   final Widget Function()? Function(String name) listPages;
   final String homeRouter;
+  final List<Widget> globalWidgets;
   HomeRouterDelegate(
       {required this.listPages,
       required this.homeRouter,
@@ -24,6 +25,7 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
       this.useLoading = true,
       this.useSnackbar = true,
       this.backgroundImage,
+      this.globalWidgets=const [],
       this.isDesktop = true});
   @override
   GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
@@ -50,6 +52,7 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
       useLoading: useLoading,
       useSnackbar: useSnackbar,
       backgroundImage: backgroundImage,
+      globalWidgets: globalWidgets,
       child: StreamBuilder(
           stream: Global.outerStream,
           builder: (context, value) {

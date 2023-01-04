@@ -12,6 +12,7 @@ class GlobalState extends StatefulWidget {
       this.useSnackbar = true,
       this.isDesktop = true,
       this.backgroundImage,
+      this.globalWidgets = const [],
       required this.listPages,
       required this.homeRouter})
       : super(key: key);
@@ -24,6 +25,7 @@ class GlobalState extends StatefulWidget {
   final bool isDesktop;
   final DecorationImage? backgroundImage;
   final String homeRouter;
+  final List<Widget> globalWidgets;
   @override
   State<GlobalState> createState() => _GlobalStateState();
 }
@@ -35,13 +37,13 @@ class _GlobalStateState extends State<GlobalState> {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
     Global.setInitPages(widget.listPages);
-    Global.setHomeRouter(widget.homeRouter);
     if (widget.initBinding == null) {
       setState(() {
         didInit = true;
       });
     } else {
       widget.initBinding?.dependencies().then((value) => setState(() {
+            Global.setHomeRouter(widget.homeRouter);
             didInit = true;
           }));
     }
@@ -56,19 +58,21 @@ class _GlobalStateState extends State<GlobalState> {
 
   Widget buildChild() {
     if (didInit) {
-      return Scaffold(
-        body: Container(
+      return Material(
+        color: Colors.transparent,
+        child: Container(
             decoration: BoxDecoration(image: widget.backgroundImage),
             child: widget.child),
       );
     }
-    return Container();
+    return const SizedBox();
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        ...widget.globalWidgets,
         buildChild(),
         widget.useLoading
             ? Positioned.fill(
