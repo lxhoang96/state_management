@@ -72,7 +72,6 @@ class _GlobalStateState extends State<GlobalState> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        ...widget.globalWidgets,
         buildChild(),
         widget.useLoading
             ? Positioned.fill(
@@ -103,6 +102,7 @@ class _GlobalStateState extends State<GlobalState> {
                   return const SizedBox();
                 })
             : const SizedBox(),
+        ...widget.globalWidgets,
       ],
     );
   }

@@ -4,12 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'nav_config.dart';
+// final _innerKey = GlobalKey<NavigatorState>();
 
 class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<HomeRoutePath> {
   @override
-  GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
-  final heroC = HeroController();
+  GlobalKey<NavigatorState> get navigatorKey =>
+      GlobalObjectKey<NavigatorState>(this);
+
   InnerDelegateRouter({required initInner}) {
     Global.setInitInnerRouter(initInner);
   }
@@ -21,8 +23,7 @@ class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
           if (value.data != null && value.data!.isNotEmpty) {
             return Navigator(
                 key: navigatorKey,
-                observers: [heroC],
-                pages: value.data!,
+                pages: value.data!.toList(),
                 onPopPage: (route, result) {
                   if (!route.didPop(result)) return false;
 

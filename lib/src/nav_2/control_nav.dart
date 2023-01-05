@@ -27,11 +27,13 @@ class AppNav {
 
   final List<MaterialPage> _innerPages = [];
   final List<MaterialPage> _outerPages = [];
-  Widget Function()? Function(String name) _initPages = (String name) {};
+  Widget Function()? Function(String name) _initPages = (String name) {
+    return null;
+  };
   MaterialPage unknownPage =
       MaterialPage(child: Container(), name: unknownPath);
 
-  MaterialPage homePage = MaterialPage(child: Container(), name: homePath);
+  MaterialPage homePage = MaterialPage(child: Container(), name: homePath, key: const ValueKey(homePath));
 
   Stream<List<MaterialPage<dynamic>>> get outerStream =>
       _streamOuterController.stream;
@@ -63,11 +65,11 @@ class AppNav {
   /// set Homepage
   void setHomeRouter(String routerName) {
     final page = _initPages(routerName);
-    if (page == null) {
+    if (page == null || _outerPages.isNotEmpty) {
       return;
     }
     _navTree.add(NavNote(routerName: routerName));
-    final router = MaterialPage(child: page(), name: routerName);
+    final router = MaterialPage(child: page(), name: routerName, key: ValueKey(routerName));
     homePage = router;
     _outerPages.add(router);
     _streamOuterController.add(_outerPages);
@@ -76,14 +78,14 @@ class AppNav {
   /// set HomePage of nested pages if has any
   void setInitInnerRouter(String routerName) {
     final page = _initPages(routerName);
-    if (page == null) {
+    if (page == null || _innerPages.isNotEmpty) {
       return;
     }
     _navTree.add(NavNote(
         routerName: routerName,
         parentRouter: _outerPages.last.name,
         isInner: true));
-    _innerPages.add(MaterialPage(child: page(), name: routerName));
+    _innerPages.add(MaterialPage(child: page(), name: routerName, key: ValueKey(routerName)));
     _streamInnerController.add(_innerPages);
   }
 
@@ -134,7 +136,7 @@ class AppNav {
     } else {
       _navTree.add(NavNote(routerName: routerName));
     }
-    final router = MaterialPage(child: page(), name: routerName);
+    final router = MaterialPage(child: page(), name: routerName, key: ValueKey(routerName));
 
     if (isInner) {
       _innerPages.add(router);
@@ -150,11 +152,14 @@ class AppNav {
     if (_navTree.isEmpty) {
       return;
     }
-    _navTree.removeLast();
-    if (_innerPages.isNotEmpty) {
+    final note = _navTree.last;
+    if (note.isInner && _innerPages.length > 1) {
+      _navTree.removeLast();
       _innerPages.removeLast();
       _streamInnerController.add(_innerPages);
-    } else {
+    }
+    if (!note.isInner && _outerPages.length > 1) {
+      _navTree.removeLast();
       _outerPages.removeLast();
       _streamOuterController.add(_outerPages);
     }
@@ -167,14 +172,17 @@ class AppNav {
     if (index == -1) {
       return;
     }
+
+    for (int i = index; i < _navTree.length; i++) {
+      final note = _navTree[i];
+      if (note.isInner) {
+        _innerPages.removeWhere((element) => element.name == note.routerName);
+      } else {
+        _outerPages.removeWhere((element) => element.name == note.routerName);
+      }
+    }
     _navTree.length = index;
 
-    if (index < _outerPages.length) {
-      _innerPages.clear();
-      _outerPages.length = index;
-    } else {
-      _innerPages.length = index - _outerPages.length;
-    }
     _streamOuterController.add(_outerPages);
     _streamInnerController.add(_innerPages);
   }
@@ -192,11 +200,11 @@ class AppNav {
       _updatePages(routerName);
       _navTree.add(NavNote(
           routerName: routerName,
-          level: note.level ,
-          parentRouter: note.routerName ,
+          level: note.level,
+          parentRouter: note.parentRouter,
           isInner: note.isInner));
     }
-    final router = MaterialPage(child: page(), name: routerName);
+    final router = MaterialPage(child: page(), name: routerName, key: ValueKey(routerName));
     if (_navTree.last.isInner) {
       _innerPages.removeLast();
       _innerPages.add(router);
@@ -217,7 +225,7 @@ class AppNav {
     _navTree
       ..clear()
       ..add(NavNote(routerName: routerName));
-    final router = MaterialPage(child: page(), name: routerName);
+    final router = MaterialPage(child: page(), name: routerName, key: ValueKey(routerName));
 
     _innerPages.clear();
     _outerPages
@@ -259,7 +267,7 @@ class AppNav {
             level: _navTree.last.level + 1,
             parentRouter: _navTree.last.routerName));
       }
-      final router = MaterialPage(child: page(), name: routerName);
+      final router = MaterialPage(child: page(), name: routerName, key: ValueKey(routerName));
       _outerPages.add(router);
       _streamOuterController.add(_outerPages);
     }
@@ -278,7 +286,7 @@ class AppNav {
           level: _navTree.last.level + 1,
           parentRouter: _navTree.last.routerName,
           isInner: true));
-      final router = MaterialPage(child: page(), name: routerName);
+      final router = MaterialPage(child: page(), name: routerName, key: ValueKey(routerName));
       _innerPages.add(router);
       _streamInnerController.add(_innerPages);
     }

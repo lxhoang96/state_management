@@ -25,10 +25,11 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
       this.useLoading = true,
       this.useSnackbar = true,
       this.backgroundImage,
-      this.globalWidgets=const [],
+      this.globalWidgets = const [],
       this.isDesktop = true});
   @override
-  GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
+  GlobalKey<NavigatorState> get navigatorKey =>
+      GlobalObjectKey<NavigatorState>(this);
 
   // @override
   // HomeRoutePath get currentConfiguration {
@@ -59,7 +60,7 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
             if (value.data != null && value.data!.isNotEmpty) {
               return Navigator(
                   key: navigatorKey,
-                  pages: value.data!,
+                  pages: value.data!.toList(),
                   onPopPage: (route, result) {
                     if (!route.didPop(result)) return false;
 
