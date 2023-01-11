@@ -1,6 +1,6 @@
 import 'package:base/base_component.dart';
-import 'package:base/base_navigation.dart';
 import 'package:base/base_widget.dart';
+import 'package:base/src/nav_2/custom_page.dart';
 import 'package:flutter/material.dart';
 
 class GlobalState extends StatefulWidget {
@@ -8,19 +8,25 @@ class GlobalState extends StatefulWidget {
       {Key? key,
       required this.child,
       this.initBinding,
-      required this.appIcon,
+      this.appIcon,
       this.useLoading = true,
       this.useSnackbar = true,
       this.isDesktop = true,
-      this.backgroundImage})
+      this.backgroundImage,
+      this.globalWidgets = const [],
+      required this.listPages,
+      required this.homeRouter})
       : super(key: key);
   final Widget child;
   final InitBinding? initBinding;
-  final String appIcon;
+  final Map<String, InitPage> listPages;
+  final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;
   final bool isDesktop;
   final DecorationImage? backgroundImage;
+  final String homeRouter;
+  final List<Widget> globalWidgets;
   @override
   State<GlobalState> createState() => _GlobalStateState();
 }
@@ -31,13 +37,14 @@ class _GlobalStateState extends State<GlobalState> {
   void initState() {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
-
+    Global.setInitPages(widget.listPages);
     if (widget.initBinding == null) {
       setState(() {
         didInit = true;
       });
     } else {
       widget.initBinding?.dependencies().then((value) => setState(() {
+            Global.setHomeRouter(widget.homeRouter);
             didInit = true;
           }));
     }
@@ -52,11 +59,14 @@ class _GlobalStateState extends State<GlobalState> {
 
   Widget buildChild() {
     if (didInit) {
-      return Container(
-          decoration: BoxDecoration(image: widget.backgroundImage),
-          child: widget.child);
+      return Material(
+        color: Colors.transparent,
+        child: Container(
+            decoration: BoxDecoration(image: widget.backgroundImage),
+            child: widget.child),
+      );
     }
-    return Container();
+    return const SizedBox();
   }
 
   @override
@@ -93,6 +103,7 @@ class _GlobalStateState extends State<GlobalState> {
                   return const SizedBox();
                 })
             : const SizedBox(),
+        ...widget.globalWidgets,
       ],
     );
   }

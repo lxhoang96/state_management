@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AppLoading {
   static final showing = Observer<bool>(initValue: false, autoClose: false);
 
-  static Widget loadingWidget(String image, {int autoCloseSec = 3}) {
+  static Widget loadingWidget(String? image, {int autoCloseSec = 3}) {
     Future.delayed(Duration(seconds: autoCloseSec)).then((value) {
       closeLoading();
     });
@@ -23,7 +23,9 @@ class AppLoading {
             SizedBox(
               width: 50,
               height: 50,
-              child: Image.asset(image), //AppImages.landingImg('icon_robot')
+              child: image != null
+                  ? Image.asset(image)
+                  : const CircularProgressIndicator(), //AppImages.landingImg('icon_robot')
             )
           ],
         ),

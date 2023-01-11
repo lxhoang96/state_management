@@ -1,26 +1,21 @@
 import 'package:base/base_component.dart';
-import 'package:base/base_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 class Observer<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
-  late String _initRoute;
+  String? _initRoute;
   Observer({required T initValue, bool autoClose = true}) {
     _object = initValue;
     _streamController.sink.add(_object);
 
-    if (AppRouter.listActiveRouter.isEmpty) {
-      _initRoute = AppRouter.initRoute;
-    } else {
-      _initRoute = AppRouter.listActiveRouter.last;
-    }
     if (autoClose) {
+      _initRoute = Global.getCurrentRouter();
       Global.addObs(this);
     }
   }
-  String get route => _initRoute;
+  String? get route => _initRoute;
 
   T get value => _object;
   set value(T valueSet) {
