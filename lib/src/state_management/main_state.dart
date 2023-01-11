@@ -1,5 +1,6 @@
 import 'package:base/base_component.dart';
 import 'package:base/src/nav_2/control_nav.dart';
+import 'package:base/src/nav_2/custom_page.dart';
 import 'package:flutter/material.dart';
 
 abstract class MainStateRepo {
@@ -15,7 +16,7 @@ abstract class MainStateRepo {
   void addObs(Observer observer);
 
   /// Set pages will display in App
-  void setInitPages(Widget Function()? Function(String name) initPages);
+  void setInitPages(Map<String, InitPage> initPages);
 
   /// set Homepage
   void setHomeRouter(String routerName);
@@ -24,7 +25,7 @@ abstract class MainStateRepo {
   void setInitInnerRouter(String routerName);
 
   /// set UnknownPage on Web
-  void setUnknownPage(MaterialPage page);
+  void setUnknownPage(String name);
 
   /// show UnknownPage
   void showUnknownPage();
@@ -33,7 +34,7 @@ abstract class MainStateRepo {
   void showHomePage();
 
   /// push a page
-  void pushNamed(String routerName, {bool isInner = false});
+  void pushNamed(String routerName);
 
   /// remove last page
   void pop();
@@ -51,7 +52,7 @@ abstract class MainStateRepo {
   void setOuterPagesForWeb(List<String> listRouter);
 
   /// only for web with path on browser
-  void setInnerPagesForWeb(List<String> listRouter);
+  void setInnerPagesForWeb({required parentName, List<String> listRouter = const []});
 
   String getCurrentRouter();
 }
@@ -63,8 +64,8 @@ class MainState extends MainStateRepo {
 
   Stream<List<MaterialPage<dynamic>>> get outerStream =>
       _navApp.outerStream;
-  Stream<List<MaterialPage<dynamic>>> get innerStream =>
-      _navApp.innerStream;
+  Stream<List<MaterialPage<dynamic>>>? innerStream(String parentName) =>
+      _navApp.getInnerStream(parentName);
 
   @override
   T add<T>(T instance) {
@@ -73,7 +74,7 @@ class MainState extends MainStateRepo {
       return controller as T;
     } else {
       _listCtrl[T] =
-          InstanceRoute(route: _navApp.getCurrentRouter(), instance: instance);
+          InstanceRoute(route: _navApp.currentRouter, instance: instance);
       if (instance is BaseController) {
         instance.init();
       }
@@ -88,7 +89,7 @@ class MainState extends MainStateRepo {
     remove<T>();
 
     _listCtrl[T] =
-        InstanceRoute(route: _navApp.getCurrentRouter(), instance: instance);
+        InstanceRoute(route: _navApp.currentRouter, instance: instance);
     debugPrint("Added New Controller Type:$T");
     if (instance is BaseController) {
       instance.init();
@@ -185,8 +186,8 @@ class MainState extends MainStateRepo {
   }
 
   @override
-  void pushNamed(String routerName, {bool isInner = false}) =>
-      _navApp.pushNamed(routerName, isInner: isInner);
+  void pushNamed(String routerName) =>
+      _navApp.pushNamed(routerName);
 
   @override
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
@@ -196,19 +197,19 @@ class MainState extends MainStateRepo {
       _navApp.setInitInnerRouter(routerName);
 
   @override
-  void setInitPages(Widget Function()? Function(String name) initPages) =>
+  void setInitPages(Map<String, InitPage> initPages) =>
       _navApp.setInitPages(initPages);
 
   @override
-  void setInnerPagesForWeb(List<String> listRouter) =>
-      _navApp.setInnerPagesForWeb(listRouter);
+  void setInnerPagesForWeb({required parentName, List<String> listRouter = const []}) =>
+      _navApp.setInnerPagesForWeb(parentName: parentName, listRouter: listRouter);
 
   @override
   void setOuterPagesForWeb(List<String> listRouter) =>
       _navApp.setOuterPagesForWeb(listRouter);
 
   @override
-  void setUnknownPage(MaterialPage page) => _navApp.setUnknownPage(page);
+  void setUnknownPage(String name) => _navApp.setUnknownPage(name);
 
   @override
   void showHomePage() => _navApp.showHomePage();
@@ -217,7 +218,7 @@ class MainState extends MainStateRepo {
   void showUnknownPage() => _navApp.showUnknownPage();
 
   @override
-  getCurrentRouter() => _navApp.getCurrentRouter();
+  getCurrentRouter() => _navApp.currentRouter;
 }
 
 class InstanceRoute<T> {

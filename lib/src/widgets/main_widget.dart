@@ -1,5 +1,6 @@
 import 'package:base/base_component.dart';
 import 'package:base/base_widget.dart';
+import 'package:base/src/nav_2/custom_page.dart';
 import 'package:flutter/material.dart';
 
 class GlobalState extends StatefulWidget {
@@ -18,7 +19,7 @@ class GlobalState extends StatefulWidget {
       : super(key: key);
   final Widget child;
   final InitBinding? initBinding;
-  final Widget Function()? Function(String name) listPages;
+  final Map<String, InitPage> listPages;
   final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;

@@ -1,38 +1,75 @@
-// import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 
-// class CustomPage extends MaterialPage {
-//   const CustomPage(
-//       {required super.child,
-//       required super.name,
-//       required super.key,
-//       this.subPages = const []});
+class InitPage {
+  final Widget Function() widget;
+  final String? parentName;
+  InitPage({required this.widget, this.parentName});
+  BasePage toBasePage(String routerName) {
+    return BasePage(
+      routerName: routerName,
+      widget: widget,
+      parentName: parentName,
+    );
+  }
+}
 
-//   final List<CustomPage> subPages;
-// }
+class BasePage extends InitPage {
+  final String routerName;
+  final List<BasePage> innerPages = [];
+  BasePage({
+    required this.routerName,
+    required super.widget,
+    super.parentName,
+  });
+}
 
-// extension PageExtension on CustomPage {
-//   update(CustomPage newValue) => newValue;
+extension BasePageExtension on BasePage {
+  MaterialPage getPage() {
+    return MaterialPage(
+        child: widget(), name: routerName, key: ValueKey(routerName));
+  }
 
-//   add(CustomPage newValue) {
-//     subPages.add(newValue);
-//   }
+  addInner(BasePage innerPage) => innerPages.add(innerPage);
+  bool pop() {
+    if (innerPages.length <= 1) return false;
+    innerPages.removeLast();
+    return true;
+  }
 
-//   back() {
-//     if (subPages.length <= 1) return false;
-//     subPages.removeLast();
-//     return true;
-//   }
+  void popAllAndPushInner(BasePage innerPage) => innerPages
+    ..clear()
+    ..add(innerPage);
 
-//   backUntil(String checkValue) {
-//     if (subPages.length <= 1) return false;
-//     final index = subPages.indexWhere((element) => element.name == checkValue);
-//     subPages.removeRange(index, subPages.length);
-//     return true;
-//   }
+  void popAndAddInner(BasePage innerPage) {
+    if (innerPages.isNotEmpty) {
+      innerPages.removeLast();
+    }
 
-//   backUntilAndAdd(String checkValue, CustomPage newValue) {
-//     final canBack = backUntil(checkValue);
-//     if (!canBack) return false;
-//     subPages.add(newValue);
-//   }
-// }
+    innerPages.add(innerPage);
+  }
+
+  bool popUntil(String innerName) {
+    if (innerPages.length <= 1) return false;
+    final index =
+        innerPages.indexWhere((element) => element.routerName == innerName);
+    if (index > 0) {
+      innerPages.length = index;
+      return true;
+    }
+    return false;
+  }
+}
+
+extension ConvertBasePage on List<BasePage> {
+  List<MaterialPage> getMaterialPage() {
+    final List<MaterialPage> pages = [];
+    forEach((element) {
+      pages.add(element.getPage());
+    });
+    return pages;
+  }
+
+  BasePage? getByName(String routerName) =>
+      firstWhereOrNull((element) => element.routerName == routerName);
+}

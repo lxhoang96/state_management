@@ -4,6 +4,7 @@ import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'custom_page.dart';
 import 'nav_config.dart';
 
 class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
@@ -14,7 +15,7 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
   final bool useSnackbar;
   final DecorationImage? backgroundImage;
   final bool isDesktop;
-  final Widget Function()? Function(String name) listPages;
+  final Map<String, InitPage> listPages;
   final String homeRouter;
   final List<Widget> globalWidgets;
   HomeRouterDelegate(
@@ -87,7 +88,7 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
     }
 
     if (homeRoutePath.pathName != null || homeRoutePath.pathName != homePath) {
-      Global.setOuterPagesForWeb(homeRoutePath.pathName!.split('/'));
+      // Global.setOuterPagesForWeb(homeRoutePath.pathName!.split('/'));
       notifyListeners();
       return;
     }

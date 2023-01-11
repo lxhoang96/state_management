@@ -12,13 +12,14 @@ class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
   GlobalKey<NavigatorState> get navigatorKey =>
       GlobalObjectKey<NavigatorState>(this);
 
-  InnerDelegateRouter({required initInner}) {
+  InnerDelegateRouter({required this.parentName, required initInner}) {
     Global.setInitInnerRouter(initInner);
   }
+  final String parentName;
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: Global.innerStream,
+        stream: Global.innerStream(parentName),
         builder: (context, value) {
           if (value.data != null && value.data!.isNotEmpty) {
             return Navigator(
@@ -47,8 +48,8 @@ class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
     }
 
     if (homeRoutePath.pathName != null || homeRoutePath.pathName != homePath) {
-      Global.setInnerPagesForWeb(
-          homeRoutePath.pathName!.split('/value:')[1].split('/'));
+      // Global.setInnerPagesForWeb(
+      //     homeRoutePath.pathName!.split('/value:')[1].split('/'));
       return;
     }
     Global.showHomePage();
