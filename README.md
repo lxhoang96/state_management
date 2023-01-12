@@ -12,7 +12,7 @@ and the Flutter guide for
 -->
 
 
-## Features
+# Features
 
 1. State management
 - Auto dispose controller, observer
@@ -22,11 +22,11 @@ and the Flutter guide for
 3. Custom dialog, snackbar 
 - Dialog, snackbar is not in navigation tree
 
-## Used
+# Used
 
 
 1. In main.dart, add MainWidget
-# Navigation 1.0
+## Navigation 1.0
 ```
 GlobalState(
   initBinding: InitBindingImpl(),
@@ -39,7 +39,7 @@ GlobalState(
   child:  child!,
 ),
 ```
-# Navigation 2.0
+## Navigation 2.0
 ```
 MaterialApp.router(
   routerDelegate: HomeRouterDelegate(
@@ -68,12 +68,12 @@ class InitBindingImpl extends InitBinding {
 ```
 
 3. Navigation in App with routers:
-# Navigation 1.0
+## Navigation 1.0
 ```
 initialRoute: RouterName.appControl,
 routes: routes,
 ```
-# Navigation 2.0
+## Navigation 2.0
 ```
 listPages: listPages,
 homeRouter: RouterName.landing,
@@ -151,12 +151,12 @@ combinedStream.value.listen((streams) {
   return Text(_stream + _stream1 + _stream2);
 });
 ```
-## Additional information
+# Additional information
 
 Pure Dart package depended on rxdart version
 
 
-## Auto generate template scripts
+# Auto generate template scripts
 1. Generate code for feature-first & Clean architecture project
 - app.sh: script generate app level folder
 - feature.sh: script generate feature level
