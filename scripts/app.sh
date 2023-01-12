@@ -6,8 +6,8 @@ cd lib
 
 mkdir app
 cd app
-mkdir client
-cd client
+mkdir network
+cd network
 mkdir helper
 mkdir interceptors
 mkdir local
