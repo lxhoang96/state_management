@@ -32,6 +32,7 @@ class ${x}Controller extends DefaultController{
 
 }" >> $1_controller.dart
 cd ..
+cd ..
 mkdir widgets
 cd ..
 mkdir domain

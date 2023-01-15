@@ -12,7 +12,7 @@ and the Flutter guide for
 -->
 
 
-## Features
+# Features
 
 1. State management
 - Auto dispose controller, observer
@@ -20,11 +20,13 @@ and the Flutter guide for
 2. Navigation without context
 
 3. Custom dialog, snackbar 
-- Dialog, snackbar is not in navigator tree
+- Dialog, snackbar is not in navigation tree
 
-## Used
+# Used
+
 
 1. In main.dart, add MainWidget
+## Navigation 1.0
 ```
 GlobalState(
   initBinding: InitBindingImpl(),
@@ -36,6 +38,21 @@ GlobalState(
       fit: BoxFit.fill),
   child:  child!,
 ),
+```
+## Navigation 2.0
+```
+MaterialApp.router(
+  routerDelegate: HomeRouterDelegate(
+    listPages: listPages,
+    // globalWidgets: [UserInteractionWidget()],
+    homeRouter: RouterName.landing,
+    initBinding: InitBindingImpl(),
+    appIcon: AppImages.landingImg('icon_robot'),
+    backgroundImage: DecorationImage(
+        image: AssetImage(AppImages.img('background')), fit: BoxFit.fill),
+  ),
+
+  routeInformationParser: HomeRouteInformationParser(),
 ```
 
 2. Add app level controllers
@@ -51,9 +68,15 @@ class InitBindingImpl extends InitBinding {
 ```
 
 3. Navigation in App with routers:
+## Navigation 1.0
 ```
 initialRoute: RouterName.appControl,
 routes: routes,
+```
+## Navigation 2.0
+```
+listPages: listPages,
+homeRouter: RouterName.landing,
 ```
 
 4. Creates controllers for each router
@@ -80,10 +103,12 @@ Global.find<HomeController>();
 6. Create Observer to listen value changed
 ```
 final index = Observer(initValue: 0);
+index.value = 1; //update value
 ```
 7. Stream subcribe with ObserWidget and ObserListWidget in Widget tree
 
 ```
+// listen single value
 ObserWidget(
   value: controller.index,
   child: (value) {
@@ -96,6 +121,8 @@ ObserWidget(
 ```
 
 ```
+// listen multiple values
+
 ObserListWidget(
   listStream: [
     Observer(initValue: 0).stream,
@@ -111,6 +138,7 @@ ObserListWidget(
 
 Or not: 
 ```
+// listen without return Widget
 final combinedStream = ObserverCombined([
   stream,
   stream1,
@@ -123,10 +151,12 @@ combinedStream.value.listen((streams) {
   return Text(_stream + _stream1 + _stream2);
 });
 ```
-## Additional information
+# Additional information
 
 Pure Dart package depended on rxdart version
 
 
-## Future planning
+# Auto generate template scripts
 1. Generate code for feature-first & Clean architecture project
+- app.sh: script generate app level folder
+- feature.sh: script generate feature level

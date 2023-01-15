@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'nav_config.dart';
 
-class HomeRouteInformationParser extends RouteInformationParser<RoutePathConfigure> {
+class HomeRouteInformationParser
+    extends RouteInformationParser<RoutePathConfigure> {
   // final RouterList routerList;
   // HomeRouteInformationParser(this.routerList);
 

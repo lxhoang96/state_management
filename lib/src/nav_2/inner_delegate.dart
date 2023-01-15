@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'nav_config.dart';
-// final _innerKey = GlobalKey<NavigatorState>();
 
 class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {

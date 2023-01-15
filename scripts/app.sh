@@ -6,11 +6,25 @@ cd lib
 
 mkdir app
 cd app
-mkdir client
-cd client
+mkdir network
+cd network
 mkdir helper
 mkdir interceptors
 mkdir local
+mkdir urls
+cd urls
+touch api_endpoints.dart
+touch roots.dart
+echo "
+final String baseUrl = 'localhost:9000';
+" >> roots.dart
+echo "
+class AppEndPoint {
+  static const register = 'user/register';
+  static const login = 'user/login';
+}
+" >> api_endpoints.dart
+cd ..
  
 cd ..
 mkdir features
@@ -19,6 +33,19 @@ cd navigation
 touch app_routers.dart
 touch router_names.dart
 
+echo "
+class RouteName {
+  static const landing = '/';
+}
+">> router_names.dart
+
+echo "
+import 'package:base/base_navigation.dart';
+
+Map<String, InitPage> listPages = {
+  RouterName.landing: InitPage(widget: () => LandingScreen()),
+}
+"
 cd ..
 cd ..
 

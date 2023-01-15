@@ -75,8 +75,7 @@ class AppNav {
   void setUnknownPage(String name) {
     final page = _initPages[name];
     if (page == null) {
-            throw Exception(['Can not find a page with this name']);
-
+      throw Exception(['Can not find a page with this name']);
     }
 
     unknownRouter = page.toBasePage(name);
@@ -110,8 +109,7 @@ class AppNav {
   void pushNamed(String routerName) {
     final page = _initPages[routerName];
     if (page == null) {
-            throw Exception(['Can not find a page with this name']);
-
+      throw Exception(['Can not find a page with this name']);
     }
     if (_outerPages.isNotEmpty) {
       _updatePages(routerName, parentName: page.parentName);
@@ -133,8 +131,7 @@ class AppNav {
   void pop() {
     final parentName = _currentRouter?.parentName;
     if (parentName == null && _outerPages.length <= 1) {
-            throw Exception(['Can not pop: no backward router']);
-
+      throw Exception(['Can not pop: no backward router']);
     }
     final lastParent = _outerPages.last;
     if (parentName != null && lastParent.pop()) {
@@ -152,8 +149,7 @@ class AppNav {
   void popUntil(String routerName) {
     final parentName = _initPages[routerName]?.parentName;
     if (parentName == null && _outerPages.length <= 1) {
-                 throw Exception(['Can not pop: no backward router']);
-
+      throw Exception(['Can not pop: no backward router']);
     }
     final lastParent = _outerPages.last;
     if (parentName != null &&
@@ -172,13 +168,11 @@ class AppNav {
   void popAndReplaceNamed(String routerName) {
     final newPage = _initPages[routerName];
     if (newPage == null) {
-                  throw Exception(['Can not find a page with this name']);
-
+      throw Exception(['Can not find a page with this name']);
     }
     final parentName = newPage.parentName;
     if (parentName == null && _outerPages.isEmpty) {
-                       throw Exception(['Can not pop: no backward router']);
-
+      throw Exception(['Can not pop: no backward router']);
     }
 
     if (parentName != null) {
@@ -200,8 +194,7 @@ class AppNav {
   void popAllAndPushNamed(String routerName) {
     final page = _initPages[routerName];
     if (page == null) {
-                       throw Exception(['Can not find a page with this name']);
-
+      throw Exception(['Can not find a page with this name']);
     }
     final newPage = page.toBasePage(routerName);
 

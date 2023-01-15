@@ -41,17 +41,6 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   GlobalKey<NavigatorState> get navigatorKey =>
       GlobalObjectKey<NavigatorState>(this);
 
-  // @override
-  // RoutePathConfigure get currentConfiguration {
-  //   if (isError) return RoutePathConfigure.unKnown();
-
-  //   if (pathName == null) return RoutePathConfigure.home();
-  //   if (isInner) return RoutePathConfigure.innerPage(pathName);
-  //   return RoutePathConfigure.outerPage(pathName);
-  // }
-
-  // pop() {}
-
   @override
   Widget build(BuildContext context) {
     return GlobalState(
@@ -104,34 +93,12 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     }
 
     if (configuration.pathName != null && configuration.pathName != homePath) {
-      Global.setOuterPagesForWeb(configuration.pathName!.replaceAll('//', '/').split('/'));
+      Global.setOuterPagesForWeb(
+          configuration.pathName!.replaceAll('//', '/').split('/'));
       notifyListeners();
       return;
     }
     Global.showHomePage();
     notifyListeners();
   }
-
-
 }
-
-// final examplePage = MaterialPage(child: child);
-
-// class AppNav {
-//   static const initRoute = '/';
-//   static List<String> listActiveRouter = [];
-//   static pushNamed(String page) {
-//     listActiveRouter.add(page);
-//   }
-
-//   static back() {
-//     listActiveRouter.removeLast();
-//   }
-
-//   static backAllandPushNamed(String page) {
-//     listActiveRouter = [];
-//     listActiveRouter.add(page);
-//   }
-
-//   // static
-// }
