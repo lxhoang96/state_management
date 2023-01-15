@@ -1,4 +1,5 @@
 import 'package:base/base_widget.dart';
+import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/foundation.dart';
@@ -7,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'custom_page.dart';
 import 'nav_config.dart';
 
-class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<HomeRoutePath> {
+class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final InitBinding? initBinding;
   final String? appIcon;
   final bool useLoading;
@@ -27,18 +28,26 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
       this.useSnackbar = true,
       this.backgroundImage,
       this.globalWidgets = const [],
-      this.isDesktop = true});
+      this.isDesktop = true}) {
+    final outerStream = ObserverCombined([Global.outerStream]);
+    outerStream.value.listen((event) {
+      pages = event[0];
+      notifyListeners();
+    });
+  }
+
+  List<Page> pages = [];
   @override
   GlobalKey<NavigatorState> get navigatorKey =>
       GlobalObjectKey<NavigatorState>(this);
 
   // @override
-  // HomeRoutePath get currentConfiguration {
-  //   if (isError) return HomeRoutePath.unKnown();
+  // RoutePathConfigure get currentConfiguration {
+  //   if (isError) return RoutePathConfigure.unKnown();
 
-  //   if (pathName == null) return HomeRoutePath.home();
-  //   if (isInner) return HomeRoutePath.innerPage(pathName);
-  //   return HomeRoutePath.outerPage(pathName);
+  //   if (pathName == null) return RoutePathConfigure.home();
+  //   if (isInner) return RoutePathConfigure.innerPage(pathName);
+  //   return RoutePathConfigure.outerPage(pathName);
   // }
 
   // pop() {}
@@ -46,55 +55,64 @@ class HomeRouterDelegate extends RouterDelegate<HomeRoutePath>
   @override
   Widget build(BuildContext context) {
     return GlobalState(
-      listPages: listPages,
-      homeRouter: homeRouter,
-      initBinding: initBinding,
-      appIcon: appIcon,
-      isDesktop: isDesktop,
-      useLoading: useLoading,
-      useSnackbar: useSnackbar,
-      backgroundImage: backgroundImage,
-      globalWidgets: globalWidgets,
-      child: StreamBuilder(
-          stream: Global.outerStream,
-          builder: (context, value) {
-            if (value.data != null && value.data!.isNotEmpty) {
-              return Navigator(
-                  key: navigatorKey,
-                  pages: value.data!.toList(),
-                  onPopPage: (route, result) {
-                    if (!route.didPop(result)) return false;
+        listPages: listPages,
+        homeRouter: homeRouter,
+        initBinding: initBinding,
+        appIcon: appIcon,
+        isDesktop: isDesktop,
+        useLoading: useLoading,
+        useSnackbar: useSnackbar,
+        backgroundImage: backgroundImage,
+        globalWidgets: globalWidgets,
+        child: pages.isNotEmpty
+            ? Navigator(
+                key: navigatorKey,
+                pages: pages,
+                onPopPage: (route, result) {
+                  if (!route.didPop(result)) {
+                    return false;
+                  }
+                  Global.pop();
+                  notifyListeners();
 
-                    Global.pop();
-
-                    return true;
-                  });
-            }
-            return const SizedBox();
-          }),
-    );
+                  return true;
+                })
+            : const SizedBox());
   }
 
   @override
-  Future<void> setNewRoutePath(HomeRoutePath homeRoutePath) async {
+  RoutePathConfigure get currentConfiguration {
+    if (pages.length > 1) {
+      return RoutePathConfigure.otherPage(Global.getPath());
+    }
+    if (Global.getCurrentRouter() == unknownPath) {
+      return RoutePathConfigure.unKnown();
+    }
+    return RoutePathConfigure.home();
+  }
+
+  @override
+  Future<void> setNewRoutePath(RoutePathConfigure configuration) async {
     if (!kIsWeb) {
       notifyListeners();
       return;
     }
-    if (homeRoutePath.isUnknown) {
+    if (configuration.isUnknown) {
       Global.showUnknownPage();
       notifyListeners();
       return;
     }
 
-    if (homeRoutePath.pathName != null || homeRoutePath.pathName != homePath) {
-      // Global.setOuterPagesForWeb(homeRoutePath.pathName!.split('/'));
+    if (configuration.pathName != null && configuration.pathName != homePath) {
+      Global.setOuterPagesForWeb(configuration.pathName!.replaceAll('//', '/').split('/'));
       notifyListeners();
       return;
     }
     Global.showHomePage();
     notifyListeners();
   }
+
+
 }
 
 // final examplePage = MaterialPage(child: child);

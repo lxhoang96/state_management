@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'nav_config.dart';
 // final _innerKey = GlobalKey<NavigatorState>();
 
-class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<HomeRoutePath> {
+class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   @override
   GlobalKey<NavigatorState> get navigatorKey =>
       GlobalObjectKey<NavigatorState>(this);
@@ -38,18 +38,18 @@ class InnerDelegateRouter extends RouterDelegate<HomeRoutePath>
   }
 
   @override
-  Future<void> setNewRoutePath(HomeRoutePath homeRoutePath) async {
+  Future<void> setNewRoutePath(RoutePathConfigure configuration) async {
     if (!kIsWeb) {
       return;
     }
-    if (homeRoutePath.isUnknown) {
+    if (configuration.isUnknown) {
       Global.showUnknownPage();
       return;
     }
 
-    if (homeRoutePath.pathName != null || homeRoutePath.pathName != homePath) {
+    if (configuration.pathName != null || configuration.pathName != homePath) {
       // Global.setInnerPagesForWeb(
-      //     homeRoutePath.pathName!.split('/value:')[1].split('/'));
+      //     RoutePathConfigure.pathName!.split('/value:')[1].split('/'));
       return;
     }
     Global.showHomePage();

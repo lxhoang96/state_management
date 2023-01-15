@@ -1,19 +1,19 @@
-class HomeRoutePath {
+class RoutePathConfigure {
   final String? _pathName;
   final bool _isUnknown;
   // final bool _isInner;
 
-  HomeRoutePath.home()
+  RoutePathConfigure.home()
       : _pathName = null,
         // _isInner = false,
         _isUnknown = false;
 
-  // HomeRoutePath.innerPage(this._pathName) : _isUnknown = false;
+  // RoutePathConfigure.innerPage(this._pathName) : _isUnknown = false;
   // // _isInner = true;
-  // HomeRoutePath.outerPage(this._pathName) : _isUnknown = false;
+  // RoutePathConfigure.outerPage(this._pathName) : _isUnknown = false;
   // _isInner = false;
-  HomeRoutePath.otherPage(this._pathName) : _isUnknown = false;
-  HomeRoutePath.unKnown()
+  RoutePathConfigure.otherPage(this._pathName) : _isUnknown = false;
+  RoutePathConfigure.unKnown()
       : _pathName = null,
         // _isInner = false,
         _isUnknown = true;
