@@ -6,6 +6,7 @@ cd lib
 
 mkdir app
 cd app
+mkdir global_controllers
 mkdir network
 cd network
 mkdir helper
@@ -16,7 +17,7 @@ cd urls
 touch api_endpoints.dart
 touch roots.dart
 echo "
-final String baseUrl = 'localhost:9000';
+const String baseUrl = 'localhost:9000';
 " >> roots.dart
 echo "
 class AppEndPoint {
@@ -43,9 +44,9 @@ echo "
 import 'package:base/base_navigation.dart';
 
 Map<String, InitPage> listPages = {
-  RouterName.landing: InitPage(widget: () => LandingScreen()),
-}
-"
+ // RouterName.landing: InitPage(widget: () => LandingScreen()),
+};
+" >> app_routers.dart
 cd ..
 cd ..
 
