@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 
 import 'custom_page.dart';
 
-const homePath = '/';
+String homePath = '/';
 const unknownPath = '/unknown';
 
 class AppNav {
@@ -31,9 +31,12 @@ class AppNav {
       _outerPages.removeWhere((element) => element.routerName == routerName);
       return;
     }
-    final _page = _outerPages.getByName(parentName);
-    if (_page == null) return;
-    _page.innerPages.removeWhere((element) => element.routerName == routerName);
+    final page = _outerPages.getByName(parentName);
+    if (page == null) {
+      throw Exception(['Can not find a page with this name']);
+    }
+
+    page.innerPages.removeWhere((element) => element.routerName == routerName);
   }
 
   /// Set pages will display in App
@@ -44,15 +47,12 @@ class AppNav {
   /// set Homepage
   void setHomeRouter(String routerName) {
     final page = _initPages[routerName];
-    if (page == null || _outerPages.isNotEmpty) {
-      return;
+    if (page == null) {
+      throw Exception(['Can not find a page with this name']);
     }
-
+    homePath = routerName;
     homeRouter = page.toBasePage(routerName);
-    _outerPages.add(homeRouter);
-    _currentRouter = homeRouter;
-
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    showHomePage();
   }
 
   /// set HomePage of nested pages if has any
@@ -66,14 +66,16 @@ class AppNav {
     final router = page.toBasePage(routerName);
     parentRouter.innerPages.add(router);
     _currentRouter = router;
-    _streamInnerController[parentRouter.routerName] = BehaviorSubject<List<MaterialPage>>.seeded(parentRouter.innerPages.getMaterialPage());
+    _streamInnerController[parentRouter.routerName] =
+        BehaviorSubject<List<MaterialPage>>.seeded(
+            parentRouter.innerPages.getMaterialPage());
   }
 
   /// set UnknownPage on Web
   void setUnknownPage(String name) {
     final page = _initPages[name];
     if (page == null) {
-      return;
+      throw Exception(['Can not find a page with this name']);
     }
 
     unknownRouter = page.toBasePage(name);
@@ -107,7 +109,7 @@ class AppNav {
   void pushNamed(String routerName) {
     final page = _initPages[routerName];
     if (page == null) {
-      return;
+      throw Exception(['Can not find a page with this name']);
     }
     if (_outerPages.isNotEmpty) {
       _updatePages(routerName, parentName: page.parentName);
@@ -129,7 +131,7 @@ class AppNav {
   void pop() {
     final parentName = _currentRouter?.parentName;
     if (parentName == null && _outerPages.length <= 1) {
-      return;
+      throw Exception(['Can not pop: no backward router']);
     }
     final lastParent = _outerPages.last;
     if (parentName != null && lastParent.pop()) {
@@ -147,7 +149,7 @@ class AppNav {
   void popUntil(String routerName) {
     final parentName = _initPages[routerName]?.parentName;
     if (parentName == null && _outerPages.length <= 1) {
-      return;
+      throw Exception(['Can not pop: no backward router']);
     }
     final lastParent = _outerPages.last;
     if (parentName != null &&
@@ -166,11 +168,11 @@ class AppNav {
   void popAndReplaceNamed(String routerName) {
     final newPage = _initPages[routerName];
     if (newPage == null) {
-      return;
+      throw Exception(['Can not find a page with this name']);
     }
     final parentName = newPage.parentName;
     if (parentName == null && _outerPages.isEmpty) {
-      return;
+      throw Exception(['Can not pop: no backward router']);
     }
 
     if (parentName != null) {
@@ -192,7 +194,7 @@ class AppNav {
   void popAllAndPushNamed(String routerName) {
     final page = _initPages[routerName];
     if (page == null) {
-      return;
+      throw Exception(['Can not find a page with this name']);
     }
     final newPage = page.toBasePage(routerName);
 
@@ -208,7 +210,10 @@ class AppNav {
       return;
     }
     final parentPage = _outerPages.getByName(page.parentName!);
-    if (parentPage == null) return;
+    if (parentPage == null) {
+      throw Exception(['Can not find parent for this page']);
+    }
+
     parentPage.popAllAndPushInner(newPage);
     _currentRouter = parentPage.innerPages.last;
     _streamInnerController[page.parentName]
@@ -234,10 +239,17 @@ class AppNav {
 
   /// only for web with path on browser
   void setOuterPagesForWeb(List<String> listRouter) {
+    listRouter.removeWhere((element) => element == '');
     _outerPages.clear();
     for (var routerName in listRouter) {
+      if (!routerName.startsWith('/')) {
+        routerName = '/$routerName';
+      }
       final page = _initPages[routerName];
       if (page == null) {
+        _outerPages
+          ..clear()
+          ..add(unknownRouter);
         return;
       }
 
@@ -261,5 +273,13 @@ class AppNav {
     }
     _streamInnerController[parentName]
         ?.add(parentPage.innerPages.getMaterialPage());
+  }
+
+  getPath() {
+    String path = '';
+    for (var element in _outerPages) {
+      path += element.routerName;
+    }
+    return path;
   }
 }

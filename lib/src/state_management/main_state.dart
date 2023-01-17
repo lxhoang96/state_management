@@ -52,9 +52,11 @@ abstract class MainStateRepo {
   void setOuterPagesForWeb(List<String> listRouter);
 
   /// only for web with path on browser
-  void setInnerPagesForWeb({required parentName, List<String> listRouter = const []});
+  void setInnerPagesForWeb(
+      {required parentName, List<String> listRouter = const []});
 
   String getCurrentRouter();
+  String getPath();
 }
 
 class MainState extends MainStateRepo {
@@ -62,8 +64,7 @@ class MainState extends MainStateRepo {
   static final List<Observer> _listObserver = [];
   final _navApp = AppNav();
 
-  Stream<List<MaterialPage<dynamic>>> get outerStream =>
-      _navApp.outerStream;
+  Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
   Stream<List<MaterialPage<dynamic>>>? innerStream(String parentName) =>
       _navApp.getInnerStream(parentName);
 
@@ -186,8 +187,7 @@ class MainState extends MainStateRepo {
   }
 
   @override
-  void pushNamed(String routerName) =>
-      _navApp.pushNamed(routerName);
+  void pushNamed(String routerName) => _navApp.pushNamed(routerName);
 
   @override
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
@@ -201,8 +201,10 @@ class MainState extends MainStateRepo {
       _navApp.setInitPages(initPages);
 
   @override
-  void setInnerPagesForWeb({required parentName, List<String> listRouter = const []}) =>
-      _navApp.setInnerPagesForWeb(parentName: parentName, listRouter: listRouter);
+  void setInnerPagesForWeb(
+          {required parentName, List<String> listRouter = const []}) =>
+      _navApp.setInnerPagesForWeb(
+          parentName: parentName, listRouter: listRouter);
 
   @override
   void setOuterPagesForWeb(List<String> listRouter) =>
@@ -219,6 +221,9 @@ class MainState extends MainStateRepo {
 
   @override
   getCurrentRouter() => _navApp.currentRouter;
+
+  @override
+  String getPath() => _navApp.getPath();
 }
 
 class InstanceRoute<T> {
