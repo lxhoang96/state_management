@@ -222,7 +222,7 @@ class AppNav {
 
   /// check a page is active or not
   bool checkActiveRouter(String routerName) {
-    if (routerName == homePath) return true;
+    if (routerName == '/') return true;
     final page = _initPages[routerName];
     if (page?.parentName == null) {
       return _outerPages.firstWhereOrNull(
