@@ -57,6 +57,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
             ? Navigator(
                 key: navigatorKey,
                 pages: pages,
+                // transitionDelegate: ,
                 onPopPage: (route, result) {
                   if (!route.didPop(result)) {
                     return false;

@@ -56,6 +56,9 @@ abstract class MainStateRepo {
       {required parentName, List<String> listRouter = const []});
 
   String getCurrentRouter();
+
+  dynamic getCurrentArgument();
+
   String getPath();
 }
 
@@ -224,6 +227,9 @@ class MainState extends MainStateRepo {
 
   @override
   String getPath() => _navApp.getPath();
+
+  @override
+  getCurrentArgument() => _navApp.arguments;
 }
 
 class InstanceRoute<T> {

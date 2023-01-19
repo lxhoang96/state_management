@@ -3,13 +3,19 @@ import 'package:flutter/material.dart';
 
 class InitPage {
   final Widget Function() widget;
+  final dynamic argument;
   final String? parentName;
-  InitPage({required this.widget, this.parentName});
+  InitPage({
+    required this.widget,
+    this.parentName,
+    this.argument,
+  });
   BasePage toBasePage(String routerName) {
     return BasePage(
       routerName: routerName,
       widget: widget,
       parentName: parentName,
+      argument: argument,
     );
   }
 }
@@ -21,13 +27,17 @@ class BasePage extends InitPage {
     required this.routerName,
     required super.widget,
     super.parentName,
+    super.argument,
   });
 }
 
 extension BasePageExtension on BasePage {
   MaterialPage getPage() {
     return MaterialPage(
-        child: widget(), name: routerName, key: ValueKey(routerName));
+        child: widget(),
+        name: routerName,
+        key: ValueKey(routerName),
+        arguments: argument);
   }
 
   addInner(BasePage innerPage) => innerPages.add(innerPage);

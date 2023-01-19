@@ -24,7 +24,9 @@ class AppNav {
 
   BasePage? _currentRouter;
 
+  // BasePage? get currentRouter => _currentRouter;
   String get currentRouter => _currentRouter?.routerName ?? homePath;
+  dynamic get arguments => _currentRouter?.argument;
 
   _updatePages(String routerName, {String? parentName}) {
     if (parentName == null) {
