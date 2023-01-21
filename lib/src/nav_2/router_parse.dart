@@ -3,34 +3,35 @@ import 'package:flutter/material.dart';
 
 import 'nav_config.dart';
 
-class HomeRouteInformationParser extends RouteInformationParser<HomeRoutePath> {
+/// update flow by path in Web
+class HomeRouteInformationParser
+    extends RouteInformationParser<RoutePathConfigure> {
   // final RouterList routerList;
   // HomeRouteInformationParser(this.routerList);
 
   @override
-  Future<HomeRoutePath> parseRouteInformation(
+  Future<RoutePathConfigure> parseRouteInformation(
       RouteInformation routeInformation) async {
     if (routeInformation.location == null) {
-      return HomeRoutePath.unKnown();
+      return RoutePathConfigure.unKnown();
     }
     final uri = Uri.parse(routeInformation.location ?? '');
 
     if (uri.pathSegments.isEmpty) {
-      return HomeRoutePath.home();
+      return RoutePathConfigure.home();
     }
 
-
-    return HomeRoutePath.otherPage(routeInformation.location);
+    return RoutePathConfigure.otherPage(routeInformation.location);
   }
 
   @override
-  RouteInformation? restoreRouteInformation(HomeRoutePath homeRoutePath) {
-    if (homeRoutePath.isUnknown) {
+  RouteInformation? restoreRouteInformation(RoutePathConfigure configuration) {
+    if (configuration.isUnknown) {
       return const RouteInformation(location: unknownPath);
     }
-    if (homeRoutePath.isHomePage) return const RouteInformation(location: homePath);
-    if (homeRoutePath.isOtherPage) {
-      return RouteInformation(location: homeRoutePath.pathName);
+    if (configuration.isHomePage) return RouteInformation(location: homePath);
+    if (configuration.isOtherPage) {
+      return RouteInformation(location: configuration.pathName);
     }
 
     return null;

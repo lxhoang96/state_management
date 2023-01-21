@@ -1,19 +1,30 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
+/// It is where your navigator flow starts.
+/// Each [InitPage] present a page later.
+/// It contains a function return Widget, [argument] and [parentName] (optional)
 class InitPage {
   final Widget Function() widget;
+  final dynamic argument;
   final String? parentName;
-  InitPage({required this.widget, this.parentName});
+  InitPage({
+    required this.widget,
+    this.parentName,
+    this.argument,
+  });
   BasePage toBasePage(String routerName) {
     return BasePage(
       routerName: routerName,
       widget: widget,
       parentName: parentName,
+      argument: argument,
     );
   }
 }
 
+/// A BasePage extends InitPage to return a Page with 
+/// String [routerName] and List of BasePage [innerPages] (optional)
 class BasePage extends InitPage {
   final String routerName;
   final List<BasePage> innerPages = [];
@@ -21,13 +32,17 @@ class BasePage extends InitPage {
     required this.routerName,
     required super.widget,
     super.parentName,
+    super.argument,
   });
 }
 
 extension BasePageExtension on BasePage {
   MaterialPage getPage() {
     return MaterialPage(
-        child: widget(), name: routerName, key: ValueKey(routerName));
+        child: widget(),
+        name: routerName,
+        key: ValueKey(routerName),
+        arguments: argument);
   }
 
   addInner(BasePage innerPage) => innerPages.add(innerPage);

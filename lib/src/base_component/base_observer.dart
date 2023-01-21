@@ -2,6 +2,12 @@ import 'package:base/base_component.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
+/// An observer can be used to update value in multiple place using stream.
+/// An observer can be automatically close by default and can be handled
+///  by hand with autoClose == false.
+/// An observer can get and set value with .value
+/// An observer can use in Widget tree with [ObserWidget] and [ObserListWidget].
+/// Or in controller with [ObserverCombined]
 class Observer<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;

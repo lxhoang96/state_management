@@ -23,6 +23,7 @@ class GlobalState extends StatefulWidget {
   final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;
+  
   final bool isDesktop;
   final DecorationImage? backgroundImage;
   final String homeRouter;
@@ -38,23 +39,19 @@ class _GlobalStateState extends State<GlobalState> {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
     Global.setInitPages(widget.listPages);
-    if (widget.initBinding == null) {
-      setState(() {
-        didInit = true;
-      });
-    } else {
-      widget.initBinding?.dependencies().then((value) => setState(() {
-            Global.setHomeRouter(widget.homeRouter);
-            didInit = true;
-          }));
-    }
-
+    init();
     super.initState();
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  init() async {
+    await widget.initBinding?.dependencies();
+    Global.setHomeRouter(widget.homeRouter);
+    didInit = true;
   }
 
   Widget buildChild() {
