@@ -7,14 +7,26 @@ import 'custom_page.dart';
 String homePath = '/';
 const unknownPath = '/unknown';
 
+/// This is the place you can controll your app flow with Navigation 2.0
+/// [AppNav] have to be used with [HomeRouterDelegate], 
+/// [HomeRouteInformationParser] and [InnerDelegateRouter] 
+/// for controlling your entire app.
+///
 class AppNav {
+  /// UnknownRouter can be update during app, so you can show different page
+  /// for each unknownRouter.
   var unknownRouter =
       BasePage(routerName: unknownPath, widget: () => Container());
+  /// this is HomeRouter which will show when you open the app.
   var homeRouter = BasePage(routerName: homePath, widget: () => Container());
+
+  /// The Navigator stack is updated with these stream
+  /// [_streamOuterController] for main flow and [_streamInnerController] for nested stack
   final _streamOuterController = BehaviorSubject<List<MaterialPage>>();
   final Map<String, BehaviorSubject<List<MaterialPage>>>
       _streamInnerController = {};
 
+  /// This is pages will be shown in Navigator.
   final List<BasePage> _outerPages = [];
   Map<String, InitPage> _initPages = {};
 
@@ -22,10 +34,12 @@ class AppNav {
   Stream<List<MaterialPage>>? getInnerStream(String routerName) =>
       _streamInnerController[routerName]?.stream;
 
+  /// currentRouter, this can be in main flow or nested flow
   BasePage? _currentRouter;
 
-  // BasePage? get currentRouter => _currentRouter;
   String get currentRouter => _currentRouter?.routerName ?? homePath;
+
+  /// argument when navigation.
   dynamic get arguments => _currentRouter?.argument;
 
   _updatePages(String routerName, {String? parentName}) {

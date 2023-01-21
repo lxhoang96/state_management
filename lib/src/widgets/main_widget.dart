@@ -23,6 +23,7 @@ class GlobalState extends StatefulWidget {
   final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;
+  
   final bool isDesktop;
   final DecorationImage? backgroundImage;
   final String homeRouter;

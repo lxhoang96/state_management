@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'nav_config.dart';
 
+/// update flow by path in Web
 class HomeRouteInformationParser
     extends RouteInformationParser<RoutePathConfigure> {
   // final RouterList routerList;

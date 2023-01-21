@@ -62,6 +62,8 @@ abstract class MainStateRepo {
   String getPath();
 }
 
+/// The heart of the package, when you control how app navigate, 
+/// auto remove controller and observer
 class MainState extends MainStateRepo {
   final Map<Type, InstanceRoute> _listCtrl = {};
   static final List<Observer> _listObserver = [];

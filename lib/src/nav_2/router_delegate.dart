@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'custom_page.dart';
 import 'nav_config.dart';
 
+/// [RouterDelegate] for main flow.
 class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final InitBinding? initBinding;
@@ -32,6 +33,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     final outerStream = ObserverCombined([Global.outerStream]);
     outerStream.value.listen((event) {
       pages = event[0];
+      // update with [ChangeNotifier] 
       notifyListeners();
     });
   }

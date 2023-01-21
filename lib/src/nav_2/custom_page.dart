@@ -1,6 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
+/// It is where your navigator flow starts.
+/// Each [InitPage] present a page later.
+/// It contains a function return Widget, [argument] and [parentName] (optional)
 class InitPage {
   final Widget Function() widget;
   final dynamic argument;
@@ -20,6 +23,8 @@ class InitPage {
   }
 }
 
+/// A BasePage extends InitPage to return a Page with 
+/// String [routerName] and List of BasePage [innerPages] (optional)
 class BasePage extends InitPage {
   final String routerName;
   final List<BasePage> innerPages = [];
