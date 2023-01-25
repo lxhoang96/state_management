@@ -11,7 +11,7 @@ import 'package:rxdart/rxdart.dart';
 class Observer<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
-  String? _initRoute;
+  late String _initRoute;
   Observer({required T initValue, bool autoClose = true}) {
     _object = initValue;
     _streamController.sink.add(_object);
@@ -21,7 +21,7 @@ class Observer<T> {
       Global.addObs(this);
     }
   }
-  String? get route => _initRoute;
+  String get route => _initRoute;
 
   T get value => _object;
   set value(T valueSet) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// controller interface 
+/// controller interface
 abstract class BaseController {
   init();
 
@@ -16,8 +16,6 @@ abstract class BaseController {
 /// ready: start immediately after first time screen is built
 /// dispose: called when router contains this controller is not in navigator stack
 class DefaultController extends BaseController {
-  DefaultController();
-
   @override
   void dispose() {
     debugPrint('${this} disposing');
@@ -25,13 +23,10 @@ class DefaultController extends BaseController {
 
   @override
   init() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => {
-      onReady()
-    });
-
+    WidgetsBinding.instance.addPostFrameCallback((_) => {onReady()});
   }
 
   @override
-  onReady() {
-  }
+  onReady() {}
+
 }
