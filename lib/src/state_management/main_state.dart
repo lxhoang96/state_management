@@ -33,6 +33,9 @@ abstract class MainStateRepo {
   /// show HomePage
   void showHomePage();
 
+  /// show lost connected page
+  void showLostConnectedPage();
+
   /// push a page
   void pushNamed(String routerName);
 
@@ -230,6 +233,9 @@ class MainState extends MainStateRepo {
 
   @override
   getCurrentArgument() => _navApp.arguments;
+
+  @override
+  void showLostConnectedPage() => _navApp.showLostConnectedPage();
 }
 
 class InstanceRoute<T> {

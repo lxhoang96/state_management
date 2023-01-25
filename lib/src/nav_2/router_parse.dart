@@ -33,7 +33,9 @@ class HomeRouteInformationParser
     if (configuration.isOtherPage) {
       return RouteInformation(location: configuration.pathName);
     }
-
+    if (configuration.lostConnected) {
+      return const RouteInformation(location: lostConnectedPath);
+    }
     return null;
   }
 }
