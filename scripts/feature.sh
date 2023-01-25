@@ -40,11 +40,11 @@ cd domain
 mkdir entities
 mkdir enum
 mkdir repositories
-mkdir usecases
 cd ..
 mkdir data
 cd data
 mkdir helpers
+mkdir usecases
 cd ..
 cd ..
 touch $1_export.dart
