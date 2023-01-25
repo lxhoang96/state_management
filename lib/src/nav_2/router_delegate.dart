@@ -106,7 +106,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       notifyListeners();
       return;
     }
-    Global.showHomePage();
+    // Global.showHomePage();
     notifyListeners();
   }
 }

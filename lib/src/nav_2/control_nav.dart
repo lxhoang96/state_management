@@ -71,7 +71,7 @@ class AppNav {
       throw Exception(['Can not find a page with this name']);
     }
     homePath = routerName;
-    homeRouter = page.toBasePage(routerName);
+    homeRouter = page.toBasePage(homePath);
     showHomePage();
   }
 
@@ -98,7 +98,7 @@ class AppNav {
       throw Exception(['Can not find a page with this name']);
     }
 
-    unknownRouter = page.toBasePage(name);
+    unknownRouter = page.toBasePage(unknownPath);
   }
 
   /// show UnknownPage
@@ -131,7 +131,7 @@ class AppNav {
       throw Exception(['Can not find a page with this name']);
     }
 
-    lostConnectedRouter = page.toBasePage(name);
+    lostConnectedRouter = page.toBasePage(lostConnectedPath);
   }
 
   void showLostConnectedPage() {
