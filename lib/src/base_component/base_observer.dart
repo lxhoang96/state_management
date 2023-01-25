@@ -41,6 +41,9 @@ class Observer<T> {
   }
 }
 
+/// [ObserverCombined] is a combined list stream without a [StreamBuilder].
+/// [ObserverCombined] is used in Logic class for update a specific value
+/// without rebuild Widgets.
 class ObserverCombined {
   final _streamController = BehaviorSubject();
 
@@ -52,6 +55,8 @@ class ObserverCombined {
   dispose() => _streamController.close();
 }
 
+/// [ObserWidget] is a custom [StreamBuilder] to rebuild Widgets when
+/// a stream has updated.
 class ObserWidget<T> extends StatelessWidget {
   const ObserWidget({super.key, required this.value, required this.child});
   final Observer<T> value;
@@ -69,6 +74,8 @@ class ObserWidget<T> extends StatelessWidget {
   }
 }
 
+/// [ObserListWidget] is a custom[StreamBuilder] to rebuild Widgets when a stream
+/// in a List of stream has new value.
 class ObserListWidget extends StatelessWidget {
   const ObserListWidget(
       {super.key, required this.listStream, required this.child});

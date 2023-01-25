@@ -6,10 +6,11 @@ import 'custom_page.dart';
 
 String homePath = '/';
 const unknownPath = '/unknown';
+const lostConnectedPath = '/lostConnected';
 
 /// This is the place you can controll your app flow with Navigation 2.0
-/// [AppNav] have to be used with [HomeRouterDelegate], 
-/// [HomeRouteInformationParser] and [InnerDelegateRouter] 
+/// [AppNav] have to be used with [HomeRouterDelegate],
+/// [HomeRouteInformationParser] and [InnerDelegateRouter]
 /// for controlling your entire app.
 ///
 class AppNav {
@@ -17,8 +18,11 @@ class AppNav {
   /// for each unknownRouter.
   var unknownRouter =
       BasePage(routerName: unknownPath, widget: () => Container());
+
   /// this is HomeRouter which will show when you open the app.
-  var homeRouter = BasePage(routerName: homePath, widget: () => Container());
+  late final BasePage homeRouter;
+
+  late final BasePage lostConnectedRouter;
 
   /// The Navigator stack is updated with these stream
   /// [_streamOuterController] for main flow and [_streamInnerController] for nested stack
@@ -119,6 +123,21 @@ class AppNav {
     _streamInnerController.forEach((key, value) {
       value.close();
     });
+  }
+
+  void setLostConnectedPage(String name) {
+    final page = _initPages[name];
+    if (page == null) {
+      throw Exception(['Can not find a page with this name']);
+    }
+
+    lostConnectedRouter = page.toBasePage(name);
+  }
+
+  void showLostConnectedPage() {
+    _outerPages.add(lostConnectedRouter);
+    _currentRouter = lostConnectedRouter;
+    _streamOuterController.add(_outerPages.getMaterialPage());
   }
 
   /// push a page

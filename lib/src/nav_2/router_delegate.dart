@@ -33,7 +33,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     final outerStream = ObserverCombined([Global.outerStream]);
     outerStream.value.listen((event) {
       pages = event[0];
-      // update with [ChangeNotifier] 
+      // update with [ChangeNotifier]
       notifyListeners();
     });
   }
@@ -91,6 +91,11 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     }
     if (configuration.isUnknown) {
       Global.showUnknownPage();
+      notifyListeners();
+      return;
+    }
+    if (configuration.lostConnected) {
+      Global.showLostConnectedPage();
       notifyListeners();
       return;
     }

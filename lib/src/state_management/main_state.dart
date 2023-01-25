@@ -33,6 +33,9 @@ abstract class MainStateRepo {
   /// show HomePage
   void showHomePage();
 
+  /// show lost connected page
+  void showLostConnectedPage();
+
   /// push a page
   void pushNamed(String routerName);
 
@@ -62,7 +65,7 @@ abstract class MainStateRepo {
   String getPath();
 }
 
-/// The heart of the package, when you control how app navigate, 
+/// The heart of the package, when you control how app navigate,
 /// auto remove controller and observer
 class MainState extends MainStateRepo {
   final Map<Type, InstanceRoute> _listCtrl = {};
@@ -232,6 +235,9 @@ class MainState extends MainStateRepo {
 
   @override
   getCurrentArgument() => _navApp.arguments;
+
+  @override
+  void showLostConnectedPage() => _navApp.showLostConnectedPage();
 }
 
 class InstanceRoute<T> {
