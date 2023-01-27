@@ -21,7 +21,6 @@ class AppNav {
 
   /// this is HomeRouter which will show when you open the app.
   late final BasePage homeRouter;
-
   late final BasePage lostConnectedRouter;
 
   /// The Navigator stack is updated with these stream
@@ -158,6 +157,9 @@ class AppNav {
     if (initPage.parentName == null) {
       _outerPages.add(router);
       _streamOuterController.add(_outerPages.getMaterialPage());
+      // final currentRouting = _streamOuterController.value;
+      // currentRouting.add(router.getPage());
+      // _streamOuterController.add(currentRouting);
       return;
     }
     // add new page to inner routing if it has parent.

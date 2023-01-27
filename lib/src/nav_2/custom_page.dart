@@ -23,10 +23,11 @@ class InitPage {
   }
 }
 
-/// A BasePage extends InitPage to return a Page with 
+/// A BasePage extends InitPage to return a Page with
 /// String [routerName] and List of BasePage [innerPages] (optional)
 class BasePage extends InitPage {
   final String routerName;
+  MaterialPage? page;
   final List<BasePage> innerPages = [];
   BasePage({
     required this.routerName,
@@ -34,10 +35,8 @@ class BasePage extends InitPage {
     super.parentName,
     super.argument,
   });
-}
 
-extension BasePageExtension on BasePage {
-  MaterialPage getPage() {
+  MaterialPage _initPage() {
     return MaterialPage(
         child: widget(),
         name: routerName,
@@ -45,6 +44,13 @@ extension BasePageExtension on BasePage {
         arguments: argument);
   }
 
+  MaterialPage getPage() {
+    page ??= _initPage();
+    return page!;
+  }
+}
+
+extension BasePageExtension on BasePage {
   addInner(BasePage innerPage) => innerPages.add(innerPage);
   bool pop() {
     if (innerPages.length <= 1) return false;

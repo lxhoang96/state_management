@@ -31,7 +31,7 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
     if (pages.isNotEmpty) {
       return Navigator(
           key: navigatorKey,
-          pages: pages,
+          pages: pages.toList(),
           onPopPage: (route, result) {
             if (!route.didPop(result)) return false;
 
