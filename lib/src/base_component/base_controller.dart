@@ -16,22 +16,17 @@ abstract class BaseController {
 /// ready: start immediately after first time screen is built
 /// dispose: called when router contains this controller is not in navigator stack
 class DefaultController extends BaseController {
-  DefaultController();
-
   @override
   void dispose() {
-    debugPrint('${this} disposing');
+    debugPrint('$this disposing');
   }
 
   @override
   init() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => {
-      onReady()
-    });
-
+    WidgetsBinding.instance.addPostFrameCallback((_) => {onReady()});
   }
 
   @override
-  onReady() {
-  }
+  onReady() {}
+
 }

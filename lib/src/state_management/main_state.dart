@@ -108,10 +108,9 @@ class MainState extends MainStateRepo {
 
   @override
   T find<T>() {
-    // if (_listCtrl[T]?.instance != null) {
-    //   return _listCtrl[T]?.instance as T;
-    // }
-    return _listCtrl[T]?.instance as T;
+    final instance = _listCtrl[T]?.instance;
+    if (instance == null) throw Exception(['Can not find $T, maybe you did not add this controller']);
+    return _listCtrl[T]?.instance;
   }
 
   @override
@@ -150,8 +149,7 @@ class MainState extends MainStateRepo {
 
   void _autoRemoveObs() {
     _listObserver.removeWhere((element) {
-      if (element.route == null) return false;
-      final result = !_navApp.checkActiveRouter(element.route!);
+      final result = !_navApp.checkActiveRouter(element.route);
       if (result) {
         debugPrint('Closing $element obs!');
         element.dispose();
@@ -247,4 +245,5 @@ class InstanceRoute<T> {
   InstanceRoute({required this.route, required this.instance});
 }
 
+// ignore: non_constant_identifier_names
 final Global = MainState();

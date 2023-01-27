@@ -38,10 +38,10 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     });
   }
 
-  List<Page> pages = [];
   @override
-  GlobalKey<NavigatorState> get navigatorKey =>
-      GlobalObjectKey<NavigatorState>(this);
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  List<Page> pages = [];
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         child: pages.isNotEmpty
             ? Navigator(
                 key: navigatorKey,
-                pages: pages,
+                pages: pages.toList(),
                 // transitionDelegate: ,
                 onPopPage: (route, result) {
                   if (!route.didPop(result)) {
@@ -106,7 +106,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       notifyListeners();
       return;
     }
-    Global.showHomePage();
+    // Global.showHomePage();
     notifyListeners();
   }
 }
