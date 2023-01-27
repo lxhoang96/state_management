@@ -18,7 +18,7 @@ abstract class BaseController {
 class DefaultController extends BaseController {
   @override
   void dispose() {
-    debugPrint('${this} disposing');
+    debugPrint('$this disposing');
   }
 
   @override

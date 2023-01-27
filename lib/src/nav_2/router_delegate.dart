@@ -40,8 +40,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
 
   List<Page> pages = [];
   @override
-  GlobalKey<NavigatorState> get navigatorKey =>
-      GlobalObjectKey<NavigatorState>(this);
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {

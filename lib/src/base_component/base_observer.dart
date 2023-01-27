@@ -36,7 +36,7 @@ class Observer<T> {
   Stream<T> get stream => _streamController.stream;
 
   dispose() {
-    debugPrint('${this} disposing');
+    debugPrint('$this disposing');
     _streamController.close();
   }
 }
