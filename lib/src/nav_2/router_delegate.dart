@@ -30,7 +30,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.backgroundImage,
       this.globalWidgets = const [],
       this.isDesktop = true}) {
-    final outerStream = ObserverCombined([Global.outerStream]);
+    final outerStream = ObserverCombined([MainState.instance.outerStream]);
     outerStream.value.listen((event) {
       pages = event[0];
       // update with [ChangeNotifier]
@@ -64,7 +64,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
                   if (!route.didPop(result)) {
                     return false;
                   }
-                  Global.pop();
+                  MainState.instance.pop();
                   notifyListeners();
 
                   return true;
@@ -75,9 +75,9 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   @override
   RoutePathConfigure get currentConfiguration {
     if (pages.length > 1) {
-      return RoutePathConfigure.otherPage(Global.getPath());
+      return RoutePathConfigure.otherPage(MainState.instance.getPath());
     }
-    if (Global.getCurrentRouter() == unknownPath) {
+    if (MainState.instance.getCurrentRouter() == unknownPath) {
       return RoutePathConfigure.unKnown();
     }
     return RoutePathConfigure.home();
@@ -90,23 +90,23 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       return;
     }
     if (configuration.isUnknown) {
-      Global.showUnknownPage();
+      MainState.instance.showUnknownPage();
       notifyListeners();
       return;
     }
     if (configuration.lostConnected) {
-      Global.showLostConnectedPage();
+      MainState.instance.showLostConnectedPage();
       notifyListeners();
       return;
     }
 
     if (configuration.pathName != null && configuration.pathName != homePath) {
-      Global.setOuterPagesForWeb(
+      MainState.instance.setOuterPagesForWeb(
           configuration.pathName!.replaceAll('//', '/').split('/'));
       notifyListeners();
       return;
     }
-    // Global.showHomePage();
+    // MainState.instance.showHomePage();
     notifyListeners();
   }
 }

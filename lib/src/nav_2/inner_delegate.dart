@@ -14,8 +14,8 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
       GlobalObjectKey<NavigatorState>(this);
 
   InnerDelegateRouter({required parentName, required initInner}) {
-    Global.setInitInnerRouter(initInner);
-    final stream = Global.innerStream(parentName);
+    MainState.instance.setInitInnerRouter(initInner);
+    final stream = MainState.instance.innerStream(parentName);
     if (stream == null) return;
     final innerStream = ObserverCombined([stream]);
     innerStream.value.listen((event) {
@@ -35,7 +35,7 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
           onPopPage: (route, result) {
             if (!route.didPop(result)) return false;
 
-            Global.pop();
+            MainState.instance.pop();
 
             return true;
           });
@@ -49,15 +49,15 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
       return;
     }
     if (configuration.isUnknown) {
-      Global.showUnknownPage();
+      MainState.instance.showUnknownPage();
       return;
     }
 
     if (configuration.pathName != null || configuration.pathName != homePath) {
-      // Global.setInnerPagesForWeb(
+      // MainState.instance.setInnerPagesForWeb(
       //     RoutePathConfigure.pathName!.split('/value:')[1].split('/'));
       return;
     }
-    Global.showHomePage();
+    MainState.instance.showHomePage();
   }
 }

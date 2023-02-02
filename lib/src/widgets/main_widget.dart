@@ -1,7 +1,10 @@
-import 'package:base/base_component.dart';
-import 'package:base/base_widget.dart';
+import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/custom_page.dart';
+import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
+
+import 'custom_loading.dart';
+import 'custom_snackbar.dart';
 
 class GlobalState extends StatefulWidget {
   const GlobalState(
@@ -23,7 +26,7 @@ class GlobalState extends StatefulWidget {
   final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;
-  
+
   final bool isDesktop;
   final DecorationImage? backgroundImage;
   final String homeRouter;
@@ -38,7 +41,7 @@ class _GlobalStateState extends State<GlobalState> {
   void initState() {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
-    Global.setInitPages(widget.listPages);
+    MainState.instance.setInitPages(widget.listPages);
     init();
     super.initState();
   }
@@ -50,7 +53,7 @@ class _GlobalStateState extends State<GlobalState> {
 
   init() async {
     await widget.initBinding?.dependencies();
-    Global.setHomeRouter(widget.homeRouter);
+    MainState.instance.setHomeRouter(widget.homeRouter);
     didInit = true;
   }
 
@@ -100,6 +103,7 @@ class _GlobalStateState extends State<GlobalState> {
                   return const SizedBox();
                 })
             : const SizedBox(),
+
         ...widget.globalWidgets,
       ],
     );

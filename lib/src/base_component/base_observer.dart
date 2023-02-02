@@ -1,4 +1,4 @@
-import 'package:base/base_component.dart';
+import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -17,8 +17,8 @@ class Observer<T> {
     _streamController.sink.add(_object);
 
     if (autoClose) {
-      _initRoute = Global.getCurrentRouter();
-      Global.addObs(this);
+      _initRoute = MainState.instance.getCurrentRouter();
+      MainState.instance.addObs(this);
     }
   }
   String get route => _initRoute;

@@ -1,3 +1,6 @@
+import 'package:base/src/interfaces/appnav_interfaces.dart';
+import 'package:base/src/interfaces/dialognav_interfaces.dart';
+import 'package:base/src/nav_dialog/navigator_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
@@ -13,7 +16,9 @@ const lostConnectedPath = '/lostConnected';
 /// [HomeRouteInformationParser] and [InnerDelegateRouter]
 /// for controlling your entire app.
 ///
-class AppNav {
+class AppNav implements AppNavInterfaces, DialogNavigatorInterfaces {
+  final _dialogNav = DialogNavigator();
+
   /// UnknownRouter can be update during app, so you can show different page
   /// for each unknownRouter.
   var unknownRouter =
@@ -43,7 +48,7 @@ class AppNav {
   String get currentRouter => _currentRouter?.routerName ?? homePath;
 
   /// argument when navigation.
-  dynamic get arguments => _currentRouter?.argument;
+  dynamic get _arguments => _currentRouter?.argument;
 
   _removeDuplicate(String routerName, {String? parentName}) {
     if (parentName == null) {
@@ -61,6 +66,11 @@ class AppNav {
   /// Set pages will display in App
   void setInitPages(Map<String, InitPage> initPages) {
     _initPages = initPages;
+  }
+
+  _updateOuter() {
+    _streamOuterController
+        .add([..._outerPages.getMaterialPage(), ..._dialogNav.listDialog]);
   }
 
   /// set Homepage
@@ -111,7 +121,7 @@ class AppNav {
       ..clear()
       ..add(unknownRouter);
     _currentRouter = unknownRouter;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _updateOuter();
     _streamInnerController.forEach((key, value) {
       value.close();
     });
@@ -123,7 +133,7 @@ class AppNav {
       ..clear()
       ..add(homeRouter);
     _currentRouter = homeRouter;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _updateOuter();
     _streamInnerController.forEach((key, value) {
       value.close();
     });
@@ -140,9 +150,10 @@ class AppNav {
   void showLostConnectedPage() {
     _outerPages.add(lostConnectedRouter);
     _currentRouter = lostConnectedRouter;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _updateOuter();
   }
 
+  @override
   /// push a page
   void pushNamed(String routerName) {
     final initPage = _initPages[routerName];
@@ -156,7 +167,7 @@ class AppNav {
     // add new page to outer routing if it has no parent.
     if (initPage.parentName == null) {
       _outerPages.add(router);
-      _streamOuterController.add(_outerPages.getMaterialPage());
+      _updateOuter();
       // final currentRouting = _streamOuterController.value;
       // currentRouting.add(router.getPage());
       // _streamOuterController.add(currentRouting);
@@ -170,6 +181,7 @@ class AppNav {
   }
 
   /// remove last page
+  @override
   void pop() {
     // there are 3 cases:
     // 1. This is outer routing and there are only 1 page, solution: can not pop
@@ -191,11 +203,12 @@ class AppNav {
     // case 3:
     final oldPage = _outerPages.removeLast();
     _currentRouter = _outerPages.last;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _updateOuter();
     _streamInnerController[oldPage.routerName]?.close();
   }
 
   /// remove several pages until page with routerName
+  @override
   void popUntil(String routerName) {
     // there are 3 cases:
     // 1. This is outer routing and there are only 1 page, solution: can not pop
@@ -220,12 +233,14 @@ class AppNav {
         _outerPages.indexWhere((element) => element.routerName == routerName) +
             1;
     _currentRouter = _outerPages.last;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _updateOuter();
   }
 
   /// remove last page and replace this with new one
+  @override
   void popAndReplaceNamed(String routerName) {
     final newPage = _initPages[routerName];
+    // check if new page exist
     if (newPage == null) {
       throw Exception(['Can not find a page with this name']);
     }
@@ -250,11 +265,12 @@ class AppNav {
     final oldLast = _outerPages.removeLast();
     _outerPages.add(newPage.toBasePage(routerName));
     _currentRouter = _outerPages.last;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _updateOuter();
     _streamInnerController[oldLast.routerName]?.close();
   }
 
   /// remove all and add a page
+  @override
   void popAllAndPushNamed(String routerName) {
     final page = _initPages[routerName];
     if (page == null) {
@@ -269,7 +285,7 @@ class AppNav {
       ..clear()
       ..add(newPage);
     _currentRouter = newPage;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _updateOuter();
     _streamInnerController.forEach((key, value) {
       value.close();
     });
@@ -310,7 +326,7 @@ class AppNav {
 
       _outerPages.add(page.toBasePage(routerName));
     }
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _updateOuter();
   }
 
   /// only for web with path on browser
@@ -336,5 +352,28 @@ class AppNav {
       path += element.routerName;
     }
     return path;
+  }
+
+  @override
+  removeAllDialog() {
+    _dialogNav.removeAllDialog();
+    _updateOuter();
+  }
+
+  @override
+  removeDialog(DialogNameInterfaces name) {
+    _dialogNav.removeDialog(name);
+    _updateOuter();
+  }
+
+  @override
+  showDialog({required Widget child, required DialogNameInterfaces name}) {
+    _dialogNav.showDialog(child: child, name: name);
+    _updateOuter();
+  }
+
+  @override
+  getCurrentArgument() {
+    return _arguments;
   }
 }
