@@ -1,6 +1,5 @@
 import 'package:base/src/interfaces/appnav_interfaces.dart';
-import 'package:base/src/interfaces/dialognav_interfaces.dart';
-import 'package:base/src/nav_dialog/navigator_dialog.dart';
+
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
@@ -16,8 +15,7 @@ const lostConnectedPath = '/lostConnected';
 /// [HomeRouteInformationParser] and [InnerDelegateRouter]
 /// for controlling your entire app.
 ///
-class AppNav implements AppNavInterfaces, DialogNavigatorInterfaces {
-  final _dialogNav = DialogNavigator();
+class AppNav implements AppNavInterfaces {
 
   /// UnknownRouter can be update during app, so you can show different page
   /// for each unknownRouter.
@@ -70,7 +68,7 @@ class AppNav implements AppNavInterfaces, DialogNavigatorInterfaces {
 
   _updateOuter() {
     _streamOuterController
-        .add([..._outerPages.getMaterialPage(), ..._dialogNav.listDialog]);
+        .add(_outerPages.getMaterialPage());
   }
 
   /// set Homepage
@@ -154,6 +152,7 @@ class AppNav implements AppNavInterfaces, DialogNavigatorInterfaces {
   }
 
   @override
+
   /// push a page
   void pushNamed(String routerName) {
     final initPage = _initPages[routerName];
@@ -352,24 +351,6 @@ class AppNav implements AppNavInterfaces, DialogNavigatorInterfaces {
       path += element.routerName;
     }
     return path;
-  }
-
-  @override
-  removeAllDialog() {
-    _dialogNav.removeAllDialog();
-    _updateOuter();
-  }
-
-  @override
-  removeDialog(DialogNameInterfaces name) {
-    _dialogNav.removeDialog(name);
-    _updateOuter();
-  }
-
-  @override
-  showDialog({required Widget child, required DialogNameInterfaces name}) {
-    _dialogNav.showDialog(child: child, name: name);
-    _updateOuter();
   }
 
   @override

@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 
 abstract class DialogNavigatorInterfaces {
-  showDialog({required Widget child, required DialogNameInterfaces name});
+  showDialog({required Widget child, required String name});
 
-  removeDialog(DialogNameInterfaces name);
+  removeDialog(String name);
 
   removeAllDialog();
+
+  removeLastDialog();
 }
-
-abstract class DialogNameInterfaces {
-
-}
-
-

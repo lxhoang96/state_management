@@ -2,12 +2,13 @@ import 'package:base/base_component.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 
-class BaseDialog {
+class BaseDialog implements DialogInterfaces {
   static final instance = BaseDialog._();
   BaseDialog._();
   Widget dialog =
       Container(color: Colors.black.withOpacity(0.5), child: const SizedBox());
 
+  @override
   showDialog({
     required Widget child,
     required String name,
@@ -15,9 +16,11 @@ class BaseDialog {
     required Observer<bool> barrierDismissible,
     Function? onClosed,
   }) {
-    dialog = Material(
-      color: backgroundColor ?? Colors.black.withOpacity(0.5),
-      child: Stack(
+    dialog = Scaffold(
+      // type: MaterialType.transparency,
+      backgroundColor: backgroundColor ?? Colors.black.withOpacity(0.3),
+      // backgroundColor: Colors.black,
+      body: Stack(
         children: [
           ObserWidget(
               value: barrierDismissible,
@@ -27,27 +30,34 @@ class BaseDialog {
                   highlightColor: Colors.transparent,
                   onTap: () {
                     if (dimissible) {
-                      closeDialog(name);
+                      closeDialog(name, onClosed: onClosed);
                     }
                   },
                 );
               }),
-          Center(
+          Align(
+            alignment: Alignment.center,
             child: child,
           ),
         ],
       ),
     );
-    MainState.instance.showDialog(child: child, name: name);
+    MainState.instance.showDialog(child: dialog, name: name);
   }
 
-  closeDialog(String name) {
+  @override
+  closeDialog(
+    String name, {
+    Function? onClosed,
+  }) {
     MainState.instance.removeDialog(name);
+    onClosed?.call();
   }
 }
 
 class AppDialog {
   static final _baseDialog = BaseDialog.instance;
+
   static showDialog({
     required Widget child,
     required String name,
@@ -60,10 +70,24 @@ class AppDialog {
         name: name,
         backgroundColor: backgroundColor,
         barrierDismissible: barrierDismissible,
-        onClosed: onClosed,
+        onClosed: onClosed
       );
 
-  static closeDialog(String name) => _baseDialog.closeDialog(name);
+  static closeDialog({required String name}) => _baseDialog.closeDialog(name);
 
   static closeAll() => MainState.instance.removeAllDialog();
+}
+
+abstract class DialogInterfaces {
+  showDialog({
+    required Widget child,
+    required String name,
+    Color? backgroundColor,
+    required Observer<bool> barrierDismissible,
+  });
+
+  closeDialog(
+    String name, {
+    Function? onClosed,
+  });
 }

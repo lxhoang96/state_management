@@ -30,9 +30,11 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.backgroundImage,
       this.globalWidgets = const [],
       this.isDesktop = true}) {
-    final outerStream = ObserverCombined([MainState.instance.outerStream]);
+    final outerStream = ObserverCombined(
+        [MainState.instance.outerStream, MainState.instance.dialogStream]);
     outerStream.value.listen((event) {
-      pages = event[0];
+      _pages = event[0];
+      _dialogs = event[1];
       // update with [ChangeNotifier]
       notifyListeners();
     });
@@ -41,40 +43,69 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  List<Page> pages = [];
+  List<Page> _pages = [];
+  List<Page> _dialogs = [];
+
+  final GlobalKey<NavigatorState> _dialogKey = GlobalKey<NavigatorState>();
+  final _mainHeroCtrl = MaterialApp.createMaterialHeroController();
+  final _dialogHeroCtrl = MaterialApp.createMaterialHeroController();
 
   @override
   Widget build(BuildContext context) {
-    return GlobalState(
-        listPages: listPages,
-        homeRouter: homeRouter,
-        initBinding: initBinding,
-        appIcon: appIcon,
-        isDesktop: isDesktop,
-        useLoading: useLoading,
-        useSnackbar: useSnackbar,
-        backgroundImage: backgroundImage,
-        globalWidgets: globalWidgets,
-        child: pages.isNotEmpty
-            ? Navigator(
-                key: navigatorKey,
-                pages: pages.toList(),
-                // transitionDelegate: ,
-                onPopPage: (route, result) {
-                  if (!route.didPop(result)) {
-                    return false;
-                  }
-                  MainState.instance.pop();
-                  notifyListeners();
+    return Stack(
+      children: [
+        GlobalState(
+            listPages: listPages,
+            homeRouter: homeRouter,
+            initBinding: initBinding,
+            appIcon: appIcon,
+            isDesktop: isDesktop,
+            useLoading: useLoading,
+            useSnackbar: useSnackbar,
+            backgroundImage: backgroundImage,
+            globalWidgets: globalWidgets,
+            child: _pages.isNotEmpty
+                ? HeroControllerScope(
+                    controller: _mainHeroCtrl,
+                    child: Navigator(
+                        key: navigatorKey,
+                        pages: _pages.toList(),
+                        // transitionDelegate: ,
+                        onPopPage: (route, result) {
+                          if (!route.didPop(result)) {
+                            return false;
+                          }
+                          MainState.instance.pop();
+                          notifyListeners();
 
-                  return true;
-                })
-            : const SizedBox());
+                          return true;
+                        }),
+                  )
+                : const SizedBox()),
+        if (_dialogs.isNotEmpty)
+          HeroControllerScope(
+                    controller: _dialogHeroCtrl,
+            child: Navigator(
+              key: _dialogKey,
+              pages: _dialogs.toList(),
+              onPopPage: (route, result) {
+                if (!route.didPop(result)) {
+                  return false;
+                }
+                MainState.instance.removeLastDialog();
+                notifyListeners();
+          
+                return true;
+              },
+            ),
+          ),
+      ],
+    );
   }
 
   @override
   RoutePathConfigure get currentConfiguration {
-    if (pages.length > 1) {
+    if (_pages.length > 1) {
       return RoutePathConfigure.otherPage(MainState.instance.getPath());
     }
     if (MainState.instance.getCurrentRouter() == unknownPath) {

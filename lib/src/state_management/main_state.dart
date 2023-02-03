@@ -1,19 +1,25 @@
 import 'package:base/base_component.dart';
+import 'package:base/src/interfaces/dialognav_interfaces.dart';
 import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/nav_2/custom_page.dart';
+import 'package:base/src/nav_dialog/navigator_dialog.dart';
 import 'package:flutter/material.dart';
 
 /// The heart of the package, when you control how app navigate,
 /// auto remove controller and observer
-class MainState extends MainStateInterface {
+class MainState extends MainStateInterface
+    implements DialogNavigatorInterfaces {
   static final instance = MainState._();
   MainState._();
   final Map<Type, InstanceRoute> _listCtrl = {};
   static final List<Observer> _listObserver = [];
   final _navApp = AppNav();
+  final _dialogNav = DialogNavigator();
 
   Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
+  Stream<List<MaterialPage<dynamic>>> get dialogStream =>
+      _dialogNav.dialogStream;
   Stream<List<MaterialPage<dynamic>>>? innerStream(String parentName) =>
       _navApp.getInnerStream(parentName);
 
@@ -169,16 +175,24 @@ class MainState extends MainStateInterface {
 
   void showLostConnectedPage() => _navApp.showLostConnectedPage();
 
+  @override
   removeAllDialog() {
-    _navApp.removeAllDialog();
+    _dialogNav.removeAllDialog();
   }
 
+  @override
   removeDialog(String name) {
-    _navApp.removeDialog(name);
+    _dialogNav.removeDialog(name);
   }
 
+  @override
   showDialog({required Widget child, required String name}) {
-    _navApp.showDialog(child: child, name: name);
+    _dialogNav.showDialog(child: child, name: name);
+  }
+
+  @override
+  removeLastDialog() {
+    _dialogNav.removeLastDialog();
   }
 }
 

@@ -1,3 +1,4 @@
+
 import 'appnav_interfaces.dart';
 
 abstract class MainStateInterface extends AppNavInterfaces {
@@ -10,3 +11,4 @@ abstract class MainStateInterface extends AppNavInterfaces {
 
   T addNew<T>(T instance);
 }
+
