@@ -1,4 +1,4 @@
-import 'package:base/src/state_management/extension.dart';
+import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -26,13 +26,13 @@ class Observer<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
   @override
-  final route = Global.getCurrentRouter();
+  final route = MainState.instance.getCurrentRouter();
   Observer({required T initValue, bool autoClose = true}) {
     _object = initValue;
     _streamController.sink.add(_object);
 
     if (autoClose) {
-      Global.addObs(this);
+      MainState.instance.addObs(this);
     }
   }
 

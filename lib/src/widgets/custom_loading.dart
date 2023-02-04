@@ -8,7 +8,7 @@ class AppLoading {
     Future.delayed(Duration(seconds: autoCloseSec)).then((value) {
       closeLoading();
     });
-    return Container(
+    return Material(
       color: Colors.black.withOpacity(0.5),
       child: Center(
         child: Stack(
@@ -43,12 +43,12 @@ class AppLoading {
   static closeLoading() {
     if (showing.value) {
       showing.value = false;
-      debugPrint("Dialog Off Screen");
+      debugPrint("Loading Off Screen");
     }
   }
 
   static openLoading() {
     showing.value = true;
-    debugPrint("Dialog On Screen");
+    debugPrint("Loading On Screen");
   }
 }

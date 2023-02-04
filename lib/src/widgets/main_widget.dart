@@ -1,6 +1,7 @@
 import 'package:base/base_component.dart';
 import 'package:base/base_widget.dart';
 import 'package:base/src/nav_2/custom_router.dart';
+import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 
 class GlobalWidget extends StatefulWidget {
@@ -23,7 +24,7 @@ class GlobalWidget extends StatefulWidget {
   final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;
-  
+
   final bool isDesktop;
   final DecorationImage? backgroundImage;
   final String homeRouter;
@@ -38,7 +39,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   void initState() {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
-    Global.setInitRouters(widget.listPages);
+    MainState.instance.setInitRouters(widget.listPages);
     init();
     super.initState();
   }
@@ -50,7 +51,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
 
   init() async {
     await widget.initBinding?.dependencies();
-    Global.setHomeRouter(widget.homeRouter);
+    MainState.instance.setHomeRouter(widget.homeRouter);
     didInit = true;
   }
 

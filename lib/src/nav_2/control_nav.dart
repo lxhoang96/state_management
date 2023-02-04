@@ -1,3 +1,5 @@
+import 'package:base/src/interfaces/appnav_interfaces.dart';
+
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
@@ -13,8 +15,8 @@ const lostConnectedPath = '/lostConnected';
 /// [HomeRouteInformationParser] and [InnerDelegateRouter]
 /// for controlling your entire app.
 ///
-class AppNav {
-  /// UnknownRouter can be update during app, so you can show different router
+class AppNav implements AppNavInterfaces {
+  /// UnknownRouter can be update during app, so you can show different page
   /// for each unknownRouter.
   var unknownRouter =
       BaseRouter(routerName: unknownPath, widget: () => Container());
@@ -43,7 +45,7 @@ class AppNav {
   String get currentRouter => _currentRouter?.routerName ?? homePath;
 
   /// argument when navigation.
-  dynamic get arguments => _currentRouter?.argument;
+  dynamic get _arguments => _currentRouter?.argument;
 
   _removeDuplicate(String routerName, {String? parentName}) {
     if (parentName == null) {
@@ -55,7 +57,8 @@ class AppNav {
       throw Exception(['Can not find a router with this name']);
     }
 
-    router.innerRouters.removeWhere((element) => element.routerName == routerName);
+    router.innerRouters
+        .removeWhere((element) => element.routerName == routerName);
   }
 
   /// Set routers will display in App
@@ -63,7 +66,11 @@ class AppNav {
     _initRouters = initRouters;
   }
 
-  /// set Homerouter
+  _updateOuter() {
+    _streamOuterController.add(_outerRouters.getMaterialPage());
+  }
+
+  /// set Homepage
   void setHomeRouter(String routerName) {
     final router = _initRouters[routerName];
     if (router == null) {
@@ -76,18 +83,19 @@ class AppNav {
 
   /// set HomeRouter of nested routers if has any
   void setInitInnerRouter(String routerName) {
-    final newRouter = _initRouters[routerName];
-    if (newRouter == null || newRouter.parentName == null) {
-      throw Exception(['Can not find this router or this router has no parent']);
+    final newPage = _initRouters[routerName];
+    if (newPage == null || newPage.parentName == null) {
+      throw Exception(
+          ['Can not find this router or this router has no parent']);
     }
-    final parentRouter = _outerRouters.getByName(newRouter.parentName!);
+    final parentRouter = _outerRouters.getByName(newPage.parentName!);
     if (parentRouter == null) {
       throw Exception(['Parent is not in outer routing']);
     }
 
     if (parentRouter.innerRouters.isNotEmpty) return;
 
-    final router = newRouter.toBaseRouter(routerName);
+    final router = newPage.toBaseRouter(routerName);
     parentRouter.innerRouters.add(router);
     _currentRouter = router;
     _streamInnerController[parentRouter.routerName] =
@@ -111,7 +119,7 @@ class AppNav {
       ..clear()
       ..add(unknownRouter);
     _currentRouter = unknownRouter;
-    _streamOuterController.add(_outerRouters.getMaterialPage());
+    _updateOuter();
     _streamInnerController.forEach((key, value) {
       value.close();
     });
@@ -123,7 +131,7 @@ class AppNav {
       ..clear()
       ..add(homeRouter);
     _currentRouter = homeRouter;
-    _streamOuterController.add(_outerRouters.getMaterialPage());
+    _updateOuter();
     _streamInnerController.forEach((key, value) {
       value.close();
     });
@@ -140,10 +148,12 @@ class AppNav {
   void showLostConnectedRouter() {
     _outerRouters.add(lostConnectedRouter);
     _currentRouter = lostConnectedRouter;
-    _streamOuterController.add(_outerRouters.getMaterialPage());
+    _updateOuter();
   }
 
-  /// push a router
+  @override
+
+  /// push a page
   void pushNamed(String routerName) {
     final initRouter = _initRouters[routerName];
     // check router exist
@@ -153,10 +163,10 @@ class AppNav {
     _removeDuplicate(routerName, parentName: initRouter.parentName);
     final router = initRouter.toBaseRouter(routerName);
     _currentRouter = router;
-    // add new router to outer routing if it has no parent.
+    // add new page to outer routing if it has no parent.
     if (initRouter.parentName == null) {
       _outerRouters.add(router);
-      _streamOuterController.add(_outerRouters.getMaterialPage());
+      _updateOuter();
       // final currentRouting = _streamOuterController.value;
       // currentRouting.add(router.getRouter());
       // _streamOuterController.add(currentRouting);
@@ -169,7 +179,8 @@ class AppNav {
         ?.add(parentRouter?.innerRouters.getMaterialPage() ?? []);
   }
 
-  /// remove last router
+  /// remove last page
+  @override
   void pop() {
     // there are 3 cases:
     // 1. This is outer routing and there are only 1 router, solution: can not pop
@@ -189,13 +200,14 @@ class AppNav {
       return;
     }
     // case 3:
-    final oldRouter = _outerRouters.removeLast();
+    final oldPage = _outerRouters.removeLast();
     _currentRouter = _outerRouters.last;
-    _streamOuterController.add(_outerRouters.getMaterialPage());
-    _streamInnerController[oldRouter.routerName]?.close();
+    _updateOuter();
+    _streamInnerController[oldPage.routerName]?.close();
   }
 
-  /// remove several routers until router with routerName
+  /// remove several pages until page with routerName
+  @override
   void popUntil(String routerName) {
     // there are 3 cases:
     // 1. This is outer routing and there are only 1 router, solution: can not pop
@@ -216,20 +228,22 @@ class AppNav {
       return;
     }
     // case 3:
-    _outerRouters.length =
-        _outerRouters.indexWhere((element) => element.routerName == routerName) +
-            1;
+    _outerRouters.length = _outerRouters
+            .indexWhere((element) => element.routerName == routerName) +
+        1;
     _currentRouter = _outerRouters.last;
-    _streamOuterController.add(_outerRouters.getMaterialPage());
+    _updateOuter();
   }
 
-  /// remove last router and replace this with new one
+  /// remove last page and replace this with new one
+  @override
   void popAndReplaceNamed(String routerName) {
-    final newRouter = _initRouters[routerName];
-    if (newRouter == null) {
-      throw Exception(['Can not find a router with this name']);
+    final newPage = _initRouters[routerName];
+    // check if new page exist
+    if (newPage == null) {
+      throw Exception(['Can not find a page with this name']);
     }
-    final parentName = newRouter.parentName;
+    final parentName = newPage.parentName;
 
     if (parentName == null && _outerRouters.isEmpty) {
       throw Exception(['Can not pop: no backward router']);
@@ -240,7 +254,7 @@ class AppNav {
       if (lastParent.routerName != parentName) {
         throw Exception(['Last parent does not have this child']);
       }
-      final childRouter = newRouter.toBaseRouter(routerName);
+      final childRouter = newPage.toBaseRouter(routerName);
       lastParent.popAndAddInner(childRouter);
       _currentRouter = childRouter;
       _streamInnerController[parentName]
@@ -248,13 +262,14 @@ class AppNav {
       return;
     }
     final oldLast = _outerRouters.removeLast();
-    _outerRouters.add(newRouter.toBaseRouter(routerName));
+    _outerRouters.add(newPage.toBaseRouter(routerName));
     _currentRouter = _outerRouters.last;
-    _streamOuterController.add(_outerRouters.getMaterialPage());
+    _updateOuter();
     _streamInnerController[oldLast.routerName]?.close();
   }
 
-  /// remove all and add a router
+  /// remove all and add a page
+  @override
   void popAllAndPushNamed(String routerName) {
     final router = _initRouters[routerName];
     if (router == null) {
@@ -263,13 +278,13 @@ class AppNav {
     if (router.parentName != null) {
       throw Exception(['Can not push an inner router: no parent found!']);
     }
-    final newRouter = router.toBaseRouter(routerName);
+    final newPage = router.toBaseRouter(routerName);
 
     _outerRouters
       ..clear()
-      ..add(newRouter);
-    _currentRouter = newRouter;
-    _streamOuterController.add(_outerRouters.getMaterialPage());
+      ..add(newPage);
+    _currentRouter = newPage;
+    _updateOuter();
     _streamInnerController.forEach((key, value) {
       value.close();
     });
@@ -310,7 +325,7 @@ class AppNav {
 
       _outerRouters.add(router.toBaseRouter(routerName));
     }
-    _streamOuterController.add(_outerRouters.getMaterialPage());
+    _updateOuter();
   }
 
   /// only for web with path on browser
@@ -336,5 +351,10 @@ class AppNav {
       path += element.routerName;
     }
     return path;
+  }
+
+  @override
+  getCurrentArgument() {
+    return _arguments;
   }
 }

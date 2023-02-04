@@ -1,23 +1,31 @@
-import 'package:base/src/base_component/base_observer.dart';
-
+import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'main_state.dart';
 
-extension GlobalExtension on MainStateRepo {
-  add(instance) => MainState().add(instance);
+class Global {
+  static final MainStateInterface _mainState = MainState.instance;
 
-  void remove<T>() => MainState().remove<T>();
+  static T add<T>(T instance) => _mainState.add(instance);
 
-  T? find<T>() => MainState().find<T>();
+  static void remove<T>() => _mainState.remove<T>();
 
-  void addNew<T>(T newController) => MainState().addNew<T>(newController);
+  static T find<T>() => _mainState.find<T>();
 
-  void disposeAll() => MainState().disposeAll();
+  static T addNew<T>(T newController) => _mainState.addNew<T>(newController);
 
+  static void popAndReplacenamed(String routerName) =>
+      _mainState.popAndReplaceNamed(routerName);
 
-  void addObs(Observer observer) => MainState().addObs(observer);
+  static void pop() => _mainState.pop();
 
-  void autoRemove() => MainState().autoRemove();
+  static void popAllAndPushNamed(String routerName) =>
+      _mainState.popAllAndPushNamed(routerName);
+
+  static void popAndReplaceNamed(String routerName) =>
+      _mainState.popAndReplaceNamed(routerName);
+
+  static void popUntil(String routerName) => _mainState.popUntil(routerName);
+
+  static void pushNamed(String routerName) => _mainState.pushNamed(routerName);
+
+  static dynamic getCurrentArgument() => _mainState.getCurrentArgument();
 }
-
-// ignore: non_constant_identifier_names
-final Global = MainState();

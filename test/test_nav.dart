@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('test add controller', () {
     WidgetsFlutterBinding.ensureInitialized();
-    final mainState = MainState();
+    final mainState = MainState.instance;
     mainState.add(TestController1());
     expect(mainState.find<TestController1>() == TestController1(), true);
     expect(() => mainState.find<TestController2>(), throwsA(isA<Exception>()));
@@ -14,7 +14,7 @@ void main() {
 
   test('add new controller', () {
     WidgetsFlutterBinding.ensureInitialized();
-    final mainState = MainState();
+    final mainState = MainState.instance;
     final test1Ctrl = mainState.add(TestController1());
     final test1NewCtrl = mainState.addNew(TestController1());
     expect(identical(test1Ctrl, test1NewCtrl), false);
@@ -23,7 +23,7 @@ void main() {
 
   test('remove a controller', () {
     WidgetsFlutterBinding.ensureInitialized();
-    final mainState = MainState();
+    final mainState = MainState.instance;
     mainState.add(TestController1());
     // Global.remove<TestController2>();
     // expect(Global.find<TestController1>(), test1Ctrl);

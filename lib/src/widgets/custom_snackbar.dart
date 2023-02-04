@@ -5,7 +5,17 @@ import 'package:flutter/material.dart';
 class AppSnackBar {
   static final showSnackBar = Observer(initValue: false, autoClose: false);
   static Widget snackbar = const SizedBox();
-
+//boxShadow: [
+  //   BoxShadow(
+  //     color: AppColors.black1.withAlpha(50),
+  //     offset: const Offset(
+  //       20,
+  //       20,
+  //     ),
+  //     blurRadius: 10.0,
+  //     spreadRadius: 2.0,
+  //   ),
+  // ],
   static defaultSnackBar(
       {required SnackBarStyle style,
       required String message,

@@ -16,7 +16,6 @@ abstract class BaseController {
 /// ready: start immediately after first time screen is built
 /// dispose: called when router contains this controller is not in navigator stack
 class DefaultController extends BaseController {
-
   @override
   void dispose() {
     debugPrint('$this disposing');

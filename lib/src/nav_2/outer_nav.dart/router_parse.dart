@@ -1,7 +1,7 @@
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:flutter/material.dart';
 
-import 'nav_config.dart';
+import '../nav_config.dart';
 
 /// update flow by path in Web
 class HomeRouteInformationParser

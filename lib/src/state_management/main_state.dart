@@ -1,78 +1,26 @@
 import 'package:base/base_component.dart';
+import 'package:base/base_navigation.dart';
+import 'package:base/src/base_component/base_controller.dart';
+import 'package:base/src/interfaces/dialognav_interfaces.dart';
+import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'package:base/src/nav_2/control_nav.dart';
-import 'package:base/src/nav_2/custom_router.dart';
+import 'package:base/src/nav_dialog/navigator_dialog.dart';
 import 'package:flutter/material.dart';
-
-abstract class MainStateRepo {
-  /// add an intance to App state
-  T add<T>(T instance);
-
-  void remove<T>();
-
-  T find<T>();
-
-  T addNew<T>(T instance);
-
-  void addObs(Observer observer);
-
-  /// Set pages will display in App
-  void setInitRouters(Map<String, InitRouter> initRouters);
-
-  /// set Homepage
-  void setHomeRouter(String routerName);
-
-  /// set HomeRouter of nested pages if has any
-  void setInitInnerRouter(String routerName);
-
-  /// set UnknownRouter on Web
-  void setUnknownRouter(String name);
-
-  /// show UnknownRouter
-  void showUnknownRouter();
-
-  /// show HomeRouter
-  void showHomeRouter();
-
-  /// show lost connected page
-  void showLostConnectedRouter();
-
-  /// push a page
-  void pushNamed(String routerName);
-
-  /// remove last page
-  void pop();
-
-  /// remove several pages until page with routerName
-  void popUntil(String routerName);
-
-  /// remove last page and replace this with new one
-  void popAndReplaceNamed(String routerName);
-
-  /// remove all and add a page
-  void popAllAndPushNamed(String routerName);
-
-  /// only for web with path on browser
-  void setOuterRoutersForWeb(List<String> listRouter);
-
-  /// only for web with path on browser
-  void setInnerRoutersForWeb(
-      {required parentName, List<String> listRouter = const []});
-
-  String getCurrentRouter();
-
-  dynamic getCurrentArgument();
-
-  String getPath();
-}
 
 /// The heart of the package, when you control how app navigate,
 /// auto remove controller and observer
-class MainState extends MainStateRepo {
+class MainState extends MainStateInterface
+    implements DialogNavigatorInterfaces {
+  static final instance = MainState._();
+  MainState._();
   final Map<Type, InstanceRoute> _listCtrl = {};
   static final List<Observer> _listObserver = [];
   final _navApp = AppNav();
+  final _dialogNav = DialogNavigator();
 
-Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
+  Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
+  Stream<List<MaterialPage<dynamic>>> get dialogStream =>
+      _dialogNav.dialogStream;
   Stream<List<MaterialPage<dynamic>>>? innerStream(String parentName) =>
       _navApp.getInnerStream(parentName);
 
@@ -109,7 +57,10 @@ Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
   @override
   T find<T>() {
     final instance = _listCtrl[T]?.instance;
-    if (instance == null) throw Exception(['Can not find $T, maybe you did not add this controller']);
+    if (instance == null) {
+      throw Exception(
+          ['Can not find $T, maybe you did not add this controller']);
+    }
     return _listCtrl[T]?.instance;
   }
 
@@ -158,7 +109,6 @@ Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
     });
   }
 
-  @override
   void addObs(Observer observer) {
     _listObserver.add(observer);
   }
@@ -195,47 +145,56 @@ Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
   @override
   void pushNamed(String routerName) => _navApp.pushNamed(routerName);
 
-  @override
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
 
-  @override
   void setInitInnerRouter(String routerName) =>
       _navApp.setInitInnerRouter(routerName);
 
-  @override
   void setInitRouters(Map<String, InitRouter> initRouters) =>
       _navApp.setInitRouters(initRouters);
 
-  @override
-  void setInnerRoutersForWeb(
+  void setInnerPagesForWeb(
           {required parentName, List<String> listRouter = const []}) =>
       _navApp.setInnerRoutersForWeb(
           parentName: parentName, listRouter: listRouter);
 
-  @override
   void setOuterRoutersForWeb(List<String> listRouter) =>
       _navApp.setOuterRoutersForWeb(listRouter);
 
-  @override
   void setUnknownRouter(String name) => _navApp.setUnknownRouter(name);
 
-  @override
   void showHomeRouter() => _navApp.showHomeRouter();
 
-  @override
   void showUnknownRouter() => _navApp.showUnknownRouter();
 
-  @override
   getCurrentRouter() => _navApp.currentRouter;
 
-  @override
   String getPath() => _navApp.getPath();
 
   @override
-  getCurrentArgument() => _navApp.arguments;
+  getCurrentArgument() => _navApp.getCurrentArgument();
+
+  void showLostConnectedRouter() => _navApp.showLostConnectedRouter();
 
   @override
-  void showLostConnectedRouter() => _navApp.showLostConnectedRouter();
+  removeAllDialog() {
+    _dialogNav.removeAllDialog();
+  }
+
+  @override
+  removeDialog(String name) {
+    _dialogNav.removeDialog(name);
+  }
+
+  @override
+  showDialog({required Widget child, required String name}) {
+    _dialogNav.showDialog(child: child, name: name);
+  }
+
+  @override
+  removeLastDialog() {
+    _dialogNav.removeLastDialog();
+  }
 }
 
 class InstanceRoute<T> {
@@ -244,5 +203,3 @@ class InstanceRoute<T> {
 
   InstanceRoute({required this.route, required this.instance});
 }
-
-
