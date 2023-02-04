@@ -30,3 +30,4 @@ class RoutePathConfigure {
 
   String? get pathName => _pathName;
 }
+

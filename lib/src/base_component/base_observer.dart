@@ -1,29 +1,45 @@
-import 'package:base/base_component.dart';
+import 'package:base/src/state_management/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
+abstract class ObserverAbs<T> {
+  void update();
+
+  Stream<T> get stream;
+
+  T get value;
+
+  set value(T valueSet);
+
+  String get route;
+
+  dispose();
+}
+
 /// An observer can be used to update value in multiple place using stream.
 /// An observer can be automatically close by default and can be handled
-///  by hand with autoClose == false.
+/// by hand with autoClose == false.
 /// An observer can get and set value with .value
 /// An observer can use in Widget tree with [ObserWidget] and [ObserListWidget].
 /// Or in controller with [ObserverCombined]
-class Observer<T> {
+class Observer<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
-  late String _initRoute;
+  @override
+  final route = Global.getCurrentRouter();
   Observer({required T initValue, bool autoClose = true}) {
     _object = initValue;
     _streamController.sink.add(_object);
 
     if (autoClose) {
-      _initRoute = Global.getCurrentRouter();
       Global.addObs(this);
     }
   }
-  String get route => _initRoute;
 
+  @override
   T get value => _object;
+
+  @override
   set value(T valueSet) {
     if (valueSet != _object) {
       _object = valueSet;
@@ -31,10 +47,13 @@ class Observer<T> {
     }
   }
 
+  @override
   void update() => _streamController.sink.add(_object);
 
+  @override
   Stream<T> get stream => _streamController.stream;
 
+  @override
   dispose() {
     debugPrint('$this disposing');
     _streamController.close();

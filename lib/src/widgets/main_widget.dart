@@ -1,10 +1,10 @@
 import 'package:base/base_component.dart';
 import 'package:base/base_widget.dart';
-import 'package:base/src/nav_2/custom_page.dart';
+import 'package:base/src/nav_2/custom_router.dart';
 import 'package:flutter/material.dart';
 
-class GlobalState extends StatefulWidget {
-  const GlobalState(
+class GlobalWidget extends StatefulWidget {
+  const GlobalWidget(
       {Key? key,
       required this.child,
       this.initBinding,
@@ -19,7 +19,7 @@ class GlobalState extends StatefulWidget {
       : super(key: key);
   final Widget child;
   final InitBinding? initBinding;
-  final Map<String, InitPage> listPages;
+  final Map<String, InitRouter> listPages;
   final String? appIcon;
   final bool useLoading;
   final bool useSnackbar;
@@ -29,16 +29,16 @@ class GlobalState extends StatefulWidget {
   final String homeRouter;
   final List<Widget> globalWidgets;
   @override
-  State<GlobalState> createState() => _GlobalStateState();
+  State<GlobalWidget> createState() => _GlobalWidgetState();
 }
 
-class _GlobalStateState extends State<GlobalState> {
+class _GlobalWidgetState extends State<GlobalWidget> {
   bool didInit = false;
   @override
   void initState() {
     AppLoading.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
-    Global.setInitPages(widget.listPages);
+    Global.setInitRouters(widget.listPages);
     init();
     super.initState();
   }

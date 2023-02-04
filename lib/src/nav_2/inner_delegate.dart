@@ -1,6 +1,6 @@
 import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
-import 'package:base/src/state_management/main_state.dart';
+import 'package:base/src/state_management/extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +20,6 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
     final innerStream = ObserverCombined([stream]);
     innerStream.value.listen((event) {
       pages = event[0];
-      // update with [ChangeNotifier]
       notifyListeners();
     });
   }
@@ -49,7 +48,7 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
       return;
     }
     if (configuration.isUnknown) {
-      Global.showUnknownPage();
+      Global.showUnknownRouter();
       return;
     }
 
@@ -58,6 +57,6 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
       //     RoutePathConfigure.pathName!.split('/value:')[1].split('/'));
       return;
     }
-    Global.showHomePage();
+    Global.showHomeRouter();
   }
 }

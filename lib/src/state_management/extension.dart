@@ -18,3 +18,6 @@ extension GlobalExtension on MainStateRepo {
 
   void autoRemove() => MainState().autoRemove();
 }
+
+// ignore: non_constant_identifier_names
+final Global = MainState();

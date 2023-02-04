@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
 
-import 'custom_page.dart';
+import 'custom_router.dart';
 
 String homePath = '/';
 const unknownPath = '/unknown';
@@ -14,14 +14,14 @@ const lostConnectedPath = '/lostConnected';
 /// for controlling your entire app.
 ///
 class AppNav {
-  /// UnknownRouter can be update during app, so you can show different page
+  /// UnknownRouter can be update during app, so you can show different router
   /// for each unknownRouter.
   var unknownRouter =
-      BasePage(routerName: unknownPath, widget: () => Container());
+      BaseRouter(routerName: unknownPath, widget: () => Container());
 
   /// this is HomeRouter which will show when you open the app.
-  late final BasePage homeRouter;
-  late final BasePage lostConnectedRouter;
+  late final BaseRouter homeRouter;
+  late final BaseRouter lostConnectedRouter;
 
   /// The Navigator stack is updated with these stream
   /// [_streamOuterController] for main flow and [_streamInnerController] for nested stack
@@ -29,16 +29,16 @@ class AppNav {
   final Map<String, BehaviorSubject<List<MaterialPage>>>
       _streamInnerController = {};
 
-  /// This is pages will be shown in Navigator.
-  final List<BasePage> _outerPages = [];
-  Map<String, InitPage> _initPages = {};
+  /// This is routers will be shown in Navigator.
+  final List<BaseRouter> _outerRouters = [];
+  Map<String, InitRouter> _initRouters = {};
 
   Stream<List<MaterialPage>> get outerStream => _streamOuterController.stream;
   Stream<List<MaterialPage>>? getInnerStream(String routerName) =>
       _streamInnerController[routerName]?.stream;
 
   /// currentRouter, this can be in main flow or nested flow
-  BasePage? _currentRouter;
+  BaseRouter? _currentRouter;
 
   String get currentRouter => _currentRouter?.routerName ?? homePath;
 
@@ -47,292 +47,292 @@ class AppNav {
 
   _removeDuplicate(String routerName, {String? parentName}) {
     if (parentName == null) {
-      _outerPages.removeWhere((element) => element.routerName == routerName);
+      _outerRouters.removeWhere((element) => element.routerName == routerName);
       return;
     }
-    final page = _outerPages.getByName(parentName);
-    if (page == null) {
-      throw Exception(['Can not find a page with this name']);
+    final router = _outerRouters.getByName(parentName);
+    if (router == null) {
+      throw Exception(['Can not find a router with this name']);
     }
 
-    page.innerPages.removeWhere((element) => element.routerName == routerName);
+    router.innerRouters.removeWhere((element) => element.routerName == routerName);
   }
 
-  /// Set pages will display in App
-  void setInitPages(Map<String, InitPage> initPages) {
-    _initPages = initPages;
+  /// Set routers will display in App
+  void setInitRouters(Map<String, InitRouter> initRouters) {
+    _initRouters = initRouters;
   }
 
-  /// set Homepage
+  /// set Homerouter
   void setHomeRouter(String routerName) {
-    final page = _initPages[routerName];
-    if (page == null) {
-      throw Exception(['Can not find a page with this name']);
+    final router = _initRouters[routerName];
+    if (router == null) {
+      throw Exception(['Can not find a router with this name']);
     }
     homePath = routerName;
-    homeRouter = page.toBasePage(homePath);
-    showHomePage();
+    homeRouter = router.toBaseRouter(homePath);
+    showHomeRouter();
   }
 
-  /// set HomePage of nested pages if has any
+  /// set HomeRouter of nested routers if has any
   void setInitInnerRouter(String routerName) {
-    final page = _initPages[routerName];
-    if (page == null || page.parentName == null) {
-      throw Exception(['Can not find this page or this page has no parent']);
+    final newRouter = _initRouters[routerName];
+    if (newRouter == null || newRouter.parentName == null) {
+      throw Exception(['Can not find this router or this router has no parent']);
     }
-    final parentRouter = _outerPages.getByName(page.parentName!);
+    final parentRouter = _outerRouters.getByName(newRouter.parentName!);
     if (parentRouter == null) {
       throw Exception(['Parent is not in outer routing']);
     }
 
-    if (parentRouter.innerPages.isNotEmpty) return;
+    if (parentRouter.innerRouters.isNotEmpty) return;
 
-    final router = page.toBasePage(routerName);
-    parentRouter.innerPages.add(router);
+    final router = newRouter.toBaseRouter(routerName);
+    parentRouter.innerRouters.add(router);
     _currentRouter = router;
     _streamInnerController[parentRouter.routerName] =
         BehaviorSubject<List<MaterialPage>>.seeded(
-            parentRouter.innerPages.getMaterialPage());
+            parentRouter.innerRouters.getMaterialPage());
   }
 
-  /// set UnknownPage on Web
-  void setUnknownPage(String name) {
-    final page = _initPages[name];
-    if (page == null) {
-      throw Exception(['Can not find a page with this name']);
+  /// set UnknownRouter on Web
+  void setUnknownRouter(String name) {
+    final router = _initRouters[name];
+    if (router == null) {
+      throw Exception(['Can not find a router with this name']);
     }
 
-    unknownRouter = page.toBasePage(unknownPath);
+    unknownRouter = router.toBaseRouter(unknownPath);
   }
 
-  /// show UnknownPage
-  void showUnknownPage() {
-    _outerPages
+  /// show UnknownRouter
+  void showUnknownRouter() {
+    _outerRouters
       ..clear()
       ..add(unknownRouter);
     _currentRouter = unknownRouter;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _streamOuterController.add(_outerRouters.getMaterialPage());
     _streamInnerController.forEach((key, value) {
       value.close();
     });
   }
 
-  /// show HomePage
-  void showHomePage() {
-    _outerPages
+  /// show HomeRouter
+  void showHomeRouter() {
+    _outerRouters
       ..clear()
       ..add(homeRouter);
     _currentRouter = homeRouter;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _streamOuterController.add(_outerRouters.getMaterialPage());
     _streamInnerController.forEach((key, value) {
       value.close();
     });
   }
 
-  void setLostConnectedPage(String name) {
-    final page = _initPages[name];
-    if (page == null) {
-      throw Exception(['Can not find a page with this name']);
+  void setLostConnectedRouter(String name) {
+    final router = _initRouters[name];
+    if (router == null) {
+      throw Exception(['Can not find a router with this name']);
     }
-    lostConnectedRouter = page.toBasePage(lostConnectedPath);
+    lostConnectedRouter = router.toBaseRouter(lostConnectedPath);
   }
 
-  void showLostConnectedPage() {
-    _outerPages.add(lostConnectedRouter);
+  void showLostConnectedRouter() {
+    _outerRouters.add(lostConnectedRouter);
     _currentRouter = lostConnectedRouter;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _streamOuterController.add(_outerRouters.getMaterialPage());
   }
 
-  /// push a page
+  /// push a router
   void pushNamed(String routerName) {
-    final initPage = _initPages[routerName];
-    // check page exist
-    if (initPage == null) {
-      throw Exception(['Can not find a page with this name']);
+    final initRouter = _initRouters[routerName];
+    // check router exist
+    if (initRouter == null) {
+      throw Exception(['Can not find a router with this name']);
     }
-    _removeDuplicate(routerName, parentName: initPage.parentName);
-    final router = initPage.toBasePage(routerName);
+    _removeDuplicate(routerName, parentName: initRouter.parentName);
+    final router = initRouter.toBaseRouter(routerName);
     _currentRouter = router;
-    // add new page to outer routing if it has no parent.
-    if (initPage.parentName == null) {
-      _outerPages.add(router);
-      _streamOuterController.add(_outerPages.getMaterialPage());
+    // add new router to outer routing if it has no parent.
+    if (initRouter.parentName == null) {
+      _outerRouters.add(router);
+      _streamOuterController.add(_outerRouters.getMaterialPage());
       // final currentRouting = _streamOuterController.value;
-      // currentRouting.add(router.getPage());
+      // currentRouting.add(router.getRouter());
       // _streamOuterController.add(currentRouting);
       return;
     }
-    // add new page to inner routing if it has parent.
-    final parentRouter = _outerPages.getByName(initPage.parentName!);
-    parentRouter?.innerPages.add(router);
-    _streamInnerController[initPage.parentName]
-        ?.add(parentRouter?.innerPages.getMaterialPage() ?? []);
+    // add new router to inner routing if it has parent.
+    final parentRouter = _outerRouters.getByName(initRouter.parentName!);
+    parentRouter?.innerRouters.add(router);
+    _streamInnerController[initRouter.parentName]
+        ?.add(parentRouter?.innerRouters.getMaterialPage() ?? []);
   }
 
-  /// remove last page
+  /// remove last router
   void pop() {
     // there are 3 cases:
-    // 1. This is outer routing and there are only 1 page, solution: can not pop
+    // 1. This is outer routing and there are only 1 router, solution: can not pop
     // 2. This is inner routing and can pop.
-    // 3. This is inner routing but has only one inner page, solution: pop parent page
+    // 3. This is inner routing but has only one inner router, solution: pop parent router
     final parentName = _currentRouter?.parentName;
     // case 1:
-    if (parentName == null && _outerPages.length <= 1) {
+    if (parentName == null && _outerRouters.length <= 1) {
       throw Exception(['Can not pop: no backward router']);
     }
-    final lastParent = _outerPages.last;
+    final lastParent = _outerRouters.last;
     // case 2:
     if (parentName != null && lastParent.pop()) {
-      _currentRouter = lastParent.innerPages.last;
+      _currentRouter = lastParent.innerRouters.last;
       _streamInnerController[parentName]
-          ?.add(lastParent.innerPages.getMaterialPage());
+          ?.add(lastParent.innerRouters.getMaterialPage());
       return;
     }
     // case 3:
-    final oldPage = _outerPages.removeLast();
-    _currentRouter = _outerPages.last;
-    _streamOuterController.add(_outerPages.getMaterialPage());
-    _streamInnerController[oldPage.routerName]?.close();
+    final oldRouter = _outerRouters.removeLast();
+    _currentRouter = _outerRouters.last;
+    _streamOuterController.add(_outerRouters.getMaterialPage());
+    _streamInnerController[oldRouter.routerName]?.close();
   }
 
-  /// remove several pages until page with routerName
+  /// remove several routers until router with routerName
   void popUntil(String routerName) {
     // there are 3 cases:
-    // 1. This is outer routing and there are only 1 page, solution: can not pop
+    // 1. This is outer routing and there are only 1 router, solution: can not pop
     // 2. This is inner routing and can pop.
     // 3. This is outer routing.
-    final parentName = _initPages[routerName]?.parentName;
+    final parentName = _initRouters[routerName]?.parentName;
     // case 1:
-    if (parentName == null && _outerPages.length <= 1) {
+    if (parentName == null && _outerRouters.length <= 1) {
       throw Exception(['Can not pop: no backward router']);
     }
-    final lastParent = _outerPages.last;
+    final lastParent = _outerRouters.last;
     // case 2:
     if (parentName != null &&
-        _outerPages.getByName(parentName)?.popUntil(routerName) == true) {
-      _currentRouter = lastParent.innerPages.last;
+        _outerRouters.getByName(parentName)?.popUntil(routerName) == true) {
+      _currentRouter = lastParent.innerRouters.last;
       _streamInnerController[parentName]
-          ?.add(lastParent.innerPages.getMaterialPage());
+          ?.add(lastParent.innerRouters.getMaterialPage());
       return;
     }
     // case 3:
-    _outerPages.length =
-        _outerPages.indexWhere((element) => element.routerName == routerName) +
+    _outerRouters.length =
+        _outerRouters.indexWhere((element) => element.routerName == routerName) +
             1;
-    _currentRouter = _outerPages.last;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _currentRouter = _outerRouters.last;
+    _streamOuterController.add(_outerRouters.getMaterialPage());
   }
 
-  /// remove last page and replace this with new one
+  /// remove last router and replace this with new one
   void popAndReplaceNamed(String routerName) {
-    final newPage = _initPages[routerName];
-    if (newPage == null) {
-      throw Exception(['Can not find a page with this name']);
+    final newRouter = _initRouters[routerName];
+    if (newRouter == null) {
+      throw Exception(['Can not find a router with this name']);
     }
-    final parentName = newPage.parentName;
+    final parentName = newRouter.parentName;
 
-    if (parentName == null && _outerPages.isEmpty) {
+    if (parentName == null && _outerRouters.isEmpty) {
       throw Exception(['Can not pop: no backward router']);
     }
 
     if (parentName != null) {
-      final lastParent = _outerPages.last;
+      final lastParent = _outerRouters.last;
       if (lastParent.routerName != parentName) {
         throw Exception(['Last parent does not have this child']);
       }
-      final childPage = newPage.toBasePage(routerName);
-      lastParent.popAndAddInner(childPage);
-      _currentRouter = childPage;
+      final childRouter = newRouter.toBaseRouter(routerName);
+      lastParent.popAndAddInner(childRouter);
+      _currentRouter = childRouter;
       _streamInnerController[parentName]
-          ?.add(lastParent.innerPages.getMaterialPage());
+          ?.add(lastParent.innerRouters.getMaterialPage());
       return;
     }
-    final oldLast = _outerPages.removeLast();
-    _outerPages.add(newPage.toBasePage(routerName));
-    _currentRouter = _outerPages.last;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    final oldLast = _outerRouters.removeLast();
+    _outerRouters.add(newRouter.toBaseRouter(routerName));
+    _currentRouter = _outerRouters.last;
+    _streamOuterController.add(_outerRouters.getMaterialPage());
     _streamInnerController[oldLast.routerName]?.close();
   }
 
-  /// remove all and add a page
+  /// remove all and add a router
   void popAllAndPushNamed(String routerName) {
-    final page = _initPages[routerName];
-    if (page == null) {
-      throw Exception(['Can not find a page with this name']);
+    final router = _initRouters[routerName];
+    if (router == null) {
+      throw Exception(['Can not find a router with this name']);
     }
-    if (page.parentName != null) {
-      throw Exception(['Can not push an inner page: no parent found!']);
+    if (router.parentName != null) {
+      throw Exception(['Can not push an inner router: no parent found!']);
     }
-    final newPage = page.toBasePage(routerName);
+    final newRouter = router.toBaseRouter(routerName);
 
-    _outerPages
+    _outerRouters
       ..clear()
-      ..add(newPage);
-    _currentRouter = newPage;
-    _streamOuterController.add(_outerPages.getMaterialPage());
+      ..add(newRouter);
+    _currentRouter = newRouter;
+    _streamOuterController.add(_outerRouters.getMaterialPage());
     _streamInnerController.forEach((key, value) {
       value.close();
     });
   }
 
-  /// check a page is active or not
+  /// check a router is active or not
   bool checkActiveRouter(String routerName) {
     if (routerName == '/') return true;
-    final page = _initPages[routerName];
-    if (page?.parentName == null) {
-      return _outerPages.firstWhereOrNull(
+    final router = _initRouters[routerName];
+    if (router?.parentName == null) {
+      return _outerRouters.firstWhereOrNull(
               (element) => element.routerName == routerName) !=
           null;
     }
-    return _outerPages
+    return _outerRouters
             .firstWhereOrNull(
-                (element) => element.routerName == page?.parentName)
-            ?.innerPages
+                (element) => element.routerName == router?.parentName)
+            ?.innerRouters
             .firstWhereOrNull((element) => element.routerName == routerName) !=
         null;
   }
 
   /// only for web with path on browser
-  void setOuterPagesForWeb(List<String> listRouter) {
+  void setOuterRoutersForWeb(List<String> listRouter) {
     listRouter.removeWhere((element) => element == '');
-    _outerPages.clear();
+    _outerRouters.clear();
     for (var routerName in listRouter) {
       if (!routerName.startsWith('/')) {
         routerName = '/$routerName';
       }
-      final page = _initPages[routerName];
-      if (page == null) {
-        _outerPages
+      final router = _initRouters[routerName];
+      if (router == null) {
+        _outerRouters
           ..clear()
           ..add(unknownRouter);
         return;
       }
 
-      _outerPages.add(page.toBasePage(routerName));
+      _outerRouters.add(router.toBaseRouter(routerName));
     }
-    _streamOuterController.add(_outerPages.getMaterialPage());
+    _streamOuterController.add(_outerRouters.getMaterialPage());
   }
 
   /// only for web with path on browser
-  void setInnerPagesForWeb(
+  void setInnerRoutersForWeb(
       {required parentName, List<String> listRouter = const []}) {
-    final parentPage = _outerPages.getByName(parentName);
-    if (parentPage == null) return;
+    final parentRouter = _outerRouters.getByName(parentName);
+    if (parentRouter == null) return;
     for (var routerName in listRouter) {
-      final page = _initPages[routerName];
-      if (page == null) {
+      final router = _initRouters[routerName];
+      if (router == null) {
         return;
       }
 
-      parentPage.addInner(page.toBasePage(routerName));
+      parentRouter.addInner(router.toBaseRouter(routerName));
     }
     _streamInnerController[parentName]
-        ?.add(parentPage.innerPages.getMaterialPage());
+        ?.add(parentRouter.innerRouters.getMaterialPage());
   }
 
   getPath() {
     String path = '';
-    for (var element in _outerPages) {
+    for (var element in _outerRouters) {
       path += element.routerName;
     }
     return path;

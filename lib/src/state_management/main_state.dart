@@ -1,6 +1,6 @@
 import 'package:base/base_component.dart';
 import 'package:base/src/nav_2/control_nav.dart';
-import 'package:base/src/nav_2/custom_page.dart';
+import 'package:base/src/nav_2/custom_router.dart';
 import 'package:flutter/material.dart';
 
 abstract class MainStateRepo {
@@ -16,25 +16,25 @@ abstract class MainStateRepo {
   void addObs(Observer observer);
 
   /// Set pages will display in App
-  void setInitPages(Map<String, InitPage> initPages);
+  void setInitRouters(Map<String, InitRouter> initRouters);
 
   /// set Homepage
   void setHomeRouter(String routerName);
 
-  /// set HomePage of nested pages if has any
+  /// set HomeRouter of nested pages if has any
   void setInitInnerRouter(String routerName);
 
-  /// set UnknownPage on Web
-  void setUnknownPage(String name);
+  /// set UnknownRouter on Web
+  void setUnknownRouter(String name);
 
-  /// show UnknownPage
-  void showUnknownPage();
+  /// show UnknownRouter
+  void showUnknownRouter();
 
-  /// show HomePage
-  void showHomePage();
+  /// show HomeRouter
+  void showHomeRouter();
 
   /// show lost connected page
-  void showLostConnectedPage();
+  void showLostConnectedRouter();
 
   /// push a page
   void pushNamed(String routerName);
@@ -52,10 +52,10 @@ abstract class MainStateRepo {
   void popAllAndPushNamed(String routerName);
 
   /// only for web with path on browser
-  void setOuterPagesForWeb(List<String> listRouter);
+  void setOuterRoutersForWeb(List<String> listRouter);
 
   /// only for web with path on browser
-  void setInnerPagesForWeb(
+  void setInnerRoutersForWeb(
       {required parentName, List<String> listRouter = const []});
 
   String getCurrentRouter();
@@ -72,7 +72,7 @@ class MainState extends MainStateRepo {
   static final List<Observer> _listObserver = [];
   final _navApp = AppNav();
 
-  Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
+Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
   Stream<List<MaterialPage<dynamic>>>? innerStream(String parentName) =>
       _navApp.getInnerStream(parentName);
 
@@ -203,27 +203,27 @@ class MainState extends MainStateRepo {
       _navApp.setInitInnerRouter(routerName);
 
   @override
-  void setInitPages(Map<String, InitPage> initPages) =>
-      _navApp.setInitPages(initPages);
+  void setInitRouters(Map<String, InitRouter> initRouters) =>
+      _navApp.setInitRouters(initRouters);
 
   @override
-  void setInnerPagesForWeb(
+  void setInnerRoutersForWeb(
           {required parentName, List<String> listRouter = const []}) =>
-      _navApp.setInnerPagesForWeb(
+      _navApp.setInnerRoutersForWeb(
           parentName: parentName, listRouter: listRouter);
 
   @override
-  void setOuterPagesForWeb(List<String> listRouter) =>
-      _navApp.setOuterPagesForWeb(listRouter);
+  void setOuterRoutersForWeb(List<String> listRouter) =>
+      _navApp.setOuterRoutersForWeb(listRouter);
 
   @override
-  void setUnknownPage(String name) => _navApp.setUnknownPage(name);
+  void setUnknownRouter(String name) => _navApp.setUnknownRouter(name);
 
   @override
-  void showHomePage() => _navApp.showHomePage();
+  void showHomeRouter() => _navApp.showHomeRouter();
 
   @override
-  void showUnknownPage() => _navApp.showUnknownPage();
+  void showUnknownRouter() => _navApp.showUnknownRouter();
 
   @override
   getCurrentRouter() => _navApp.currentRouter;
@@ -235,7 +235,7 @@ class MainState extends MainStateRepo {
   getCurrentArgument() => _navApp.arguments;
 
   @override
-  void showLostConnectedPage() => _navApp.showLostConnectedPage();
+  void showLostConnectedRouter() => _navApp.showLostConnectedRouter();
 }
 
 class InstanceRoute<T> {
@@ -245,5 +245,4 @@ class InstanceRoute<T> {
   InstanceRoute({required this.route, required this.instance});
 }
 
-// ignore: non_constant_identifier_names
-final Global = MainState();
+
