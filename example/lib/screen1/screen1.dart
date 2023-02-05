@@ -1,8 +1,8 @@
 import 'package:base/base_component.dart';
 import 'package:flutter/material.dart';
 
-import 'package:test_newrouter/routers/router_name.dart';
-import 'package:test_newrouter/screen1/screen1_ctrl.dart';
+import 'package:example/routers/router_name.dart';
+import 'package:example/screen1/screen1_ctrl.dart';
 
 class Screen1 extends StatelessWidget {
   Screen1({super.key});

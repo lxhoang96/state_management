@@ -32,10 +32,6 @@ class LightObserver<T> extends ValueNotifier<T> {
     }
     _changed = true;
   }
-  // @override
-  // set value(T valueSet) {
-
-  // }
 
   @override
   void dispose() {

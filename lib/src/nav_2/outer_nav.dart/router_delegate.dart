@@ -29,14 +29,6 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.backgroundImage,
       this.globalWidgets = const [],
       this.isDesktop = true}) {
-    // final outerStream = ObserverCombined(
-    //     [MainState().outerStream,MainState.instance.dialogStream]);
-    // outerStream.value.listen((event) {
-    //   _pages = event[0];
-    //   _dialogs = event[1];
-    //   // update with [ChangeNotifier]
-    //   notifyListeners();
-    // });
     MainState.instance.intialize();
     final outerStream = MainState.instance.outerStream;
     outerStream.addListener(() {
@@ -148,7 +140,13 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       return;
     }
 
-    if (configuration.pathName != null && configuration.pathName != homePath) {
+    if (configuration.isHomePage) {
+      MainState.instance.showHomeRouter();
+      notifyListeners();
+      return;
+    }
+
+    if (configuration.pathName != null) {
       MainState.instance.setOuterRoutersForWeb(
           configuration.pathName!.replaceAll('//', '/').split('/'));
       notifyListeners();

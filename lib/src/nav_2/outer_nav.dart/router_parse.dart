@@ -17,7 +17,7 @@ class HomeRouteInformationParser
     }
     final uri = Uri.parse(routeInformation.location ?? '');
 
-    if (uri.pathSegments.isEmpty) {
+    if (uri.pathSegments.isEmpty || routeInformation.location == homePath) {
       return RoutePathConfigure.home();
     }
 

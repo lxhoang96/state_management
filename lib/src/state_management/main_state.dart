@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:base/base_navigation.dart';
@@ -21,10 +20,10 @@ class MainState extends MainStateInterface
   intialize() {
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
-    _queueObs = LightObserver(Queue<Function>());
-    _queueObs.addListener(() async {
-      while (_queueObs.value.isNotEmpty) {
-        final function = _queueObs.value.removeFirst();
+    _queueNavigate = LightObserver(Queue<Function>());
+    _queueNavigate.addListener(() async {
+      while (_queueNavigate.value.isNotEmpty) {
+        final function = _queueNavigate.value.removeFirst();
         function.call();
       }
     });
@@ -42,19 +41,17 @@ class MainState extends MainStateInterface
       _navApp.getInnerStream(parentName);
 
   // bool _canNavigate = true;
-  late final LightObserver<Queue<Function>> _queueObs;
+  late final LightObserver<Queue<Function>> _queueNavigate;
   _HistoryOrder? _lastOrder;
 
   _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
-    final value = _queueObs.value;
-    debugPrint((_lastOrder == newOrder).toString());
+    final value = _queueNavigate.value;
     if (_lastOrder == newOrder) return;
-    // final newQueue = Queue<Function>.from(_queueObs.value);
+    // final newQueue = Queue<Function>.from(_queueNavigate.value);
     // newQueue.addLast(onNavigate);
     _lastOrder = newOrder;
     value.add(onNavigate);
-    debugPrint('clicked');
-    _queueObs.newValue = value;
+    _queueNavigate.newValue = value;
   }
 
   @override
@@ -251,7 +248,6 @@ class MainState extends MainStateInterface
   removeLastDialog() {
     _dialogNav.removeLastDialog();
   }
-
   @override
   get argument => _navApp.argument;
 }

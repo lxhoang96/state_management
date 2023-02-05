@@ -1,3 +1,4 @@
+import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -28,7 +29,7 @@ class Observer<T> extends ObserverAbs<T> {
     _streamController.sink.add(_object);
 
     if (autoClose) {
-      //MainState.instance.addObs(this);
+      MainState.instance.addObs(this);
     }
   }
 
