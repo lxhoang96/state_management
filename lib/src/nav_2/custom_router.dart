@@ -27,26 +27,26 @@ class InitRouter {
 /// String [routerName] and List of BaseRouter [innerRouters] (optional)
 class BaseRouter extends InitRouter {
   final String routerName;
-  MaterialPage? router;
+  MaterialPage? page;
+  late final LocalKey _key;
   final List<BaseRouter> innerRouters = [];
   BaseRouter({
     required this.routerName,
     required super.widget,
     super.parentName,
     super.argument,
-  });
+  }) {
+    _key = ValueKey(routerName);
+  }
 
   MaterialPage _initRouter() {
     return MaterialPage(
-        child: widget(),
-        name: routerName,
-        key: ValueKey(routerName),
-        arguments: argument);
+        child: widget(), name: routerName, key: _key, arguments: argument);
   }
 
   MaterialPage getRouter() {
-    router ??= _initRouter();
-    return router!;
+    page ??= _initRouter();
+    return page!;
   }
 }
 

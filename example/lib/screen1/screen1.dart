@@ -13,9 +13,12 @@ class Screen1 extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          ObserWidget(
-              value: controller.intObs,
-              child: (value) => Text(value.toString())),
+          ValueListenableBuilder(
+            valueListenable: controller.intObs,
+            builder: (context, value, widget) => Text(
+              value.toString(),
+            ),
+          ),
           TextField(
             controller: controller.textCtrl,
             onChanged: (value) {
@@ -25,6 +28,7 @@ class Screen1 extends StatelessWidget {
           TextButton(
               onPressed: () {
                 // AppRouter.pushNamed(RouteName.screen2);
+                controller.intObs.value++;
                 Global.pushNamed(RouteName.screen2);
               },
               child: const Text('To screen 2')),

@@ -16,7 +16,7 @@ class LightObserver<T> extends ValueNotifier<T> {
   bool _isUnchangeValue = false;
   bool _changed = false;
   LightObserver(super.value, {bool autoClose = true}) {
-    _isUnchangeValue = T is Iterable || T is Map;
+    _isUnchangeValue = value is Iterable || value is Map;
 
     if (autoClose) {
       MainState.instance.addLightObs(this);
@@ -24,15 +24,13 @@ class LightObserver<T> extends ValueNotifier<T> {
   }
 
   set newValue(T valueSet) {
-    debugPrint(value.toString());
-    debugPrint(valueSet.toString());
-    if (value != valueSet) {
-      value = valueSet;
-      if (_isUnchangeValue) {
-        notifyListeners();
-      }
-      _changed = true;
+    if (value == valueSet && !_isUnchangeValue) return;
+
+    value = valueSet;
+    if (_isUnchangeValue) {
+      notifyListeners();
     }
+    _changed = true;
   }
   // @override
   // set value(T valueSet) {

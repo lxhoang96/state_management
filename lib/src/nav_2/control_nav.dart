@@ -26,7 +26,8 @@ class AppNav implements AppNavInterfaces {
 
   /// The Navigator stack is updated with these stream
   /// [_streamOuterController] for main flow and [_streamInnerController] for nested stack
-  final _streamOuterController = LightObserver<List<MaterialPage>>([], autoClose: false);
+  final _streamOuterController =
+      LightObserver<List<MaterialPage>>([], autoClose: false);
   final Map<String, LightObserver<List<MaterialPage>>> _streamInnerController =
       {};
 
@@ -49,7 +50,7 @@ class AppNav implements AppNavInterfaces {
 
   final List<String> _outerNames = [];
   final List<String> _innerNames = [];
-
+  
   _removeDuplicate(String routerName, {String? parentName}) {
     if (parentName == null) {
       if (_outerNames.contains(routerName)) {
@@ -159,9 +160,8 @@ class AppNav implements AppNavInterfaces {
     _updateOuter();
   }
 
-  @override
-
   /// push a page
+  @override
   void pushNamed(String routerName) {
     final initRouter = _initRouters[routerName];
     // check router exist

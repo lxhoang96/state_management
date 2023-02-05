@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:collection';
+
 import 'package:base/base_navigation.dart';
 import 'package:base/src/base_component/base_controller.dart';
 import 'package:base/src/base_component/base_observer.dart';
@@ -18,6 +21,13 @@ class MainState extends MainStateInterface
   intialize() {
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
+    _queueObs = LightObserver(Queue<Function>());
+    _queueObs.addListener(() async {
+      while (_queueObs.value.isNotEmpty) {
+        final function = _queueObs.value.removeFirst();
+        function.call();
+      }
+    });
   }
 
   final Map<Type, InstanceRoute> _listCtrl = {};
@@ -30,6 +40,22 @@ class MainState extends MainStateInterface
   LightObserver<List<MaterialPage>> get dialogStream => _dialogNav.dialogStream;
   LightObserver<List<MaterialPage>>? innerStream(String parentName) =>
       _navApp.getInnerStream(parentName);
+
+  // bool _canNavigate = true;
+  late final LightObserver<Queue<Function>> _queueObs;
+  _HistoryOrder? _lastOrder;
+
+  _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
+    final value = _queueObs.value;
+    debugPrint((_lastOrder == newOrder).toString());
+    if (_lastOrder == newOrder) return;
+    // final newQueue = Queue<Function>.from(_queueObs.value);
+    // newQueue.addLast(onNavigate);
+    _lastOrder = newOrder;
+    value.add(onNavigate);
+    debugPrint('clicked');
+    _queueObs.newValue = value;
+  }
 
   @override
   T add<T>(T instance) {
@@ -44,7 +70,6 @@ class MainState extends MainStateInterface
       }
       debugPrint("Added Controller Type:$T");
     }
-
     return instance;
   }
 
@@ -142,30 +167,42 @@ class MainState extends MainStateInterface
 
   @override
   void pop() {
-    _navApp.pop();
-    _autoRemove();
+    _checkCanNavigate(() {
+      _navApp.pop();
+      _autoRemove();
+    }, _HistoryOrder('pop', null));
   }
 
   @override
   void popAllAndPushNamed(String routerName) {
-    _navApp.popAllAndPushNamed(routerName);
-    _autoRemove();
+    _checkCanNavigate(() {
+      _navApp.popAllAndPushNamed(routerName);
+      _autoRemove();
+    }, _HistoryOrder('popAllAndPushNamed', routerName));
   }
 
   @override
   void popAndReplaceNamed(String routerName) {
-    _navApp.popAndReplaceNamed(routerName);
-    _autoRemove();
+    _checkCanNavigate(() {
+      _navApp.popAndReplaceNamed(routerName);
+      _autoRemove();
+    }, _HistoryOrder('popAndReplaceNamed', routerName));
   }
 
   @override
   void popUntil(String routerName) {
-    _navApp.popUntil(routerName);
-    _autoRemove();
+    _checkCanNavigate(() {
+      _navApp.popUntil(routerName);
+      _autoRemove();
+    }, _HistoryOrder('popUntil', routerName));
   }
 
   @override
-  void pushNamed(String routerName) => _navApp.pushNamed(routerName);
+  void pushNamed(String routerName) {
+    _checkCanNavigate(() {
+      _navApp.pushNamed(routerName);
+    }, _HistoryOrder('pushNamed', routerName));
+  }
 
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
 
@@ -232,4 +269,16 @@ class ObserverRoute<Observer> extends InstanceRoute<Observer> {
 
 class LightObserverRoute<LightObserver> extends InstanceRoute<LightObserver> {
   LightObserverRoute({required super.route, required super.instance});
+}
+
+class _HistoryOrder {
+  final String functionName;
+  final dynamic params;
+  _HistoryOrder(this.functionName, this.params);
+
+  @override
+  bool operator ==(Object o) =>
+      o is _HistoryOrder &&
+      functionName == o.functionName &&
+      params == o.params;
 }

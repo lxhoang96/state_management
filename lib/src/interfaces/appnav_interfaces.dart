@@ -15,4 +15,5 @@ abstract class AppNavInterfaces {
   void popAllAndPushNamed(String routerName);
 
   dynamic get argument;
+
 }
