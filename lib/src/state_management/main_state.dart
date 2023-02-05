@@ -1,6 +1,7 @@
-import 'package:base/base_component.dart';
 import 'package:base/base_navigation.dart';
 import 'package:base/src/base_component/base_controller.dart';
+import 'package:base/src/base_component/base_observer.dart';
+import 'package:base/src/base_component/light_observer.dart';
 import 'package:base/src/interfaces/dialognav_interfaces.dart';
 import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'package:base/src/nav_2/control_nav.dart';
@@ -13,15 +14,21 @@ class MainState extends MainStateInterface
     implements DialogNavigatorInterfaces {
   static final instance = MainState._();
   MainState._();
-  final Map<Type, InstanceRoute> _listCtrl = {};
-  static final List<Observer> _listObserver = [];
-  final _navApp = AppNav();
-  final _dialogNav = DialogNavigator();
 
-  Stream<List<MaterialPage<dynamic>>> get outerStream => _navApp.outerStream;
-  Stream<List<MaterialPage<dynamic>>> get dialogStream =>
-      _dialogNav.dialogStream;
-  Stream<List<MaterialPage<dynamic>>>? innerStream(String parentName) =>
+  intialize() {
+    _navApp = AppNav();
+    _dialogNav = DialogNavigator();
+  }
+
+  final Map<Type, InstanceRoute> _listCtrl = {};
+  final List<ObserverRoute> _listObserver = [];
+  final List<LightObserverRoute> _listLightObserver = [];
+  late final AppNav _navApp;
+  late final DialogNavigator _dialogNav;
+
+  LightObserver<List<MaterialPage>> get outerStream => _navApp.outerStream;
+  LightObserver<List<MaterialPage>> get dialogStream => _dialogNav.dialogStream;
+  LightObserver<List<MaterialPage>>? innerStream(String parentName) =>
       _navApp.getInnerStream(parentName);
 
   @override
@@ -103,14 +110,29 @@ class MainState extends MainStateInterface
       final result = !_navApp.checkActiveRouter(element.route);
       if (result) {
         debugPrint('Closing $element obs!');
-        element.dispose();
+        element.instance.dispose();
+      }
+      return result;
+    });
+
+    _listLightObserver.removeWhere((element) {
+      final result = !_navApp.checkActiveRouter(element.route);
+      if (result) {
+        debugPrint('Closing $element obs!');
+        element.instance.dispose();
       }
       return result;
     });
   }
 
   void addObs(Observer observer) {
-    _listObserver.add(observer);
+    _listObserver
+        .add(ObserverRoute(route: _navApp.currentRouter, instance: observer));
+  }
+
+  void addLightObs(LightObserver observer) {
+    _listLightObserver.add(
+        LightObserverRoute(route: _navApp.currentRouter, instance: observer));
   }
 
   void _autoRemove() {
@@ -171,9 +193,6 @@ class MainState extends MainStateInterface
 
   String getPath() => _navApp.getPath();
 
-  @override
-  getCurrentArgument() => _navApp.getCurrentArgument();
-
   void showLostConnectedRouter() => _navApp.showLostConnectedRouter();
 
   @override
@@ -195,6 +214,9 @@ class MainState extends MainStateInterface
   removeLastDialog() {
     _dialogNav.removeLastDialog();
   }
+
+  @override
+  get argument => _navApp.argument;
 }
 
 class InstanceRoute<T> {
@@ -202,4 +224,12 @@ class InstanceRoute<T> {
   final T instance;
 
   InstanceRoute({required this.route, required this.instance});
+}
+
+class ObserverRoute<Observer> extends InstanceRoute<Observer> {
+  ObserverRoute({required super.route, required super.instance});
+}
+
+class LightObserverRoute<LightObserver> extends InstanceRoute<LightObserver> {
+  LightObserverRoute({required super.route, required super.instance});
 }

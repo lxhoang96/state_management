@@ -28,9 +28,8 @@ void main() {
     // Global.remove<TestController2>();
     // expect(Global.find<TestController1>(), test1Ctrl);
     mainState.remove<TestController1>();
-    Future.delayed(const Duration(seconds: 1)).then((value) =>
-    expect(() => mainState.find<TestController1>(), throwsA(isA<Exception>()))
-    );
+    Future.delayed(const Duration(seconds: 1)).then((value) => expect(
+        () => mainState.find<TestController1>(), throwsA(isA<Exception>())));
   });
 }
 

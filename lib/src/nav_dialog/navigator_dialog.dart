@@ -1,6 +1,6 @@
+import 'package:base/src/base_component/light_observer.dart';
 import 'package:base/src/interfaces/dialognav_interfaces.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 
 class DialogNavigator implements DialogNavigatorInterfaces {
   final List<MaterialPage> listDialog = [];
@@ -8,9 +8,9 @@ class DialogNavigator implements DialogNavigatorInterfaces {
   /// The Navigator stack is updated with these stream
   /// [_streamDialogController] for dialog flow
   final _streamDialogController =
-      BehaviorSubject<List<MaterialPage>>.seeded([]);
+      LightObserver<List<MaterialPage>>([]);
 
-  Stream<List<MaterialPage>> get dialogStream => _streamDialogController.stream;
+  LightObserver<List<MaterialPage>> get dialogStream => _streamDialogController;
 
   @override
   showDialog({required Widget child, required String name}) {
@@ -20,26 +20,29 @@ class DialogNavigator implements DialogNavigatorInterfaces {
         maintainState: false,
         key: ValueKey(name),
         name: name));
-    _streamDialogController.add(listDialog);
+    _streamDialogController.value=listDialog;
   }
 
   @override
   removeDialog(String name) {
     if (listDialog.isEmpty) return;
     listDialog.removeWhere((element) => element.name == name);
-    _streamDialogController.add(listDialog);
+       _streamDialogController.value=listDialog;
+
   }
 
   @override
   removeAllDialog() {
     listDialog.clear();
-    _streamDialogController.add(listDialog);
+       _streamDialogController.value=listDialog;
+
   }
 
   @override
   removeLastDialog() {
     if (listDialog.isEmpty) return;
     listDialog.removeLast();
-    _streamDialogController.add(listDialog);
+        _streamDialogController.value=listDialog;
+
   }
 }

@@ -1,5 +1,4 @@
 import 'package:base/base_widget.dart';
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/foundation.dart';
@@ -30,13 +29,29 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.backgroundImage,
       this.globalWidgets = const [],
       this.isDesktop = true}) {
-    final outerStream = ObserverCombined(
-        [MainState.instance.outerStream, MainState.instance.dialogStream]);
-    outerStream.value.listen((event) {
-      _pages = event[0];
-      _dialogs = event[1];
-      // update with [ChangeNotifier]
-      notifyListeners();
+    // final outerStream = ObserverCombined(
+    //     [MainState().outerStream,MainState.instance.dialogStream]);
+    // outerStream.value.listen((event) {
+    //   _pages = event[0];
+    //   _dialogs = event[1];
+    //   // update with [ChangeNotifier]
+    //   notifyListeners();
+    // });
+    MainState.instance.intialize();
+    final outerStream = MainState.instance.outerStream;
+    outerStream.addListener(() {
+      if (_pages != outerStream.value) {
+        _pages = outerStream.value;
+        notifyListeners();
+      }
+    });
+    final dialogStream = MainState.instance.dialogStream;
+
+    dialogStream.addListener(() {
+      if (_dialogs != dialogStream.value) {
+        _dialogs = dialogStream.value;
+        notifyListeners();
+      }
     });
   }
 
@@ -137,7 +152,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       notifyListeners();
       return;
     }
-    // MainState.instance.showHomePage();
+    //MainState.instance.showHomePage();
     notifyListeners();
   }
 }

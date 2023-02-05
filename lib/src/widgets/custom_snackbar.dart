@@ -1,21 +1,10 @@
-import 'package:base/base_component.dart';
+import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 class AppSnackBar {
   static final showSnackBar = Observer(initValue: false, autoClose: false);
   static Widget snackbar = const SizedBox();
-//boxShadow: [
-  //   BoxShadow(
-  //     color: AppColors.black1.withAlpha(50),
-  //     offset: const Offset(
-  //       20,
-  //       20,
-  //     ),
-  //     blurRadius: 10.0,
-  //     spreadRadius: 2.0,
-  //   ),
-  // ],
   static defaultSnackBar(
       {required SnackBarStyle style,
       required String message,
@@ -60,9 +49,6 @@ class AppSnackBar {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              // const SizedBox(
-              //   height: 16,
-              // ),
               Text(
                 message,
                 style: TextStyle(

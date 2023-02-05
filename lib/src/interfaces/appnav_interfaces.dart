@@ -14,5 +14,5 @@ abstract class AppNavInterfaces {
   /// remove all and add a page
   void popAllAndPushNamed(String routerName);
 
-  dynamic getCurrentArgument();
+  dynamic get argument;
 }

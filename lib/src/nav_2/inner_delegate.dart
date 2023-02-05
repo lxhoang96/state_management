@@ -1,4 +1,3 @@
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/foundation.dart';
@@ -16,21 +15,22 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
   InnerDelegateRouter({required parentName, required initInner}) {
     MainState.instance.setInitInnerRouter(initInner);
     final stream = MainState.instance.innerStream(parentName);
-    if (stream == null) return;
-    final innerStream = ObserverCombined([stream]);
-    innerStream.value.listen((event) {
-      pages = event[0];
-      notifyListeners();
+
+    stream?.addListener(() {
+      if (_pages != stream.value) {
+        _pages = MainState.instance.outerStream.value;
+        notifyListeners();
+      }
     });
   }
 
-  List<Page> pages = [];
+  List<Page> _pages = [];
   @override
   Widget build(BuildContext context) {
-    if (pages.isNotEmpty) {
+    if (_pages.isNotEmpty) {
       return Navigator(
           key: navigatorKey,
-          pages: pages.toList(),
+          pages: _pages.toList(),
           onPopPage: (route, result) {
             if (!route.didPop(result)) return false;
 
@@ -53,7 +53,7 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
     }
 
     if (configuration.pathName != null || configuration.pathName != homePath) {
-      // MainState.instance.setInnerPagesForWeb(
+      //MainState.instance.setInnerPagesForWeb(
       //     RoutePathConfigure.pathName!.split('/value:')[1].split('/'));
       return;
     }

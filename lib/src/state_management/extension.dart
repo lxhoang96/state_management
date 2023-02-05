@@ -2,6 +2,7 @@ import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'main_state.dart';
 
 class Global {
+
   static final MainStateInterface _mainState = MainState.instance;
 
   static T add<T>(T instance) => _mainState.add(instance);
@@ -27,5 +28,6 @@ class Global {
 
   static void pushNamed(String routerName) => _mainState.pushNamed(routerName);
 
-  static dynamic getCurrentArgument() => _mainState.getCurrentArgument();
+  static dynamic get currentArgument => _mainState.argument;
 }
+

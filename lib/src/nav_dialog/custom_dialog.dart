@@ -1,4 +1,4 @@
-import 'package:base/base_component.dart';
+import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/interfaces/dialog_interfaces.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
