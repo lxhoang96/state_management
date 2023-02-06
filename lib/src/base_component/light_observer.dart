@@ -40,6 +40,7 @@ class LightObserver<T> extends ValueNotifier<T> {
   }
 }
 
+/// supported listen multiple values.
 class MultiObserWidget extends StatefulWidget {
   const MultiObserWidget(
       {super.key, required this.notifiers, required this.builder});
@@ -81,7 +82,7 @@ class _MultiObserWidgetState extends State<MultiObserWidget> {
   @override
   void dispose() {
     for (var element in widget.notifiers) {
-      element.dispose();
+      element.removeListener(()=>_valueChanged(element));
     }
     super.dispose();
   }
