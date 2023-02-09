@@ -21,9 +21,6 @@ class Global {
   static void popAllAndPushNamed(String routerName) =>
       _mainState.popAllAndPushNamed(routerName);
 
-  static void popAndReplaceNamed(String routerName) =>
-      _mainState.popAndReplaceNamed(routerName);
-
   static void popUntil(String routerName) => _mainState.popUntil(routerName);
 
   static void pushNamed(String routerName) => _mainState.pushNamed(routerName);

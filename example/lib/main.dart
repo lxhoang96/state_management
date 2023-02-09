@@ -1,4 +1,5 @@
 import 'package:base/base_navigation.dart';
+import 'package:example/routers/route_gen.dart';
 import 'package:flutter/material.dart';
 import 'package:example/routers/router_name.dart';
 import 'package:example/screen1/screen1.dart';
@@ -35,8 +36,4 @@ class MyApp extends StatelessWidget {
   }
 }
 
-Map<String, InitRouter> routerNewList = {
-  RouteName.screen1: InitRouter(widget: () => Screen1()),
-  RouteName.screen2: InitRouter(widget: () => Screen2()),
-  RouteName.screen3: InitRouter(widget: () => Screen3()),
-};
+

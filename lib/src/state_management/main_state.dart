@@ -223,7 +223,7 @@ class MainState extends MainStateInterface
 
   void showUnknownRouter() => _navApp.showUnknownRouter();
 
-  getCurrentRouter() => _navApp.currentRouter;
+  String getCurrentRouter() => _navApp.currentRouter;
 
   String getPath() => _navApp.getPath();
 

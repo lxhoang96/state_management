@@ -1,11 +1,11 @@
 import 'package:base/base_component.dart';
+import 'package:example/inner_controll/inner_screen2/innerscreen2_ctrl.dart';
 import 'package:flutter/material.dart';
 import 'package:example/routers/router_name.dart';
-import 'package:example/screen2/screen2_ctrl.dart';
 
-class Screen2 extends StatelessWidget {
-  Screen2({super.key});
-  final controller = Global.add(Screen2Controller());
+class InnerScreen2 extends StatelessWidget {
+  InnerScreen2({super.key});
+  final controller = Global.add(InnerScreen2Controller());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,21 +25,12 @@ class Screen2 extends StatelessWidget {
           },
         ),
         TextButton(
-          onPressed: () {
-            controller.controller1.intObs.value++;
-            // AppRouter.pushNamed(RouteName.screen3);
-            Global.pushNamed(RouteName.screen3);
-          },
-          child: const Text('To screen 3'),
-        ),
-        TextButton(
-          onPressed: () {
-            controller.controller1.intObs.value++;
-            // AppRouter.pushNamed(RouteName.screen3);
-            Global.pushNamed(RouteName.innerControll);
-          },
-          child: const Text('To inner'),
-        ),
+            onPressed: () {
+              controller.controller1.intObs.value++;
+              // AppRouter.pushNamed(RouteName.screen3);
+              Global.pushNamed(RouteName.screen3);
+            },
+            child: const Text('To screen 3')),
       ],
     ));
   }
