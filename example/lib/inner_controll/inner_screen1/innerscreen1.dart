@@ -7,8 +7,7 @@ class InnerScreen1 extends StatelessWidget {
   final controller = Global.add(InnerScreen1Controller());
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
+    return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           ValueListenableBuilder(
@@ -30,7 +29,7 @@ class InnerScreen1 extends StatelessWidget {
               },
               child: const Text('To screen 2')),
         ],
-      ),
+      
     );
   }
 }

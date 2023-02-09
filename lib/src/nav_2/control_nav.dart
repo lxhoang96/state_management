@@ -103,7 +103,9 @@ class AppNav implements AppNavInterfaces {
     final router = newPage.toBaseRouter(routerName);
     parentRouter.innerRouters.add(router);
     _streamInnerController[parentRouter.routerName] =
-        LightObserver<List<MaterialPage>>([], autoClose: false);
+        LightObserver<List<MaterialPage>>(
+            parentRouter.innerRouters.getMaterialPage(),
+            autoClose: false);
     _currentRouter = router;
   }
 

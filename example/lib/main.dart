@@ -32,8 +32,19 @@ class MyApp extends StatelessWidget {
       routerDelegate: HomeRouterDelegate(
           listPages: routerNewList, homeRouter: RouteName.screen1),
       routeInformationParser: HomeRouteInformationParser(),
+      theme: ThemeData(
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: {
+              TargetPlatform.android: CustomTransitionBuilder(),
+              TargetPlatform.iOS: CustomTransitionBuilder(),
+              TargetPlatform.macOS: CustomTransitionBuilder(),
+              TargetPlatform.windows: CustomTransitionBuilder(),
+              TargetPlatform.linux: CustomTransitionBuilder(),
+            },
+          ),
+          useMaterial3: true,
+          bottomSheetTheme:
+              const BottomSheetThemeData(backgroundColor: Colors.transparent)),
     );
   }
 }
-
-

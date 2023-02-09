@@ -179,9 +179,9 @@ class MainState extends MainStateInterface
   }
 
   @override
-  void popAndReplaceNamed(String routerName) {
+  void popAndReplaceNamed(String routerName, {String? parentName}) {
     _checkCanNavigate(() {
-      _navApp.popAndReplaceNamed(routerName);
+      _navApp.popAndReplaceNamed(routerName, parentName: parentName);
       _autoRemove();
     }, _HistoryOrder('popAndReplaceNamed', routerName));
   }
@@ -195,9 +195,9 @@ class MainState extends MainStateInterface
   }
 
   @override
-  void pushNamed(String routerName) {
+  void pushNamed(String routerName, {String? parentName}) {
     _checkCanNavigate(() {
-      _navApp.pushNamed(routerName);
+      _navApp.pushNamed(routerName, parentName: parentName);
     }, _HistoryOrder('pushNamed', routerName));
   }
 
