@@ -13,7 +13,7 @@ Map<String, InitRouter> routerNewList = {
   RouteName.screen3: InitRouter(widget: () => Screen3()),
   RouteName.innerControll: InitRouter(widget: () => InnerScreen()),
   RouteName.inner1: InitRouter(
-      widget: () => InnerScreen1(), parentName: RouteName.innerControll),
+      widget: () => InnerScreen1()),
   RouteName.inner2: InitRouter(
-      widget: () => InnerScreen2(), parentName: RouteName.innerControll),
+      widget: () => InnerScreen2()),
 };

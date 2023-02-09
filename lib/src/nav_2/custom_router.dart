@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 class InitRouter {
   final Widget Function() widget;
   final dynamic argument;
-  final String? parentName;
+  // final String? parentName;
   InitRouter({
     required this.widget,
-    this.parentName,
+    // this.parentName,
     this.argument,
   });
-  BaseRouter toBaseRouter(String routerName) {
+  BaseRouter toBaseRouter(String routerName, {String? parentName}) {
     return BaseRouter(
       routerName: routerName,
       widget: widget,
@@ -29,11 +29,12 @@ class BaseRouter extends InitRouter {
   final String routerName;
   MaterialPage? page;
   late final LocalKey _key;
+  final String? parentName;
   final List<BaseRouter> innerRouters = [];
   BaseRouter({
     required this.routerName,
     required super.widget,
-    super.parentName,
+    this.parentName,
     super.argument,
   }) {
     _key = ValueKey(routerName);
@@ -80,8 +81,6 @@ extension BaseRouterExtension on BaseRouter {
     }
     return false;
   }
-
-  
 }
 
 extension ConvertBaseRouter on List<BaseRouter> {

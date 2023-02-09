@@ -10,7 +10,7 @@ class InnerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Router(
-        routerDelegate: InnerDelegateRouter(initInner: RouteName.inner1),
+        routerDelegate: InnerDelegateRouter(initInner: RouteName.inner1,parentName: RouteName.innerControll),
         routeInformationParser: HomeRouteInformationParser(),
       ),
       bottomNavigationBar: Row(

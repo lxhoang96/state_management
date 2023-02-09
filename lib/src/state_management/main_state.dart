@@ -203,8 +203,8 @@ class MainState extends MainStateInterface
 
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
 
-  void setInitInnerRouter(String routerName) =>
-      _navApp.setInitInnerRouter(routerName);
+  void setInitInnerRouter(String routerName, String parentName) =>
+      _navApp.setInitInnerRouter(routerName, parentName);
 
   void setInitRouters(Map<String, InitRouter> initRouters) =>
       _navApp.setInitRouters(initRouters);

@@ -87,14 +87,13 @@ class AppNav implements AppNavInterfaces {
   }
 
   /// set HomeRouter of nested routers if has any
-  void setInitInnerRouter(String routerName) {
+  void setInitInnerRouter(String routerName, String parentName) {
     // O(n)
     final newPage = _initRouters[routerName];
-    if (newPage == null || newPage.parentName == null) {
-      throw Exception(
-          ['Can not find this router or this router has no parent']);
+    if (newPage == null) {
+      throw Exception(['Can not find this router']);
     }
-    final parentRouter = _outerRouters.getByName(newPage.parentName!); // O(n)
+    final parentRouter = _outerRouters.getByName(parentName); // O(n)
     if (parentRouter == null) {
       throw Exception(['Parent is not in outer routing']);
     }
@@ -163,27 +162,26 @@ class AppNav implements AppNavInterfaces {
 
   /// push a page
   @override
-  void pushNamed(String routerName) {
+  void pushNamed(String routerName, {String? parentName}) {
     // O(n)
     final initRouter = _initRouters[routerName];
     // check router exist
     if (initRouter == null) {
       throw Exception(['Can not find a router with this name']);
     }
-    _removeDuplicate(routerName, parentName: initRouter.parentName); // O(n)
+    _removeDuplicate(routerName, parentName: parentName); // O(n)
     final router = initRouter.toBaseRouter(routerName);
     _currentRouter = router;
     // add new page to outer routing if it has no parent.
-    if (initRouter.parentName == null) {
+    if (parentName == null) {
       _outerRouters.add(router);
       _updateOuter();
       return;
     }
     // add new router to inner routing if it has parent.
-    final parentRouter =
-        _outerRouters.getByName(initRouter.parentName!); // O(n)
+    final parentRouter = _outerRouters.getByName(parentName); // O(n)
     parentRouter?.innerRouters.add(router);
-    _streamInnerController[initRouter.parentName]?.newValue =
+    _streamInnerController[parentName]?.newValue =
         parentRouter?.innerRouters.getMaterialPage() ?? []; // O(n)
   }
 
@@ -218,13 +216,12 @@ class AppNav implements AppNavInterfaces {
 
   /// remove several pages until page with routerName
   @override
-  void popUntil(String routerName) {
+  void popUntil(String routerName, {String? parentName}) {
     // O(n)
     // there are 3 cases:
     // 1. This is outer routing and there are only 1 router, solution: can not pop
     // 2. This is inner routing and can pop.
     // 3. This is outer routing.
-    final parentName = _initRouters[routerName]?.parentName;
     // case 1:
     if (parentName == null && _outerRouters.length <= 1) {
       throw Exception(['Can not pop: no backward router']);
@@ -249,14 +246,13 @@ class AppNav implements AppNavInterfaces {
 
   /// remove last page and replace this with new one
   @override
-  void popAndReplaceNamed(String routerName) {
+  void popAndReplaceNamed(String routerName, {String? parentName}) {
     // O(n)
     final newPage = _initRouters[routerName];
     // check if new page exist
     if (newPage == null) {
       throw Exception(['Can not find a page with this name']);
     }
-    final parentName = newPage.parentName;
 
     if (parentName == null && _outerRouters.isEmpty) {
       throw Exception(['Can not pop: no backward router']);
@@ -283,13 +279,13 @@ class AppNav implements AppNavInterfaces {
 
   /// remove all and add a page
   @override
-  void popAllAndPushNamed(String routerName) {
+  void popAllAndPushNamed(String routerName, {String? parentName}) {
     // O(n)
     final router = _initRouters[routerName];
     if (router == null) {
       throw Exception(['Can not find a router with this name']);
     }
-    if (router.parentName != null) {
+    if (parentName != null) {
       throw Exception(['Can not push an inner router: no parent found!']);
     }
     final newPage = router.toBaseRouter(routerName);
@@ -305,18 +301,18 @@ class AppNav implements AppNavInterfaces {
   }
 
   /// check a router is active or not
-  bool checkActiveRouter(String routerName) {
+  bool checkActiveRouter(String routerName, {String? parentName}) {
     // O(n)
     if (routerName == '/') return true;
-    final router = _initRouters[routerName];
-    if (router?.parentName == null) {
+
+    if (parentName == null) {
       return _outerRouters.firstWhereOrNull(
               (element) => element.routerName == routerName) !=
           null; // O(n)
     }
+
     return _outerRouters
-            .firstWhereOrNull(
-                (element) => element.routerName == router?.parentName)
+            .firstWhereOrNull((element) => element.routerName == parentName)
             ?.innerRouters
             .firstWhereOrNull((element) => element.routerName == routerName) !=
         null; // O(n)
