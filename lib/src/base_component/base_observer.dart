@@ -20,6 +20,7 @@ abstract class ObserverAbs<T> {
 /// An observer can get and set value with .value
 /// An observer can use in Widget tree with [ObserWidget] and [ObserListWidget].
 /// Or in controller with [ObserverCombined]
+@Deprecated('This observer is deprecated and will be move to legacy. Use [LightObserver] instead')
 class Observer<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;

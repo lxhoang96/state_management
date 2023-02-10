@@ -7,7 +7,7 @@ class AppSnackBar {
   static Widget snackbar = const SizedBox();
   static defaultSnackBar(
       {required SnackBarStyle style,
-      required String message,
+      required String? message,
       required String title,
       String? fontFamily,
       Function? onTap}) {
@@ -49,15 +49,16 @@ class AppSnackBar {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Text(
-                message,
-                style: TextStyle(
-                  color: style.textColor,
-                  fontSize: 12,
-                  fontFamily: fontFamily,
-                  fontWeight: FontWeight.w400,
+              if (message != null)
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: style.textColor,
+                    fontSize: 12,
+                    fontFamily: fontFamily,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
