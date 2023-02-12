@@ -8,9 +8,9 @@ class DialogNavigator implements DialogNavigatorInterfaces {
   /// The Navigator stack is updated with these stream
   /// [_streamDialogController] for dialog flow
   final _streamDialogController =
-      LightObserver<List<MaterialPage>>([]);
+      InnerObserver<List<MaterialPage>>([]);
 
-  LightObserver<List<MaterialPage>> get dialogStream => _streamDialogController;
+  InnerObserver<List<MaterialPage>> get dialogStream => _streamDialogController;
 
   @override
   showDialog({required Widget child, required String name}) {

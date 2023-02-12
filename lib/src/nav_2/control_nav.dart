@@ -27,17 +27,16 @@ class AppNav implements AppNavInterfaces {
 
   /// The Navigator stack is updated with these stream
   /// [_streamOuterController] for main flow and [_streamInnerController] for nested stack
-  final _streamOuterController =
-      LightObserver<List<MaterialPage>>([], autoClose: false);
-  final Map<String, LightObserver<List<MaterialPage>>> _streamInnerController =
+  final _streamOuterController = InnerObserver<List<MaterialPage>>([]);
+  final Map<String, InnerObserver<List<MaterialPage>>> _streamInnerController =
       {};
 
   /// This is routers will be shown in Navigator.
   final List<BaseRouter> _outerRouters = [];
   Map<String, InitRouter> _initRouters = {};
 
-  LightObserver<List<MaterialPage>> get outerStream => _streamOuterController;
-  LightObserver<List<MaterialPage>>? getInnerStream(String routerName) =>
+  InnerObserver<List<MaterialPage>> get outerStream => _streamOuterController;
+  InnerObserver<List<MaterialPage>>? getInnerStream(String routerName) =>
       _streamInnerController[routerName];
 
   /// currentRouter, this can be in main flow or nested flow
@@ -103,9 +102,9 @@ class AppNav implements AppNavInterfaces {
     final router = newPage.toBaseRouter(routerName);
     parentRouter.innerRouters.add(router);
     _streamInnerController[parentRouter.routerName] =
-        LightObserver<List<MaterialPage>>(
-            parentRouter.innerRouters.getMaterialPage(),
-            autoClose: false);
+        InnerObserver<List<MaterialPage>>(
+      parentRouter.innerRouters.getMaterialPage(),
+    );
     _currentRouter = router;
   }
 
@@ -130,6 +129,7 @@ class AppNav implements AppNavInterfaces {
     _streamInnerController.forEach((key, value) {
       value.dispose();
     });
+    _streamInnerController.clear();
   }
 
   /// show HomeRouter
@@ -143,6 +143,7 @@ class AppNav implements AppNavInterfaces {
     _streamInnerController.forEach((key, value) {
       value.dispose();
     });
+    _streamInnerController.clear();
   }
 
   void setLostConnectedRouter(String name) {
@@ -214,6 +215,7 @@ class AppNav implements AppNavInterfaces {
     _currentRouter = _outerRouters.last;
     _updateOuter(); // O(n)
     _streamInnerController[oldPage.routerName]?.dispose();
+    _streamInnerController.remove(oldPage.routerName);
   }
 
   /// remove several pages until page with routerName
@@ -277,6 +279,7 @@ class AppNav implements AppNavInterfaces {
     _currentRouter = _outerRouters.last;
     _updateOuter(); // O(n)
     _streamInnerController[oldLast.routerName]?.dispose();
+    _streamInnerController.remove(oldLast.routerName);
   }
 
   /// remove all and add a page
@@ -300,6 +303,7 @@ class AppNav implements AppNavInterfaces {
     _streamInnerController.forEach((key, value) {
       value.dispose();
     }); // O(n)
+    _streamInnerController.clear();
   }
 
   /// check a router is active or not

@@ -1,4 +1,4 @@
-import 'package:base/src/base_component/base_observer.dart';
+import 'package:base/src/base_component/light_observer.dart';
 import 'package:base/src/interfaces/dialog_interfaces.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +14,7 @@ class BaseDialog implements DialogInterfaces {
     required Widget child,
     required String name,
     Color? backgroundColor,
-    required Observer<bool> barrierDismissible,
+    required InnerObserver<bool> barrierDismissible,
     Function? onClosed,
   }) {
     dialog = Scaffold(
@@ -23,9 +23,9 @@ class BaseDialog implements DialogInterfaces {
       // backgroundColor: Colors.black,
       body: Stack(
         children: [
-          ObserWidget(
-              value: barrierDismissible,
-              child: (dimissible) {
+          ValueListenableBuilder(
+              valueListenable: barrierDismissible,
+              builder: (context, dimissible, _) {
                 return InkWell(
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
@@ -63,7 +63,7 @@ class AppDialog {
     required Widget child,
     required String name,
     Color? backgroundColor,
-    required Observer<bool> barrierDismissible,
+    required InnerObserver<bool> barrierDismissible,
     Function? onClosed,
   }) =>
       _baseDialog.showDialog(

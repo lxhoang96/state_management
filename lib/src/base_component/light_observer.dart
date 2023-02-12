@@ -1,26 +1,10 @@
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 
-// abstract class LightObserverAbs<T> {
-//   String get route;
-// }
-
-/// A light observer is a [ValueNotifier], that can be used to update value
-/// in multiple place using ValueNotifier.
-/// An observer can be automatically close by default and can be handled
-/// by hand with autoClose == false.
-/// An observer can get and set value with .value
-/// An observer can use in Widget tree with [ValueListenableBuilder] and [MultiObserWidget].
-/// Or in controller with [LightObserverCombined]
-class LightObserver<T> extends ValueNotifier<T> {
+class InnerObserver<T> extends ValueNotifier<T> {
   bool _isUnchangeValue = false;
-  bool _changed = false;
-  LightObserver(super.value, {bool autoClose = true}) {
+  InnerObserver(super.value) {
     _isUnchangeValue = value is Iterable || value is Map;
-
-    if (autoClose) {
-      MainState.instance.addLightObs(this);
-    }
   }
 
   set newValue(T valueSet) {
@@ -30,6 +14,40 @@ class LightObserver<T> extends ValueNotifier<T> {
     if (_isUnchangeValue) {
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    debugPrint('$this disposing');
+    super.dispose();
+  }
+}
+
+/// A light observer is a [ValueNotifier], that can be used to update value
+/// in multiple place using ValueNotifier.
+/// An observer can be automatically close by default and can be handled
+/// by hand with autoClose == false.
+/// An observer can get and set value with .value
+/// An observer can use in Widget tree with [ValueListenableBuilder] and [MultiObserWidget].
+/// Or in controller with [LightObserverCombined]
+class LightObserver<T> extends InnerObserver<T> {
+  bool _changed = false;
+  LightObserver(super.value, {bool autoClose = true}) {
+    _isUnchangeValue = value is Iterable || value is Map;
+
+    if (autoClose) {
+      MainState.instance.addLightObs(this);
+    }
+  }
+
+  @override
+  set newValue(T valueSet) {
+    // if (value == valueSet && !_isUnchangeValue) return;
+
+    // value = valueSet;
+    // if (_isUnchangeValue) {
+    //   notifyListeners();
+    // }
     _changed = true;
   }
 
@@ -82,7 +100,7 @@ class _MultiObserWidgetState extends State<MultiObserWidget> {
   @override
   void dispose() {
     for (var element in widget.notifiers) {
-      element.removeListener(()=>_valueChanged(element));
+      element.removeListener(() => _valueChanged(element));
     }
     super.dispose();
   }
@@ -96,3 +114,20 @@ class _MultiObserWidgetState extends State<MultiObserWidget> {
     values[obs.hashCode] = obs.value;
   }
 }
+
+// class MultiListener {
+//   final List<LightObserver> _listObserver;
+//   MultiListener(this._listObserver);
+
+//   init(){
+//     bool changed = false;
+//     for (var element in _listObserver) {
+//       if (element._changed) {
+//         element.removeListener(() => _valueChanged(element));
+//         element.addListener(() => _valueChanged(element));
+//         changed = true;
+//         element._changed = false;
+//       }
+//     }
+//   }
+// }

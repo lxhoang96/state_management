@@ -1,9 +1,8 @@
 import 'dart:collection';
 
 import 'package:base/base_navigation.dart';
-import 'package:base/src/base_component/base_controller.dart';
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/base_component/light_observer.dart';
+import 'package:base/src/interfaces/controller_interface.dart';
 import 'package:base/src/interfaces/dialognav_interfaces.dart';
 import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'package:base/src/nav_2/control_nav.dart';
@@ -20,7 +19,7 @@ class MainState extends MainStateInterface
   intialize() {
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
-    _queueNavigate = LightObserver(Queue<Function>());
+    _queueNavigate = InnerObserver(Queue<Function>());
     _queueNavigate.addListener(() async {
       while (_queueNavigate.value.isNotEmpty) {
         final function = _queueNavigate.value.removeFirst();
@@ -30,18 +29,18 @@ class MainState extends MainStateInterface
   }
 
   final Map<Type, InstanceRoute> _listCtrl = {};
-  final List<ObserverRoute> _listObserver = [];
+  // final List<ObserverRoute> _listObserver = [];
   final List<LightObserverRoute> _listLightObserver = [];
   late final AppNav _navApp;
   late final DialogNavigator _dialogNav;
 
-  LightObserver<List<MaterialPage>> get outerStream => _navApp.outerStream;
-  LightObserver<List<MaterialPage>> get dialogStream => _dialogNav.dialogStream;
-  LightObserver<List<MaterialPage>>? innerStream(String parentName) =>
+  InnerObserver<List<MaterialPage>> get outerStream => _navApp.outerStream;
+  InnerObserver<List<MaterialPage>> get dialogStream => _dialogNav.dialogStream;
+  InnerObserver<List<MaterialPage>>? innerStream(String parentName) =>
       _navApp.getInnerStream(parentName);
 
   // bool _canNavigate = true;
-  late final LightObserver<Queue<Function>> _queueNavigate;
+  late final InnerObserver<Queue<Function>> _queueNavigate;
   _HistoryOrder? _lastOrder;
 
   _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
@@ -128,14 +127,14 @@ class MainState extends MainStateInterface
   }
 
   void _autoRemoveObs() {
-    _listObserver.removeWhere((element) {
-      final result = !_navApp.checkActiveRouter(element.route);
-      if (result) {
-        debugPrint('Closing $element obs!');
-        element.instance.dispose();
-      }
-      return result;
-    });
+    // _listObserver.removeWhere((element) {
+    //   final result = !_navApp.checkActiveRouter(element.route);
+    //   if (result) {
+    //     debugPrint('Closing $element obs!');
+    //     element.instance.dispose();
+    //   }
+    //   return result;
+    // });
 
     _listLightObserver.removeWhere((element) {
       final result = !_navApp.checkActiveRouter(element.route);
@@ -147,12 +146,13 @@ class MainState extends MainStateInterface
     });
   }
 
-  void addObs(Observer observer) {
-    _listObserver
-        .add(ObserverRoute(route: _navApp.currentRouter, instance: observer));
-  }
+  // @Deprecated('')
+  // void addObs(Observer observer) {
+  //   _listObserver
+  //       .add(ObserverRoute(route: _navApp.currentRouter, instance: observer));
+  // }
 
-  void addLightObs(LightObserver observer) {
+  void addLightObs(InnerObserver observer) {
     _listLightObserver.add(
         LightObserverRoute(route: _navApp.currentRouter, instance: observer));
   }
@@ -259,9 +259,9 @@ class InstanceRoute<T> {
   InstanceRoute({required this.route, required this.instance});
 }
 
-class ObserverRoute<Observer> extends InstanceRoute<Observer> {
-  ObserverRoute({required super.route, required super.instance});
-}
+// class ObserverRoute<Observer> extends InstanceRoute<Observer> {
+//   ObserverRoute({required super.route, required super.instance});
+// }
 
 class LightObserverRoute<LightObserver> extends InstanceRoute<LightObserver> {
   LightObserverRoute({required super.route, required super.instance});

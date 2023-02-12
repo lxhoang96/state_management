@@ -1,5 +1,4 @@
 import 'package:base/base_widget.dart';
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/custom_router.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,7 @@ class GlobalWidget extends StatefulWidget {
       {Key? key,
       required this.child,
       this.initBinding,
-      this.appIcon,
+      this.loadingWidget,
       this.useLoading = true,
       this.useSnackbar = true,
       this.isDesktop = true,
@@ -21,7 +20,7 @@ class GlobalWidget extends StatefulWidget {
   final Widget child;
   final InitBinding? initBinding;
   final Map<String, InitRouter> listPages;
-  final String? appIcon;
+  final Widget? loadingWidget;
   final bool useLoading;
   final bool useSnackbar;
 
@@ -37,7 +36,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   bool didInit = false;
   @override
   void initState() {
-    AppLoading.showing.value = false;
+    LoadingController.instance.showing.value = false;
     AppSnackBar.showSnackBar.value = false;
     MainState.instance.setInitRouters(widget.listPages);
     init();
@@ -74,11 +73,11 @@ class _GlobalWidgetState extends State<GlobalWidget> {
         buildChild(),
         widget.useLoading
             ? Positioned.fill(
-                child: ObserWidget(
-                  value: AppLoading.showing,
-                  child: (value) {
+                child: ValueListenableBuilder(
+                  valueListenable: LoadingController.instance.showing,
+                  builder: (context,value,_) {
                     if (value == true) {
-                      return AppLoading.loadingWidget(widget.appIcon);
+                      return LoadingController.instance.loadingWidget(widget.loadingWidget);
                     }
                     return const SizedBox();
                   },
@@ -86,9 +85,9 @@ class _GlobalWidgetState extends State<GlobalWidget> {
               )
             : const SizedBox(),
         widget.useSnackbar
-            ? ObserWidget(
-                value: AppSnackBar.showSnackBar,
-                child: (value) {
+            ? ValueListenableBuilder(
+                valueListenable: AppSnackBar.showSnackBar,
+                builder: (context,value,_) {
                   if (value == true) {
                     return Align(
                         alignment: widget.isDesktop

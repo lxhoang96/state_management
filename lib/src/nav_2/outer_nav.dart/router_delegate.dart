@@ -11,7 +11,7 @@ import '../nav_config.dart';
 class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final InitBinding? initBinding;
-  final String? appIcon;
+  final Widget? loadingWidget;
   final bool useLoading;
   final bool useSnackbar;
   final DecorationImage? backgroundImage;
@@ -23,7 +23,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       {required this.listPages,
       required this.homeRouter,
       this.initBinding,
-      this.appIcon,
+      this.loadingWidget,
       this.useLoading = true,
       this.useSnackbar = true,
       this.backgroundImage,
@@ -65,7 +65,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
           listPages: listPages,
           homeRouter: homeRouter,
           initBinding: initBinding,
-          appIcon: appIcon,
+          loadingWidget: loadingWidget,
           isDesktop: isDesktop,
           useLoading: useLoading,
           useSnackbar: useSnackbar,

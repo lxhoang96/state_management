@@ -1,9 +1,9 @@
-import 'package:base/src/base_component/base_observer.dart';
+import 'package:base/src/base_component/light_observer.dart';
 import 'package:base/src/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 class AppSnackBar {
-  static final showSnackBar = Observer(initValue: false, autoClose: false);
+  static final showSnackBar = InnerObserver(false);
   static Widget snackbar = const SizedBox();
   static defaultSnackBar(
       {required SnackBarStyle style,
