@@ -2,17 +2,31 @@ import 'package:base/src/base_component/light_observer.dart';
 import 'package:base/src/theme/colors.dart';
 import 'package:flutter/material.dart';
 
-class AppSnackBar {
-  static final showSnackBar = InnerObserver(false);
-  static Widget snackbar = const SizedBox();
-  static defaultSnackBar(
+abstract class SnackbarInterface {
+  void showSnackbar(
       {required SnackBarStyle style,
       required String? message,
       required String title,
-      String? fontFamily,
-      Function? onTap}) {
+      Function? onTap,
+      int timeout = 3});
+
+  void showCustomSnackbar({required Widget child, int timeout = 3});
+}
+
+class SnackBarController extends SnackbarInterface {
+  static final instance = SnackBarController._();
+  SnackBarController._();
+  final showSnackBar = InnerObserver(false);
+  Widget snackbar = const SizedBox();
+  @override
+  showSnackbar(
+      {required SnackBarStyle style,
+      required String? message,
+      required String title,
+      Function? onTap,
+      int timeout = 3}) {
     showSnackBar.value = true;
-    Future.delayed(const Duration(seconds: 3))
+    Future.delayed(Duration(seconds: timeout))
         .then((value) => showSnackBar.value = false);
     snackbar = Material(
       color: Colors.transparent,
@@ -45,7 +59,6 @@ class AppSnackBar {
                 style: TextStyle(
                   color: style.textColor,
                   fontSize: 16,
-                  fontFamily: fontFamily,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -55,7 +68,6 @@ class AppSnackBar {
                   style: TextStyle(
                     color: style.textColor,
                     fontSize: 12,
-                    fontFamily: fontFamily,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -65,6 +77,33 @@ class AppSnackBar {
       ),
     );
   }
+
+  @override
+  showCustomSnackbar({required Widget child, int timeout = 3}) {
+    snackbar = child;
+    showSnackBar.value = true;
+    Future.delayed(Duration(seconds: timeout))
+        .then((value) => showSnackBar.value = false);
+  }
+}
+
+class AppSnackbar {
+  static final SnackbarInterface _controller = SnackBarController.instance;
+  static showSnackbar(
+          {required SnackBarStyle style,
+          required String? message,
+          required String title,
+          Function? onTap,
+          int timeout = 3}) =>
+      _controller.showSnackbar(
+          style: style,
+          message: message,
+          title: title,
+          onTap: onTap,
+          timeout: timeout);
+
+  static showCustomSnackbar({required Widget child, int timeout = 3}) =>
+      _controller.showCustomSnackbar(child: child, timeout: timeout);
 }
 
 enum SnackBarStyle {

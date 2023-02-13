@@ -8,7 +8,7 @@ abstract class LoadingInterface {
 }
 
 class AppLoading {
-  static final _controller = LoadingController.instance;
+  static final LoadingInterface _controller = LoadingController.instance;
   static closeLoading() => _controller.closeLoading();
 
   static openLoading() => _controller.openLoading();

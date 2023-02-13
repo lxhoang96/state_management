@@ -37,7 +37,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   @override
   void initState() {
     LoadingController.instance.showing.value = false;
-    AppSnackBar.showSnackBar.value = false;
+    SnackBarController.instance.showSnackBar.value = false;
     MainState.instance.setInitRouters(widget.listPages);
     init();
     super.initState();
@@ -86,7 +86,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
             : const SizedBox(),
         widget.useSnackbar
             ? ValueListenableBuilder(
-                valueListenable: AppSnackBar.showSnackBar,
+                valueListenable: SnackBarController.instance.showSnackBar,
                 builder: (context,value,_) {
                   if (value == true) {
                     return Align(
@@ -95,7 +95,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
                             : Alignment.topCenter,
                         child: SizedBox(
                             width: widget.isDesktop ? 240 : double.infinity,
-                            child: AppSnackBar.snackbar));
+                            child: SnackBarController.instance.snackbar));
                   }
                   return const SizedBox();
                 })

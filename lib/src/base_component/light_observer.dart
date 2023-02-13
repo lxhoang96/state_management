@@ -115,19 +115,19 @@ class _MultiObserWidgetState extends State<MultiObserWidget> {
   }
 }
 
-// class MultiListener {
+// class MultiListener extends ChangeNotifier{
 //   final List<LightObserver> _listObserver;
 //   MultiListener(this._listObserver);
 
 //   init(){
-//     bool changed = false;
 //     for (var element in _listObserver) {
-//       if (element._changed) {
-//         element.removeListener(() => _valueChanged(element));
 //         element.addListener(() => _valueChanged(element));
-//         changed = true;
 //         element._changed = false;
 //       }
 //     }
+  
+// @override
+//   addListener(VoidCallback listener){
+
 //   }
 // }
