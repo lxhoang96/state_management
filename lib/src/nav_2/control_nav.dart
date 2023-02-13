@@ -250,9 +250,10 @@ class AppNav implements AppNavInterfaces {
     }
 
     if (parentName != null) {
-      final lastParent = _outerRouters.last;
-      if (lastParent.routerName != parentName) {
-        throw Exception(['Last parent does not have this child']);
+      final lastParent = _outerRouters
+          .firstWhereOrNull((element) => element.routerName == parentName);
+      if (lastParent == null) {
+        throw Exception(['Parent not in stack']);
       }
       final childRouter = newPage.toBaseRouter(routerName);
       lastParent.popAndAddInner(childRouter);
