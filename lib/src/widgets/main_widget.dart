@@ -94,7 +94,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
                             ? Alignment.topRight
                             : Alignment.topCenter,
                         child: SizedBox(
-                            width: widget.isDesktop ? 240 : double.infinity,
+                            width: widget.isDesktop ? 300 : double.infinity,
                             child: SnackBarController.instance.snackbar));
                   }
                   return const SizedBox();

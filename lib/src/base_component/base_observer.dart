@@ -24,6 +24,7 @@ abstract class ObserverAbs<T> {
 class Observer<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
+  bool _isDispose = false;
 
   Observer({required T initValue, bool autoClose = true}) {
     _object = initValue;
@@ -53,8 +54,10 @@ class Observer<T> extends ObserverAbs<T> {
 
   @override
   dispose() {
+    if (_isDispose) return;
     debugPrint('$this disposing');
     _streamController.close();
+    _isDispose = true;
   }
 }
 

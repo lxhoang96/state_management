@@ -31,7 +31,6 @@ class SnackBarController extends SnackbarInterface {
     snackbar = Material(
       color: Colors.transparent,
       child: Container(
-        height: 60,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
@@ -53,6 +52,7 @@ class SnackBarController extends SnackbarInterface {
           onTap: () => onTap?.call(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 title,
