@@ -1,3 +1,4 @@
+
 import 'package:base/base_component.dart';
 import 'package:base/base_widget.dart';
 import 'package:base/src/nav_2/custom_router.dart';
@@ -95,7 +96,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
                             ? Alignment.topRight
                             : Alignment.topCenter,
                         child: SizedBox(
-                            width: widget.isDesktop ? 240 : double.infinity,
+                            width: widget.isDesktop ? 300 : double.infinity,
                             child: AppSnackBar.snackbar));
                   }
                   return const SizedBox();

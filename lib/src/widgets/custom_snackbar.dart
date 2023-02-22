@@ -28,7 +28,6 @@ class AppSnackBar {
     snackbar = Material(
       color: Colors.transparent,
       child: Container(
-        height: 60,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
@@ -50,6 +49,7 @@ class AppSnackBar {
           onTap: () => onTap?.call(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 title,
