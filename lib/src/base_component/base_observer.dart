@@ -1,4 +1,5 @@
 import 'package:base/src/state_management/main_state.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -20,9 +21,11 @@ abstract class ObserverAbs<T> {
 /// An observer can get and set value with .value
 /// An observer can use in Widget tree with [ObserWidget] and [ObserListWidget].
 /// Or in controller with [ObserverCombined]
+// @Deprecated('This observer is deprecated and will be move to legacy. Use [LightObserver] instead')
 class Observer<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
+  bool _isDispose = false;
 
   Observer({required T initValue, bool autoClose = true}) {
     _object = initValue;
@@ -45,6 +48,46 @@ class Observer<T> extends ObserverAbs<T> {
   }
 
   @override
+  void update() {
+    if (_streamController.isClosed) return;
+    _streamController.valueOrNull;
+    _streamController.sink.add(_object);
+  }
+
+  @override
+  Stream<T> get stream => _streamController.stream;
+
+  @override
+  dispose() {
+    if (_isDispose) return;
+    debugPrint('$this disposing');
+    _streamController.close();
+    _isDispose = true;
+  }
+}
+
+class InnerObserver<T> extends ObserverAbs<T> {
+  final _streamController = BehaviorSubject<T>();
+  late T _object;
+  bool _isDispose = false;
+
+  InnerObserver({required T initValue}) {
+    _object = initValue;
+    _streamController.sink.add(_object);
+  }
+
+  @override
+  T get value => _object;
+
+  @override
+  set value(T valueSet) {
+    if (valueSet != _object) {
+      _object = valueSet;
+      _streamController.sink.add(_object);
+    }
+  }
+
+  @override
   void update() => _streamController.sink.add(_object);
 
   @override
@@ -52,8 +95,10 @@ class Observer<T> extends ObserverAbs<T> {
 
   @override
   dispose() {
+    if (_isDispose) return;
     debugPrint('$this disposing');
     _streamController.close();
+    _isDispose = true;
   }
 }
 
@@ -73,9 +118,10 @@ class ObserverCombined {
 
 /// [ObserWidget] is a custom [StreamBuilder] to rebuild Widgets when
 /// a stream has updated.
+// @Deprecated('')
 class ObserWidget<T> extends StatelessWidget {
   const ObserWidget({super.key, required this.value, required this.child});
-  final Observer<T> value;
+  final ObserverAbs<T> value;
   final Widget Function(T value) child;
   @override
   Widget build(BuildContext context) {
@@ -111,4 +157,8 @@ class ObserListWidget extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         });
   }
+}
+
+bool testEqual<T>(T p, T n) {
+  return const DeepCollectionEquality().equals(p, n);
 }

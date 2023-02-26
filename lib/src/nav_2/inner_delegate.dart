@@ -12,13 +12,12 @@ class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
   GlobalKey<NavigatorState> get navigatorKey =>
       GlobalObjectKey<NavigatorState>(this);
 
-  InnerDelegateRouter({required parentName, required initInner}) {
-    MainState.instance.setInitInnerRouter(initInner);
+  InnerDelegateRouter({required String parentName, required String initInner}) {
+    MainState.instance.setInitInnerRouter(initInner, parentName);
     final stream = MainState.instance.innerStream(parentName);
-
-    stream?.addListener(() {
-      if (_pages != stream.value) {
-        _pages = MainState.instance.outerStream.value;
+    stream?.stream.listen((value) {
+      if (!listEquals(_pages, value)) {
+        _pages = value;
         notifyListeners();
       }
     });

@@ -11,7 +11,7 @@ import '../nav_config.dart';
 class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final InitBinding? initBinding;
-  final String? appIcon;
+  final Widget? loadingWidget;
   final bool useLoading;
   final bool useSnackbar;
   final DecorationImage? backgroundImage;
@@ -23,7 +23,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       {required this.listPages,
       required this.homeRouter,
       this.initBinding,
-      this.appIcon,
+      this.loadingWidget,
       this.useLoading = true,
       this.useSnackbar = true,
       this.backgroundImage,
@@ -31,17 +31,23 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.isDesktop = true}) {
     MainState.instance.intialize();
     final outerStream = MainState.instance.outerStream;
-    outerStream.addListener(() {
-      if (_pages != outerStream.value) {
-        _pages = outerStream.value;
+    outerStream.stream.listen((value) {
+      if (!listEquals(_pages, value)) {
+        // _pages
+        //   ..clear()
+        //   ..addAll(value);
+        _pages = value;
         notifyListeners();
       }
     });
     final dialogStream = MainState.instance.dialogStream;
 
-    dialogStream.addListener(() {
-      if (_dialogs != dialogStream.value) {
-        _dialogs = dialogStream.value;
+    dialogStream.stream.listen((value) {
+      if (!listEquals(_dialogs, value)) {
+        // _dialogs
+        //   ..clear()
+        //   ..addAll(value);
+        _dialogs = value;
         notifyListeners();
       }
     });
@@ -65,7 +71,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
           listPages: listPages,
           homeRouter: homeRouter,
           initBinding: initBinding,
-          appIcon: appIcon,
+          loadingWidget: loadingWidget,
           isDesktop: isDesktop,
           useLoading: useLoading,
           useSnackbar: useSnackbar,

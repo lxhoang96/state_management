@@ -1,13 +1,7 @@
+import 'package:base/src/interfaces/controller_interface.dart';
 import 'package:flutter/material.dart';
 
-/// controller interface
-abstract class BaseController {
-  init();
 
-  onReady();
-
-  void dispose();
-}
 
 /// Controller is where you write your logic code
 /// It should not be used to navigate.

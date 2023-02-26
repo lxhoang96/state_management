@@ -13,9 +13,9 @@ class Screen3 extends StatelessWidget {
         body: Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ValueListenableBuilder(
-          valueListenable: controller.controller1.intObs,
-          builder: (context, value, widget) => Text(
+        ObserWidget(
+          value: controller.controller1.intObs,
+          child: (value) => Text(
             value.toString(),
           ),
         ),

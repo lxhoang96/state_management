@@ -25,12 +25,12 @@ class BaseDialog implements DialogInterfaces {
         children: [
           ObserWidget(
               value: barrierDismissible,
-              child: (dimissible) {
+              child: (value) {
                 return InkWell(
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () {
-                    if (dimissible) {
+                    if (value) {
                       closeDialog(name, onClosed: onClosed);
                     }
                   },

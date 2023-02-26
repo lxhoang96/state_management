@@ -1,13 +1,13 @@
 import 'dart:collection';
 
 import 'package:base/base_navigation.dart';
-import 'package:base/src/base_component/base_controller.dart';
 import 'package:base/src/base_component/base_observer.dart';
-import 'package:base/src/base_component/light_observer.dart';
+import 'package:base/src/interfaces/controller_interface.dart';
 import 'package:base/src/interfaces/dialognav_interfaces.dart';
 import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/nav_dialog/navigator_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// The heart of the package, when you control how app navigate,
@@ -16,57 +16,69 @@ class MainState extends MainStateInterface
     implements DialogNavigatorInterfaces {
   static final instance = MainState._();
   MainState._();
-
+  bool _isIntialize = false;
   intialize() {
+    if (_isIntialize) return;
+
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
-    _queueNavigate = LightObserver(Queue<Function>());
-    _queueNavigate.addListener(() async {
-      while (_queueNavigate.value.isNotEmpty) {
-        final function = _queueNavigate.value.removeFirst();
-        function.call();
+    _queueNavigate = InnerObserver(initValue: Queue<Function>());
+
+    _queueNavigate.stream.listen((function) {
+      while (function.isNotEmpty) {
+        final oldFunc = _queueNavigate.value.removeFirst();
+        oldFunc.call();
       }
     });
+    _isIntialize = true;
   }
 
   final Map<Type, InstanceRoute> _listCtrl = {};
   final List<ObserverRoute> _listObserver = [];
-  final List<LightObserverRoute> _listLightObserver = [];
+  // final List<LightObserverRoute> _listLightObserver = [];
   late final AppNav _navApp;
   late final DialogNavigator _dialogNav;
 
-  LightObserver<List<MaterialPage>> get outerStream => _navApp.outerStream;
-  LightObserver<List<MaterialPage>> get dialogStream => _dialogNav.dialogStream;
-  LightObserver<List<MaterialPage>>? innerStream(String parentName) =>
+  InnerObserver<List<MaterialPage>> get outerStream => _navApp.outerStream;
+  InnerObserver<List<MaterialPage>> get dialogStream => _dialogNav.dialogStream;
+  InnerObserver<List<MaterialPage>>? innerStream(String parentName) =>
       _navApp.getInnerStream(parentName);
 
   // bool _canNavigate = true;
-  late final LightObserver<Queue<Function>> _queueNavigate;
+  late final InnerObserver<Queue<Function>> _queueNavigate;
   _HistoryOrder? _lastOrder;
 
   _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
+    final stopwatch = Stopwatch()..start();
+
     final value = _queueNavigate.value;
     if (_lastOrder == newOrder) return;
-    // final newQueue = Queue<Function>.from(_queueNavigate.value);
-    // newQueue.addLast(onNavigate);
     _lastOrder = newOrder;
     value.add(onNavigate);
-    _queueNavigate.newValue = value;
+    _queueNavigate.value = value;
+    _queueNavigate.update();
+    debugPrint('checkCanNavigate() executed in ${stopwatch.elapsed}');
   }
 
   @override
   T add<T>(T instance) {
+    final stopwatch = Stopwatch()..start();
+
     final controller = _listCtrl[T]?.instance;
     if (controller != null) {
       return controller as T;
     } else {
-      _listCtrl[T] =
-          InstanceRoute(route: _navApp.currentRouter, instance: instance);
+      _listCtrl[T] = InstanceRoute(
+          route: _navApp.currentRouter,
+          instance: instance,
+          parentName: _navApp.parentRouter);
       if (instance is BaseController) {
         instance.init();
       }
       debugPrint("Added Controller Type:$T");
     }
+    debugPrint('addController(T) executed in ${stopwatch.elapsed}');
+
     return instance;
   }
 
@@ -74,8 +86,10 @@ class MainState extends MainStateInterface
   addNew<T>(instance) {
     remove<T>();
 
-    _listCtrl[T] =
-        InstanceRoute(route: _navApp.currentRouter, instance: instance);
+    _listCtrl[T] = InstanceRoute(
+        route: _navApp.currentRouter,
+        instance: instance,
+        parentName: _navApp.parentRouter);
     debugPrint("Added New Controller Type:$T");
     if (instance is BaseController) {
       instance.init();
@@ -106,7 +120,8 @@ class MainState extends MainStateInterface
   }
 
   _removeByInstance(InstanceRoute instanceInput) {
-    final result = !_navApp.checkActiveRouter(instanceInput.route);
+    final result = !_navApp.checkActiveRouter(instanceInput.route,
+        parentName: instanceInput.parentName);
     if (result) {
       final instance = instanceInput.instance;
       if (instance is BaseController) {
@@ -117,6 +132,7 @@ class MainState extends MainStateInterface
   }
 
   void _autoRemoveCtrl() {
+    final stopwatch = Stopwatch()..start();
     _listCtrl.removeWhere((key, value) {
       final result = _removeByInstance(value);
       if (result) {
@@ -125,41 +141,50 @@ class MainState extends MainStateInterface
       return result;
     });
     debugPrint('After deleted: ${_listCtrl.length}');
+    debugPrint('_autoRemoveCtrl() executed in ${stopwatch.elapsed}');
   }
 
   void _autoRemoveObs() {
+    final stopwatch = Stopwatch()..start();
     _listObserver.removeWhere((element) {
-      final result = !_navApp.checkActiveRouter(element.route);
+      final result = !_navApp.checkActiveRouter(element.route,
+          parentName: element.parentName);
       if (result) {
-        debugPrint('Closing $element obs!');
         element.instance.dispose();
       }
       return result;
     });
+    debugPrint('_autoRemoveObs() executed in ${stopwatch.elapsed}');
 
-    _listLightObserver.removeWhere((element) {
-      final result = !_navApp.checkActiveRouter(element.route);
-      if (result) {
-        debugPrint('Closing $element obs!');
-        element.instance.dispose();
-      }
-      return result;
-    });
+    // _listLightObserver.removeWhere((element) {
+    //   final result = !_navApp.checkActiveRouter(element.route,
+    //       parentName: element.parentName);
+    //   if (result) {
+    //     debugPrint('Closing $element obs!');
+    //     element.instance.dispose();
+    //   }
+    //   return result;
+    // });
   }
 
+  // @Deprecated('')
   void addObs(Observer observer) {
-    _listObserver
-        .add(ObserverRoute(route: _navApp.currentRouter, instance: observer));
+    _listObserver.add(ObserverRoute(
+        route: _navApp.currentRouter,
+        instance: observer,
+        parentName: _navApp.parentRouter));
   }
 
-  void addLightObs(LightObserver observer) {
-    _listLightObserver.add(
-        LightObserverRoute(route: _navApp.currentRouter, instance: observer));
-  }
+  // void addLightObs(Observer observer) {
+  //   _listLightObserver.add(LightObserverRoute(
+  //       route: _navApp.currentRouter,
+  //       instance: observer,
+  //       parentName: _navApp.parentRouter));
+  // }
 
   void _autoRemove() {
-    _autoRemoveCtrl();
     _autoRemoveObs();
+    _autoRemoveCtrl();
   }
 
   @override
@@ -167,52 +192,63 @@ class MainState extends MainStateInterface
     _checkCanNavigate(() {
       _navApp.pop();
       _autoRemove();
-    }, _HistoryOrder('pop', null));
+    }, _HistoryOrder('pop', [null]));
   }
 
   @override
-  void popAllAndPushNamed(String routerName) {
+  void popAllAndPushNamed(String routerName,
+      {String? parentName, dynamic arguments}) {
     _checkCanNavigate(() {
-      _navApp.popAllAndPushNamed(routerName);
+      _navApp.popAllAndPushNamed(routerName,
+          parentName: parentName, arguments: arguments);
       _autoRemove();
-    }, _HistoryOrder('popAllAndPushNamed', routerName));
+    },
+        _HistoryOrder(
+            'popAllAndPushNamed', [routerName, parentName, arguments]));
   }
 
   @override
-  void popAndReplaceNamed(String routerName) {
+  void popAndReplaceNamed(String routerName,
+      {String? parentName, dynamic arguments}) {
     _checkCanNavigate(() {
-      _navApp.popAndReplaceNamed(routerName);
+      _navApp.popAndReplaceNamed(routerName,
+          parentName: parentName, arguments: arguments);
       _autoRemove();
-    }, _HistoryOrder('popAndReplaceNamed', routerName));
+    },
+        _HistoryOrder(
+            'popAndReplaceNamed', [routerName, parentName, arguments]));
   }
 
   @override
-  void popUntil(String routerName) {
+  void popUntil(String routerName, {String? parentName}) {
     _checkCanNavigate(() {
-      _navApp.popUntil(routerName);
+      _navApp.popUntil(routerName, parentName: parentName);
       _autoRemove();
-    }, _HistoryOrder('popUntil', routerName));
+    }, _HistoryOrder('popUntil', [routerName, parentName]));
   }
 
   @override
-  void pushNamed(String routerName) {
+  void pushNamed(String routerName, {String? parentName, dynamic arguments}) {
     _checkCanNavigate(() {
-      _navApp.pushNamed(routerName);
-    }, _HistoryOrder('pushNamed', routerName));
+      _navApp.pushNamed(routerName,
+          parentName: parentName, arguments: arguments);
+    }, _HistoryOrder('pushNamed', [routerName, parentName, arguments]));
   }
 
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
 
-  void setInitInnerRouter(String routerName) =>
-      _navApp.setInitInnerRouter(routerName);
+  void setInitInnerRouter(String routerName, String parentName) =>
+      _navApp.setInitInnerRouter(routerName, parentName);
 
   void setInitRouters(Map<String, InitRouter> initRouters) =>
       _navApp.setInitRouters(initRouters);
 
   void setInnerPagesForWeb(
-          {required parentName, List<String> listRouter = const []}) =>
+          {required parentName,
+          List<String> listRouter = const [],
+          dynamic arguments}) =>
       _navApp.setInnerRoutersForWeb(
-          parentName: parentName, listRouter: listRouter);
+          parentName: parentName, listRouter: listRouter, arguments: arguments);
 
   void setOuterRoutersForWeb(List<String> listRouter) =>
       _navApp.setOuterRoutersForWeb(listRouter);
@@ -223,7 +259,7 @@ class MainState extends MainStateInterface
 
   void showUnknownRouter() => _navApp.showUnknownRouter();
 
-  getCurrentRouter() => _navApp.currentRouter;
+  String getCurrentRouter() => _navApp.currentRouter;
 
   String getPath() => _navApp.getPath();
 
@@ -248,33 +284,40 @@ class MainState extends MainStateInterface
   removeLastDialog() {
     _dialogNav.removeLastDialog();
   }
+
   @override
-  get argument => _navApp.argument;
+  get navigationArg => _navApp.navigationArg;
+
+  @override
+  get currentArguments => _navApp.currentArguments;
 }
 
 class InstanceRoute<T> {
   final String route;
   final T instance;
+  final String? parentName;
 
-  InstanceRoute({required this.route, required this.instance});
+  InstanceRoute({required this.route, required this.instance, this.parentName});
 }
 
 class ObserverRoute<Observer> extends InstanceRoute<Observer> {
-  ObserverRoute({required super.route, required super.instance});
+  ObserverRoute(
+      {required super.route, required super.instance, super.parentName});
 }
 
 class LightObserverRoute<LightObserver> extends InstanceRoute<LightObserver> {
-  LightObserverRoute({required super.route, required super.instance});
+  LightObserverRoute(
+      {required super.route, required super.instance, super.parentName});
 }
 
 class _HistoryOrder {
   final String functionName;
-  final dynamic params;
+  final List<dynamic> params;
   _HistoryOrder(this.functionName, this.params);
 
   @override
   bool operator ==(Object o) =>
       o is _HistoryOrder &&
       functionName == o.functionName &&
-      params == o.params;
+      listEquals(params, o.params);
 }
