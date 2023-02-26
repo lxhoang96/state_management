@@ -25,12 +25,21 @@ class Screen2 extends StatelessWidget {
           },
         ),
         TextButton(
-            onPressed: () {
-              controller.controller1.intObs.value++;
-              // AppRouter.pushNamed(RouteName.screen3);
-              Global.pushNamed(RouteName.screen3);
-            },
-            child: const Text('To screen 3')),
+          onPressed: () {
+            controller.controller1.intObs.value++;
+            // AppRouter.pushNamed(RouteName.screen3);
+            Global.pushNamed(RouteName.screen3);
+          },
+          child: const Text('To screen 3'),
+        ),
+        TextButton(
+          onPressed: () {
+            controller.controller1.intObs.value++;
+            // AppRouter.pushNamed(RouteName.screen3);
+            Global.pushNamed(RouteName.innerControll);
+          },
+          child: const Text('To inner'),
+        ),
       ],
     ));
   }

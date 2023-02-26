@@ -6,7 +6,7 @@ abstract class DialogInterfaces {
     required Widget child,
     required String name,
     Color? backgroundColor,
-    required Observer<bool> barrierDismissible,
+    required InnerObserver<bool> barrierDismissible,
     Function? onClosed,
   });
 

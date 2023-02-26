@@ -14,7 +14,7 @@ class BaseDialog implements DialogInterfaces {
     required Widget child,
     required String name,
     Color? backgroundColor,
-    required Observer<bool> barrierDismissible,
+    required InnerObserver<bool> barrierDismissible,
     Function? onClosed,
   }) {
     dialog = Scaffold(
@@ -63,7 +63,7 @@ class AppDialog {
     required Widget child,
     required String name,
     Color? backgroundColor,
-    required Observer<bool> barrierDismissible,
+    required InnerObserver<bool> barrierDismissible,
     Function? onClosed,
   }) =>
       _baseDialog.showDialog(
