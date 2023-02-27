@@ -3,7 +3,7 @@ import 'package:base/src/interfaces/dialognav_interfaces.dart';
 import 'package:flutter/material.dart';
 
 class DialogNavigator implements DialogNavigatorInterfaces {
-  final List<MaterialPage> listDialog = [];
+  // final List<MaterialPage> listDialog = [];
 
   /// The Navigator stack is updated with these stream
   /// [_streamDialogController] for dialog flow
@@ -14,32 +14,34 @@ class DialogNavigator implements DialogNavigatorInterfaces {
 
   @override
   showDialog({required Widget child, required String name}) {
-    listDialog.add(MaterialPage(
+    _streamDialogController.value.add(MaterialPage(
         child: child,
         // fullscreenDialog: true,
         maintainState: false,
         key: ValueKey(name),
         name: name));
-    _streamDialogController.value = listDialog;
+    // _streamDialogController.value = listDialog;
+    _streamDialogController.update();
   }
 
   @override
   removeDialog(String name) {
-    if (listDialog.isEmpty) return;
-    listDialog.removeWhere((element) => element.name == name);
-    _streamDialogController.value = listDialog;
+    if (_streamDialogController.value.isEmpty) return;
+    _streamDialogController.value
+        .removeWhere((element) => element.name == name);
+    _streamDialogController.update();
   }
 
   @override
   removeAllDialog() {
-    listDialog.clear();
-    _streamDialogController.value = listDialog;
+    _streamDialogController.value.clear();
+    _streamDialogController.update();
   }
 
   @override
   removeLastDialog() {
-    if (listDialog.isEmpty) return;
-    listDialog.removeLast();
-    _streamDialogController.value = listDialog;
+    if (_streamDialogController.value.isEmpty) return;
+    _streamDialogController.value.removeLast();
+    _streamDialogController.update();
   }
 }

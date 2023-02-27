@@ -51,19 +51,15 @@ class MainState extends MainStateInterface
   _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
     final stopwatch = Stopwatch()..start();
 
-    final value = _queueNavigate.value;
     if (_lastOrder == newOrder) return;
     _lastOrder = newOrder;
-    value.add(onNavigate);
-    _queueNavigate.value = value;
+    _queueNavigate.value.add(onNavigate);
     _queueNavigate.update();
     debugPrint('checkCanNavigate() executed in ${stopwatch.elapsed}');
   }
 
   @override
   T add<T>(T instance) {
-    final stopwatch = Stopwatch()..start();
-
     final controller = _listCtrl[T]?.instance;
     if (controller != null) {
       return controller as T;
@@ -77,7 +73,6 @@ class MainState extends MainStateInterface
       }
       debugPrint("Added Controller Type:$T");
     }
-    debugPrint('addController(T) executed in ${stopwatch.elapsed}');
 
     return instance;
   }

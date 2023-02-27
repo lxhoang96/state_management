@@ -36,7 +36,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         // _pages
         //   ..clear()
         //   ..addAll(value);
-        _pages = value;
+        _pages = value.toList();
         notifyListeners();
       }
     });
@@ -47,7 +47,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         // _dialogs
         //   ..clear()
         //   ..addAll(value);
-        _dialogs = value;
+        _dialogs = value.toList();
         notifyListeners();
       }
     });

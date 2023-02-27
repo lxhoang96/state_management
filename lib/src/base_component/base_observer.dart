@@ -25,7 +25,6 @@ abstract class ObserverAbs<T> {
 class Observer<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
-  bool _isDispose = false;
 
   Observer({required T initValue, bool autoClose = true}) {
     _object = initValue;
@@ -49,8 +48,6 @@ class Observer<T> extends ObserverAbs<T> {
 
   @override
   void update() {
-    if (_streamController.isClosed) return;
-    _streamController.valueOrNull;
     _streamController.sink.add(_object);
   }
 
@@ -59,17 +56,14 @@ class Observer<T> extends ObserverAbs<T> {
 
   @override
   dispose() {
-    if (_isDispose) return;
     debugPrint('$this disposing');
     _streamController.close();
-    _isDispose = true;
   }
 }
 
 class InnerObserver<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
-  bool _isDispose = false;
 
   InnerObserver({required T initValue}) {
     _object = initValue;
@@ -88,17 +82,17 @@ class InnerObserver<T> extends ObserverAbs<T> {
   }
 
   @override
-  void update() => _streamController.sink.add(_object);
+  void update() {
+    _streamController.sink.add(_object);
+  }
 
   @override
   Stream<T> get stream => _streamController.stream;
 
   @override
   dispose() {
-    if (_isDispose) return;
     debugPrint('$this disposing');
     _streamController.close();
-    _isDispose = true;
   }
 }
 
