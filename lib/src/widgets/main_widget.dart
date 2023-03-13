@@ -1,6 +1,7 @@
 import 'package:base/base_component.dart';
 import 'package:base/base_widget.dart';
 import 'package:base/src/nav_2/custom_router.dart';
+import 'package:base/src/nav_dialog/custom_dialog.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:base/src/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,14 @@ class GlobalWidget extends StatefulWidget {
 
 class _GlobalWidgetState extends State<GlobalWidget> {
   bool didInit = false;
+
+  @override
+  void didChangeDependencies() {
+    BaseDialog.instance.init(context);
+
+    super.didChangeDependencies();
+  }
+
   @override
   void initState() {
     LoadingController.instance.showing.value = false;

@@ -40,6 +40,7 @@ class Observer<T> extends ObserverAbs<T> {
 
   @override
   set value(T valueSet) {
+    if (_streamController.isClosed) return;
     if (valueSet != _object) {
       _object = valueSet;
       _streamController.sink.add(_object);
@@ -133,15 +134,14 @@ class ObserWidget<T> extends StatelessWidget {
 /// [ObserListWidget] is a custom[StreamBuilder] to rebuild Widgets when a stream
 /// in a List of stream has new value.
 class ObserListWidget extends StatelessWidget {
-  const ObserListWidget(
-      {super.key, required this.listStream, required this.child});
+  ObserListWidget({super.key, required this.listStream, required this.child}) {
+    stream = Rx.combineLatestList(listStream);
+  }
   final List<Stream> listStream;
   final Widget Function(dynamic value) child;
-
+  late final Stream stream;
   @override
   Widget build(BuildContext context) {
-    final stream = Rx.combineLatestList(listStream);
-
     return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {
