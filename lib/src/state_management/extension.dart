@@ -12,20 +12,25 @@ class Global {
 
   static T addNew<T>(T newController) => _mainState.addNew<T>(newController);
 
-  static void popAndReplacenamed(String routerName) =>
-      _mainState.popAndReplaceNamed(routerName);
+  static void popAndReplaceNamed(String routerName,
+          {String? parentName, dynamic arguments}) =>
+      _mainState.popAndReplaceNamed(routerName, parentName: parentName, arguments: arguments);
 
   static void pop() => _mainState.pop();
 
-  static void popAllAndPushNamed(String routerName) =>
-      _mainState.popAllAndPushNamed(routerName);
+  static void popAllAndPushNamed(String routerName,
+          {String? parentName, dynamic arguments}) =>
+      _mainState.popAllAndPushNamed(routerName,
+          parentName: parentName, arguments: arguments);
 
-  static void popAndReplaceNamed(String routerName) =>
-      _mainState.popAndReplaceNamed(routerName);
+  static void popUntil(String routerName) =>
+      _mainState.popUntil(routerName);
 
-  static void popUntil(String routerName) => _mainState.popUntil(routerName);
+  static void pushNamed(String routerName,
+          {String? parentName, dynamic arguments}) =>
+      _mainState.pushNamed(routerName, parentName: parentName, arguments: arguments);
 
-  static void pushNamed(String routerName) => _mainState.pushNamed(routerName);
+  static dynamic get currentArgumentNav => _mainState.navigationArg;
 
-  static dynamic getCurrentArgument() => _mainState.getCurrentArgument();
+  static dynamic get currentArguments => _mainState.currentArguments;
 }

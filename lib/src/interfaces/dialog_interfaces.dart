@@ -1,4 +1,3 @@
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:flutter/material.dart';
 
 abstract class DialogInterfaces {
@@ -6,7 +5,7 @@ abstract class DialogInterfaces {
     required Widget child,
     required String name,
     Color? backgroundColor,
-    required Observer<bool> barrierDismissible,
+    bool barrierDismissible=true,
     Function? onClosed,
   });
 

@@ -151,6 +151,38 @@ combinedStream.value.listen((streams) {
   return Text(_stream + _stream1 + _stream2);
 });
 ```
+
+8. Introduce LightObserver which is a custom ValueNotifiers.
+It can be used like a Observer but has better perfomance.
+LightObserver also support listen multiple values with MultiObserWidget.
+
+```
+// create an observer
+final intObs = LightObserver(0);
+```
+
+```
+// listen single value
+ValueListenableBuilder(
+  valueListenable: controller.intObs,
+  builder: (context, value, widget) => Text(
+    value.toString(),
+  ),
+),
+```
+
+```
+// listen multiple values
+MultiObserWidget(
+  notifiers: [controller.intObs],
+  builder: (context) {
+    return Text(
+      controller.intObs.value.toString(),
+      controller.stringObs.value,
+    );
+  },
+),
+```
 # Additional information
 
 Pure Dart package depended on rxdart version
