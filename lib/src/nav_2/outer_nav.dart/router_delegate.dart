@@ -51,6 +51,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         notifyListeners();
       }
     });
+    
   }
 
   @override
@@ -63,8 +64,10 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   final _mainHeroCtrl = MaterialApp.createMaterialHeroController();
   final _dialogHeroCtrl = MaterialApp.createMaterialHeroController();
 
+
   @override
   Widget build(BuildContext context) {
+
     return Stack(
       children: [
         GlobalWidget(

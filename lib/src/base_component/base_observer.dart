@@ -40,6 +40,7 @@ class Observer<T> extends ObserverAbs<T> {
 
   @override
   set value(T valueSet) {
+    if (_streamController.isClosed) return;
     if (valueSet != _object) {
       _object = valueSet;
       _streamController.sink.add(_object);
@@ -141,7 +142,6 @@ class ObserListWidget extends StatelessWidget {
   late final Stream stream;
   @override
   Widget build(BuildContext context) {
-
     return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {
