@@ -24,12 +24,12 @@ class Global {
       _mainState.popAllAndPushNamed(routerName,
           parentName: parentName, arguments: arguments);
 
-  static void popUntil(String routerName) => _mainState.popUntil(routerName);
+  static void popUntil(String routerName) =>
+      _mainState.popUntil(routerName);
 
   static void pushNamed(String routerName,
           {String? parentName, dynamic arguments}) =>
-      _mainState.pushNamed(routerName,
-          parentName: parentName, arguments: arguments);
+      _mainState.pushNamed(routerName, parentName: parentName, arguments: arguments);
 
   static dynamic get currentArgumentNav => _mainState.navigationArg;
 
