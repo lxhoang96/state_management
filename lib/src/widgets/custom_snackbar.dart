@@ -68,7 +68,7 @@ class SnackBarController extends SnackbarInterface {
                   style: TextStyle(
                     color: style.textColor,
                     fontSize: 12,
-                    fontWeight: FontWeight.w400,
+                    // fontWeight: FontWeight.w300,
                   ),
                 ),
             ],

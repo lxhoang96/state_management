@@ -14,7 +14,8 @@ class Global {
 
   static void popAndReplaceNamed(String routerName,
           {String? parentName, dynamic arguments}) =>
-      _mainState.popAndReplaceNamed(routerName, parentName: parentName, arguments: arguments);
+      _mainState.popAndReplaceNamed(routerName,
+          parentName: parentName, arguments: arguments);
 
   static void pop() => _mainState.pop();
 
