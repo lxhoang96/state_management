@@ -19,4 +19,5 @@ abstract class AppNavInterfaces {
   dynamic get navigationArg;
 
   dynamic get currentArguments;
+
 }

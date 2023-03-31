@@ -50,7 +50,9 @@ class _GlobalWidgetState extends State<GlobalWidget> {
     LoadingController.instance.showing.value = false;
     SnackBarController.instance.showSnackBar.value = false;
     MainState.instance.setInitRouters(widget.listPages);
-    init();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      init();
+    });
     super.initState();
   }
 

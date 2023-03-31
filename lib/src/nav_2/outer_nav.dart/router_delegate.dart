@@ -28,8 +28,8 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.useSnackbar = true,
       this.backgroundImage,
       this.globalWidgets = const [],
-      this.isDesktop = true}) {
-    MainState.instance.intialize();
+      this.isDesktop = true, Function(dynamic e, String currentRouter)? onNavigationError}) {
+    MainState.instance.intialize(onNavigationError: onNavigationError);
     final outerStream = MainState.instance.outerStream;
     outerStream.stream.listen((value) {
       if (!listEquals(_pages, value)) {

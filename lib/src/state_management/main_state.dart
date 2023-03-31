@@ -16,9 +16,9 @@ class MainState extends MainStateInterface
     implements DialogNavigatorInterfaces {
   static final instance = MainState._();
   MainState._();
-  bool _isIntialize = false;
-  intialize() {
-    if (_isIntialize) return;
+  bool _isIntialized = false;
+  intialize({Function(dynamic e, String currentRouter)? onNavigationError}) {
+    if (_isIntialized) return;
 
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
@@ -27,10 +27,15 @@ class MainState extends MainStateInterface
     _queueNavigate.stream.listen((function) {
       while (function.isNotEmpty) {
         final oldFunc = _queueNavigate.value.removeFirst();
-        oldFunc.call();
+        // try {
+          oldFunc.call();
+        // } catch (e) {
+          // debugPrint(e.toString());
+          // onNavigationError?.call(e, _navApp.currentRouter);
+        // }
       }
     });
-    _isIntialize = true;
+    _isIntialized = true;
   }
 
   final Map<Type, InstanceRoute> _listCtrl = {};
@@ -38,7 +43,6 @@ class MainState extends MainStateInterface
   // final List<LightObserverRoute> _listLightObserver = [];
   late final AppNav _navApp;
   late final DialogNavigator _dialogNav;
-
   InnerObserver<List<MaterialPage>> get outerStream => _navApp.outerStream;
   InnerObserver<List<MaterialPage>> get dialogStream => _dialogNav.dialogStream;
   InnerObserver<List<MaterialPage>>? innerStream(String parentName) =>
@@ -49,13 +53,10 @@ class MainState extends MainStateInterface
   _HistoryOrder? _lastOrder;
 
   _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
-    final stopwatch = Stopwatch()..start();
-
     if (_lastOrder == newOrder) return;
     _lastOrder = newOrder;
     _queueNavigate.value.add(onNavigate);
     _queueNavigate.update();
-    debugPrint('checkCanNavigate() executed in ${stopwatch.elapsed}');
   }
 
   @override
@@ -186,8 +187,8 @@ class MainState extends MainStateInterface
   void pop() {
     _checkCanNavigate(() {
       _navApp.pop();
-      _autoRemove();
     }, _HistoryOrder('pop', [null]));
+    _autoRemove();
   }
 
   @override
@@ -196,10 +197,10 @@ class MainState extends MainStateInterface
     _checkCanNavigate(() {
       _navApp.popAllAndPushNamed(routerName,
           parentName: parentName, arguments: arguments);
-      _autoRemove();
     },
         _HistoryOrder(
             'popAllAndPushNamed', [routerName, parentName, arguments]));
+    _autoRemove();
   }
 
   @override
@@ -208,18 +209,18 @@ class MainState extends MainStateInterface
     _checkCanNavigate(() {
       _navApp.popAndReplaceNamed(routerName,
           parentName: parentName, arguments: arguments);
-      _autoRemove();
     },
         _HistoryOrder(
             'popAndReplaceNamed', [routerName, parentName, arguments]));
+    _autoRemove();
   }
 
   @override
   void popUntil(String routerName, {String? parentName}) {
     _checkCanNavigate(() {
       _navApp.popUntil(routerName, parentName: parentName);
-      _autoRemove();
     }, _HistoryOrder('popUntil', [routerName, parentName]));
+    _autoRemove();
   }
 
   @override

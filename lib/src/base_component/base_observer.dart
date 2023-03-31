@@ -49,6 +49,7 @@ class Observer<T> extends ObserverAbs<T> {
 
   @override
   void update() {
+    if (_streamController.isClosed) return;
     _streamController.sink.add(_object);
   }
 
