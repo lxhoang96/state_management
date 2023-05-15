@@ -20,7 +20,7 @@ and the Flutter guide for
 2. Navigation without context
 
 3. Custom dialog, snackbar 
-- Dialog, snackbar is not in navigation tree
+- Dialog, snackbar are not in navigation tree
 
 # Used
 
@@ -151,6 +151,7 @@ combinedStream.value.listen((streams) {
   return Text(_stream + _stream1 + _stream2);
 });
 ```
+
 # Additional information
 
 Pure Dart package depended on rxdart version
