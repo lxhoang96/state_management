@@ -1,5 +1,4 @@
 import 'package:base/base_widget.dart';
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +11,7 @@ import '../nav_config.dart';
 class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final InitBinding? initBinding;
-  final String? appIcon;
+  final Widget? loadingWidget;
   final bool useLoading;
   final bool useSnackbar;
   final DecorationImage? backgroundImage;
@@ -20,23 +19,40 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   final Map<String, InitRouter> listPages;
   final String homeRouter;
   final List<Widget> globalWidgets;
-  HomeRouterDelegate(
+  final List<NavigatorObserver> observers;
+  HomeRouterDelegate( 
       {required this.listPages,
       required this.homeRouter,
       this.initBinding,
-      this.appIcon,
+      this.loadingWidget,
       this.useLoading = true,
       this.useSnackbar = true,
       this.backgroundImage,
       this.globalWidgets = const [],
-      this.isDesktop = true}) {
-    final outerStream = ObserverCombined(
-        [MainState.instance.outerStream, MainState.instance.dialogStream]);
-    outerStream.value.listen((event) {
-      _pages = event[0];
-      _dialogs = event[1];
-      // update with [ChangeNotifier]
-      notifyListeners();
+      this.observers = const [],
+      this.isDesktop = true,
+      Function(dynamic e, String currentRouter)? onNavigationError}) {
+    MainState.instance.intialize(onNavigationError: onNavigationError);
+    final outerStream = MainState.instance.outerStream;
+    outerStream.stream.listen((value) {
+      if (!listEquals(_pages, value)) {
+        // _pages
+        //   ..clear()
+        //   ..addAll(value);
+        _pages = value.toList();
+        notifyListeners();
+      }
+    });
+    final dialogStream = MainState.instance.dialogStream;
+
+    dialogStream.stream.listen((value) {
+      if (!listEquals(_dialogs, value)) {
+        // _dialogs
+        //   ..clear()
+        //   ..addAll(value);
+        _dialogs = value.toList();
+        notifyListeners();
+      }
     });
   }
 
@@ -55,50 +71,53 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     return Stack(
       children: [
         GlobalWidget(
-            listPages: listPages,
-            homeRouter: homeRouter,
-            initBinding: initBinding,
-            appIcon: appIcon,
-            isDesktop: isDesktop,
-            useLoading: useLoading,
-            useSnackbar: useSnackbar,
-            backgroundImage: backgroundImage,
-            globalWidgets: globalWidgets,
+          listPages: listPages,
+          homeRouter: homeRouter,
+          initBinding: initBinding,
+          loadingWidget: loadingWidget,
+          isDesktop: isDesktop,
+          useLoading: useLoading,
+          useSnackbar: useSnackbar,
+          backgroundImage: backgroundImage,
+          globalWidgets: globalWidgets,
+          child: HeroControllerScope(
+            controller: _mainHeroCtrl,
             child: _pages.isNotEmpty
-                ? HeroControllerScope(
-                    controller: _mainHeroCtrl,
-                    child: Navigator(
-                        key: navigatorKey,
-                        pages: _pages.toList(),
-                        // transitionDelegate: ,
-                        onPopPage: (route, result) {
-                          if (!route.didPop(result)) {
-                            return false;
-                          }
-                          MainState.instance.pop();
-                          notifyListeners();
+                ? Navigator(
+                    key: navigatorKey,
+                    pages: _pages.toList(),
+                    observers: observers,
+                    // transitionDelegate: ,
+                    onPopPage: (route, result) {
+                      if (!route.didPop(result)) {
+                        return false;
+                      }
+                      MainState.instance.pop();
+                      notifyListeners();
 
-                          return true;
-                        }),
-                  )
-                : const SizedBox()),
-        if (_dialogs.isNotEmpty)
-          HeroControllerScope(
-            controller: _dialogHeroCtrl,
-            child: Navigator(
-              key: _dialogKey,
-              pages: _dialogs.toList(),
-              onPopPage: (route, result) {
-                if (!route.didPop(result)) {
-                  return false;
-                }
-                MainState.instance.removeLastDialog();
-                notifyListeners();
-
-                return true;
-              },
-            ),
+                      return true;
+                    })
+                : const SizedBox(),
           ),
+        ),
+        HeroControllerScope(
+          controller: _dialogHeroCtrl,
+          child: _dialogs.isNotEmpty
+              ? Navigator(
+                  key: _dialogKey,
+                  pages: _dialogs.toList(),
+                  onPopPage: (route, result) {
+                    if (!route.didPop(result)) {
+                      return false;
+                    }
+                    MainState.instance.removeLastDialog();
+                    notifyListeners();
+
+                    return true;
+                  },
+                )
+              : const SizedBox(),
+        ),
       ],
     );
   }
@@ -131,13 +150,19 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       return;
     }
 
-    if (configuration.pathName != null && configuration.pathName != homePath) {
+    if (configuration.isHomePage) {
+      MainState.instance.showHomeRouter();
+      notifyListeners();
+      return;
+    }
+
+    if (configuration.pathName != null) {
       MainState.instance.setOuterRoutersForWeb(
           configuration.pathName!.replaceAll('//', '/').split('/'));
       notifyListeners();
       return;
     }
-    // MainState.instance.showHomePage();
+    //MainState.instance.showHomePage();
     notifyListeners();
   }
 }

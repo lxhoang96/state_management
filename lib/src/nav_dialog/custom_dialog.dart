@@ -1,4 +1,3 @@
-import 'package:base/base_component.dart';
 import 'package:base/src/interfaces/dialog_interfaces.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
@@ -6,44 +5,47 @@ import 'package:flutter/material.dart';
 class BaseDialog implements DialogInterfaces {
   static final instance = BaseDialog._();
   BaseDialog._();
-  Widget dialog =
+  Widget _dialog =
       Container(color: Colors.black.withOpacity(0.5), child: const SizedBox());
+  late final BuildContext _dialogContext;
+  bool _isInit = false;
+  init(BuildContext context) {
+    if (_isInit) return;
+    _dialogContext = context;
+    _isInit = true;
+  }
 
   @override
   showDialog({
-    required Widget child,
+    required Widget Function(BuildContext context) child,
     required String name,
     Color? backgroundColor,
-    required Observer<bool> barrierDismissible,
+    bool barrierDismissible = true,
     Function? onClosed,
   }) {
-    dialog = Scaffold(
+    _dialog = Scaffold(
       // type: MaterialType.transparency,
       backgroundColor: backgroundColor ?? Colors.black.withOpacity(0.3),
       // backgroundColor: Colors.black,
       body: Stack(
         children: [
-          ObserWidget(
-              value: barrierDismissible,
-              child: (dimissible) {
-                return InkWell(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    if (dimissible) {
-                      closeDialog(name, onClosed: onClosed);
-                    }
-                  },
-                );
-              }),
+          InkWell(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onTap: () {
+              if (barrierDismissible) {
+                closeDialog(name, onClosed: onClosed);
+              }
+            },
+          ),
           Align(
             alignment: Alignment.center,
-            child: child,
+            child: child.call(_dialogContext),
           ),
         ],
       ),
     );
-    MainState.instance.showDialog(child: dialog, name: name);
+    MainState.instance.showDialog(child: _dialog, name: name);
   }
 
   @override
@@ -60,10 +62,10 @@ class AppDialog {
   static final DialogInterfaces _baseDialog = BaseDialog.instance;
 
   static showDialog({
-    required Widget child,
+    required Widget Function(BuildContext context) child,
     required String name,
     Color? backgroundColor,
-    required Observer<bool> barrierDismissible,
+    bool barrierDismissible = true,
     Function? onClosed,
   }) =>
       _baseDialog.showDialog(

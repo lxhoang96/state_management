@@ -1,52 +1,61 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
+
 /// It is where your navigator flow starts.
 /// Each [InitRouter] present a router later.
-/// It contains a function returns Widget, [argument] and [parentName] (optional)
+/// It contains a function returns Widget, [argumentNav] and [parentName] (optional)
 class InitRouter {
   final Widget Function() widget;
-  final dynamic argument;
-  final String? parentName;
+  final dynamic argumentNav;
+  // final String? parentName;
   InitRouter({
     required this.widget,
-    this.parentName,
-    this.argument,
+    // this.parentName,
+    this.argumentNav,
   });
-  BaseRouter toBaseRouter(String routerName) {
+
+  BaseRouter toBaseRouter(String routerName,
+      {String? parentName, dynamic arguments}) {
     return BaseRouter(
       routerName: routerName,
       widget: widget,
       parentName: parentName,
-      argument: argument,
+      argumentNav: argumentNav,
+      arguments: arguments,
     );
   }
 }
 
 /// A BaseRouter extends InitRouter to return a Router with
 /// String [routerName] and List of BaseRouter [innerRouters] (optional)
-class BaseRouter extends InitRouter {
+class BaseRouter {
   final String routerName;
-  MaterialPage? router;
+  MaterialPage? page;
+  late final LocalKey _key;
+  final String? parentName;
+  final dynamic arguments;
   final List<BaseRouter> innerRouters = [];
+  final Widget Function() widget;
+  final dynamic argumentNav;
   BaseRouter({
     required this.routerName,
-    required super.widget,
-    super.parentName,
-    super.argument,
-  });
+    required this.widget,
+    this.parentName,
+    this.arguments,
+    this.argumentNav,
+  }) {
+    _key = ValueKey(routerName);
+  }
 
   MaterialPage _initRouter() {
     return MaterialPage(
-        child: widget(),
-        name: routerName,
-        key: ValueKey(routerName),
-        arguments: argument);
+        child: widget(), name: routerName, key: _key, arguments: arguments);
   }
 
   MaterialPage getRouter() {
-    router ??= _initRouter();
-    return router!;
+    page ??= _initRouter();
+    return page!;
   }
 }
 
