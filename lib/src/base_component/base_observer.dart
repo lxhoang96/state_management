@@ -139,7 +139,7 @@ class ObserListWidget extends StatelessWidget {
     stream = Rx.combineLatestList(listStream);
   }
   final List<Stream> listStream;
-  final Widget Function(dynamic value) child;
+  final Widget Function(List<dynamic> value) child;
   late final Stream stream;
   @override
   Widget build(BuildContext context) {

@@ -19,7 +19,8 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   final Map<String, InitRouter> listPages;
   final String homeRouter;
   final List<Widget> globalWidgets;
-  HomeRouterDelegate(
+  final List<NavigatorObserver> observers;
+  HomeRouterDelegate( 
       {required this.listPages,
       required this.homeRouter,
       this.initBinding,
@@ -28,7 +29,9 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.useSnackbar = true,
       this.backgroundImage,
       this.globalWidgets = const [],
-      this.isDesktop = true, Function(dynamic e, String currentRouter)? onNavigationError}) {
+      this.observers = const [],
+      this.isDesktop = true,
+      Function(dynamic e, String currentRouter)? onNavigationError}) {
     MainState.instance.intialize(onNavigationError: onNavigationError);
     final outerStream = MainState.instance.outerStream;
     outerStream.stream.listen((value) {
@@ -86,6 +89,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
                 ? Navigator(
                     key: navigatorKey,
                     pages: _pages.toList(),
+                    observers: observers,
                     // transitionDelegate: ,
                     onPopPage: (route, result) {
                       if (!route.didPop(result)) {

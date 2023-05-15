@@ -34,7 +34,7 @@ class AppNav implements AppNavInterfaces {
 
   /// This is routers will be shown in Navigator.
   final List<BaseRouter> _outerRouters = [];
-  Map<String, InitRouter> _initRouters = {};
+  final Map<String, InitRouter> _initRouters = {};
 
   InnerObserver<List<MaterialPage>> get outerStream => _streamOuterController;
   InnerObserver<List<MaterialPage>>? getInnerStream(String routerName) =>
@@ -71,7 +71,7 @@ class AppNav implements AppNavInterfaces {
 
   /// Set routers will display in App
   void setInitRouters(Map<String, InitRouter> initRouters) {
-    _initRouters = initRouters;
+    _initRouters.addAll(initRouters);
   }
 
   _updateOuter() {
@@ -367,7 +367,8 @@ class AppNav implements AppNavInterfaces {
         return;
       }
 
-      _outerRouters.add(router.toBaseRouter(routerName, arguments: currentArguments));
+      _outerRouters
+          .add(router.toBaseRouter(routerName, arguments: currentArguments));
     }
     _updateOuter(); // O(n)
   }

@@ -1,4 +1,3 @@
-import 'dart:collection';
 
 import 'package:base/base_navigation.dart';
 import 'package:base/src/base_component/base_observer.dart';
@@ -22,19 +21,19 @@ class MainState extends MainStateInterface
 
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
-    _queueNavigate = InnerObserver(initValue: Queue<Function>());
+    // _queueNavigate = InnerObserver(initValue: Queue<Function>());
 
-    _queueNavigate.stream.listen((function) {
-      while (function.isNotEmpty) {
-        final oldFunc = _queueNavigate.value.removeFirst();
-        // try {
-          oldFunc.call();
-        // } catch (e) {
-          // debugPrint(e.toString());
-          // onNavigationError?.call(e, _navApp.currentRouter);
-        // }
-      }
-    });
+    // _queueNavigate.stream.listen((function) {
+    //   while (function.isNotEmpty) {
+    //     final oldFunc = _queueNavigate.value.removeFirst();
+    //     // try {
+    //     oldFunc.call();
+    //     // } catch (e) {
+    //     // debugPrint(e.toString());
+    //     // onNavigationError?.call(e, _navApp.currentRouter);
+    //     // }
+    //   }
+    // });
     _isIntialized = true;
   }
 
@@ -49,14 +48,16 @@ class MainState extends MainStateInterface
       _navApp.getInnerStream(parentName);
 
   // bool _canNavigate = true;
-  late final InnerObserver<Queue<Function>> _queueNavigate;
+  // late final InnerObserver<Queue<Function>> _queueNavigate;
   _HistoryOrder? _lastOrder;
 
-  _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
-    if (_lastOrder == newOrder) return;
+  bool _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
+    if (_lastOrder == newOrder) return false;
     _lastOrder = newOrder;
-    _queueNavigate.value.add(onNavigate);
-    _queueNavigate.update();
+    onNavigate.call();
+    // _queueNavigate.value.add(onNavigate);
+    // _queueNavigate.update();
+    return true;
   }
 
   @override
