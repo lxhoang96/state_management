@@ -371,7 +371,6 @@ class AppNav implements AppNavInterfaces {
 
       _outerRouters
           .add(router.toBaseRouter(routerName, arguments: currentArguments));
-
     }
     _updateOuter(); // O(n)
   }
