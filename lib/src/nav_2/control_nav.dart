@@ -17,12 +17,12 @@ const lostConnectedPath = '/lostConnected';
 class AppNav implements AppNavInterfaces {
   /// UnknownRouter can be update during app, so you can show different page
   /// for each unknownRouter.
-  var unknownRouter =
-      BaseRouter(routerName: unknownPath, widget: () => Container());
+  BaseRouter unknownRouter = BaseRouter(
+      routerName: unknownPath, widget: () => Container());
 
   /// this is HomeRouter which will show when you open the app.
-  BaseRouter homeRouter =
-      BaseRouter(routerName: homePath, widget: () => const SizedBox());
+  BaseRouter homeRouter = BaseRouter(
+      routerName: homePath, widget: () => const SizedBox());
   late final BaseRouter lostConnectedRouter;
 
   /// The Navigator stack is updated with these stream
@@ -34,7 +34,7 @@ class AppNav implements AppNavInterfaces {
 
   /// This is routers will be shown in Navigator.
   final List<BaseRouter> _outerRouters = [];
-  Map<String, InitRouter> _initRouters = {};
+  final Map<String, InitRouter> _initRouters = {};
 
   InnerObserver<List<MaterialPage>> get outerStream => _streamOuterController;
   InnerObserver<List<MaterialPage>>? getInnerStream(String routerName) =>
@@ -71,7 +71,7 @@ class AppNav implements AppNavInterfaces {
 
   /// Set routers will display in App
   void setInitRouters(Map<String, InitRouter> initRouters) {
-    _initRouters = initRouters;
+    _initRouters.addAll(initRouters);
   }
 
   _updateOuter() {
@@ -280,6 +280,7 @@ class AppNav implements AppNavInterfaces {
       final childRouter = newPage.toBaseRouter(routerName,
           arguments: arguments, parentName: parentName);
       lastParent.popAndAddInner(childRouter); // O(n)
+
       _currentRouter = childRouter;
       _streamInnerController[parentName]?.value =
           lastParent.innerRouters.getMaterialPage(); // O(n)
@@ -288,6 +289,7 @@ class AppNav implements AppNavInterfaces {
     final oldLast = _outerRouters.removeLast();
     _outerRouters.add(newPage.toBaseRouter(routerName,
         arguments: arguments, parentName: parentName));
+
     _currentRouter = _outerRouters.last;
     _updateOuter(); // O(n)
     _streamInnerController[oldLast.routerName]?.dispose();
@@ -367,7 +369,9 @@ class AppNav implements AppNavInterfaces {
         return;
       }
 
-      _outerRouters.add(router.toBaseRouter(routerName, arguments: currentArguments));
+      _outerRouters
+          .add(router.toBaseRouter(routerName, arguments: currentArguments));
+
     }
     _updateOuter(); // O(n)
   }
@@ -389,6 +393,7 @@ class AppNav implements AppNavInterfaces {
 
       parentRouter.addInner(router.toBaseRouter(routerName,
           arguments: arguments, parentName: parentName));
+
     }
     _streamInnerController[parentName]?.value =
         parentRouter.innerRouters.getMaterialPage(); // O(n)
