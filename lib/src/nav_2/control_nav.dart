@@ -79,6 +79,17 @@ class AppNav implements AppNavInterfaces {
     _streamOuterController.value = _outerRouters.getMaterialPage(); // O(n)
   }
 
+  /// set Splash screen
+  void goSplashScreen(String routerName) {
+    final router = _initRouters[routerName];
+    if (router == null) {
+      throw Exception(['Can not find a router with this name']);
+    }
+    
+    final splashRouter = router.toBaseRouter(routerName); // O(n)
+    _outerRouters.add(splashRouter);
+  }
+
   /// set Homepage
   void setHomeRouter(String routerName) {
     final router = _initRouters[routerName];

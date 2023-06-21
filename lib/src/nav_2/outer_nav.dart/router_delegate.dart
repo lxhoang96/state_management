@@ -18,11 +18,14 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   final bool isDesktop;
   final Map<String, InitRouter> listPages;
   final String homeRouter;
+  final String? splashRouter;
   final List<Widget> globalWidgets;
   final List<NavigatorObserver> observers;
-  HomeRouterDelegate( 
+
+  HomeRouterDelegate(
       {required this.listPages,
       required this.homeRouter,
+      this.splashRouter,
       this.initBinding,
       this.loadingWidget,
       this.useLoading = true,
@@ -30,8 +33,8 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.backgroundImage,
       this.globalWidgets = const [],
       this.observers = const [],
-      this.isDesktop = true,
-      Function(dynamic e, String currentRouter)? onNavigationError}) {
+
+      this.isDesktop = true, Function(dynamic e, String currentRouter)? onNavigationError}) {
     MainState.instance.intialize(onNavigationError: onNavigationError);
     final outerStream = MainState.instance.outerStream;
     outerStream.stream.listen((value) {
@@ -76,6 +79,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         GlobalWidget(
           listPages: listPages,
           homeRouter: homeRouter,
+          splashRouter: splashRouter,
           initBinding: initBinding,
           loadingWidget: loadingWidget,
           isDesktop: isDesktop,
@@ -90,6 +94,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
                     key: navigatorKey,
                     pages: _pages.toList(),
                     observers: observers,
+
                     // transitionDelegate: ,
                     onPopPage: (route, result) {
                       if (!route.didPop(result)) {

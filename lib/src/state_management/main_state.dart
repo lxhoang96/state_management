@@ -1,3 +1,4 @@
+import 'dart:collection';
 
 import 'package:base/base_navigation.dart';
 import 'package:base/src/base_component/base_observer.dart';
@@ -21,19 +22,18 @@ class MainState extends MainStateInterface
 
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
-    // _queueNavigate = InnerObserver(initValue: Queue<Function>());
+    _queueNavigate = InnerObserver(initValue: Queue<Function>());
 
-    // _queueNavigate.stream.listen((function) {
-    //   while (function.isNotEmpty) {
-    //     final oldFunc = _queueNavigate.value.removeFirst();
-    //     // try {
-    //     oldFunc.call();
-    //     // } catch (e) {
-    //     // debugPrint(e.toString());
-    //     // onNavigationError?.call(e, _navApp.currentRouter);
-    //     // }
-    //   }
-    // });
+    _queueNavigate.stream.listen((function) {
+      while (function.isNotEmpty) {
+        final oldFunc = _queueNavigate.value.removeFirst();
+        try {
+          oldFunc.call();
+        } catch (e) {
+          onNavigationError?.call(e, _navApp.currentRouter);
+        }
+      }
+    });
     _isIntialized = true;
   }
 
@@ -48,26 +48,24 @@ class MainState extends MainStateInterface
       _navApp.getInnerStream(parentName);
 
   // bool _canNavigate = true;
-  // late final InnerObserver<Queue<Function>> _queueNavigate;
+  late final InnerObserver<Queue<Function>> _queueNavigate;
   _HistoryOrder? _lastOrder;
 
-  bool _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
-    if (_lastOrder == newOrder) return false;
+  _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
+    if (_lastOrder == newOrder) return;
     _lastOrder = newOrder;
-    onNavigate.call();
-    // _queueNavigate.value.add(onNavigate);
-    // _queueNavigate.update();
-    return true;
+    _queueNavigate.value.add(onNavigate);
+    _queueNavigate.update();
   }
 
   @override
-  T add<T>(T instance) {
+  T add<T>(T instance, {permanently = false}) {
     final controller = _listCtrl[T]?.instance;
     if (controller != null) {
       return controller as T;
     } else {
       _listCtrl[T] = InstanceRoute(
-          route: _navApp.currentRouter,
+          route: permanently ? '/' : _navApp.currentRouter,
           instance: instance,
           parentName: _navApp.parentRouter);
       if (instance is BaseController) {
@@ -80,11 +78,11 @@ class MainState extends MainStateInterface
   }
 
   @override
-  addNew<T>(instance) {
+  addNew<T>(instance, {permanently = false}) {
     remove<T>();
 
     _listCtrl[T] = InstanceRoute(
-        route: _navApp.currentRouter,
+        route: permanently ? '/' : _navApp.currentRouter,
         instance: instance,
         parentName: _navApp.parentRouter);
     debugPrint("Added New Controller Type:$T");
@@ -233,6 +231,8 @@ class MainState extends MainStateInterface
   }
 
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
+  
+  void goSplashScreen(String routerName) => _navApp.goSplashScreen(routerName);
 
   void setInitInnerRouter(String routerName, String parentName) =>
       _navApp.setInitInnerRouter(routerName, parentName);

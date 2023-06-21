@@ -4,13 +4,15 @@ import 'main_state.dart';
 class Global {
   static final MainStateInterface _mainState = MainState.instance;
 
-  static T add<T>(T instance) => _mainState.add(instance);
+  static T add<T>(T instance, {permanently = false}) =>
+      _mainState.add(instance, permanently: permanently);
 
   static void remove<T>() => _mainState.remove<T>();
 
   static T find<T>() => _mainState.find<T>();
 
-  static T addNew<T>(T newController) => _mainState.addNew<T>(newController);
+  static T addNew<T>(T newController, {permanently = false}) =>
+      _mainState.addNew<T>(newController, permanently: permanently);
 
   static void popAndReplaceNamed(String routerName,
           {String? parentName, dynamic arguments}) =>
@@ -24,12 +26,12 @@ class Global {
       _mainState.popAllAndPushNamed(routerName,
           parentName: parentName, arguments: arguments);
 
-  static void popUntil(String routerName) =>
-      _mainState.popUntil(routerName);
+  static void popUntil(String routerName) => _mainState.popUntil(routerName);
 
   static void pushNamed(String routerName,
           {String? parentName, dynamic arguments}) =>
-      _mainState.pushNamed(routerName, parentName: parentName, arguments: arguments);
+      _mainState.pushNamed(routerName,
+          parentName: parentName, arguments: arguments);
 
   static dynamic get currentArgumentNav => _mainState.navigationArg;
 

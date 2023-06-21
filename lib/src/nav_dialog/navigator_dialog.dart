@@ -3,6 +3,7 @@ import 'package:base/src/interfaces/dialognav_interfaces.dart';
 import 'package:flutter/material.dart';
 
 class DialogNavigator implements DialogNavigatorInterfaces {
+  // final List<MaterialPage> listDialog = [];
 
   /// The Navigator stack is updated with these stream
   /// [_streamDialogController] for dialog flow

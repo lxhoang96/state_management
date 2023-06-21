@@ -10,6 +10,7 @@ class GlobalWidget extends StatefulWidget {
   const GlobalWidget(
       {Key? key,
       required this.child,
+      this.splashRouter,
       this.initBinding,
       this.loadingWidget,
       this.useLoading = true,
@@ -21,6 +22,7 @@ class GlobalWidget extends StatefulWidget {
       required this.homeRouter})
       : super(key: key);
   final Widget child;
+  final String? splashRouter;
   final InitBinding? initBinding;
   final Map<String, InitRouter> listPages;
   final Widget? loadingWidget;
@@ -50,6 +52,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
     LoadingController.instance.showing.value = false;
     SnackBarController.instance.showSnackBar.value = false;
     MainState.instance.setInitRouters(widget.listPages);
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       init();
     });
@@ -62,9 +65,14 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   }
 
   init() async {
-    await widget.initBinding?.dependencies();
-    MainState.instance.setHomeRouter(widget.homeRouter);
-    didInit = true;
+    if (widget.splashRouter != null) {
+      MainState.instance.goSplashScreen(widget.splashRouter!);
+      didInit = true;
+    }
+    widget.initBinding?.dependencies().then((value) {
+      didInit = true;
+      MainState.instance.setHomeRouter(widget.homeRouter);
+    });
   }
 
   Widget buildChild() {
