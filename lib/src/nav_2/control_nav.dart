@@ -14,7 +14,7 @@ const lostConnectedPath = '/lostConnected';
 /// [HomeRouteInformationParser] and [InnerDelegateRouter]
 /// for controlling your entire app.
 ///
-class AppNav implements AppNavInterfaces {
+final class AppNav implements AppNavInterfaces {
   /// UnknownRouter can be update during app, so you can show different page
   /// for each unknownRouter.
   BaseRouter unknownRouter = BaseRouter(

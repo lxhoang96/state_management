@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 /// init: start before screen is built first time
 /// ready: start immediately after first time screen is built
 /// dispose: called when router contains this controller is not in navigator stack
-class DefaultController extends BaseController {
+base class DefaultController implements BaseController {
   @override
   void dispose() {
     debugPrint('$this disposing');

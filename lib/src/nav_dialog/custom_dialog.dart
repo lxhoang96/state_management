@@ -2,7 +2,7 @@ import 'package:base/src/interfaces/dialog_interfaces.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 
-class BaseDialog implements DialogInterfaces {
+interface class BaseDialog implements DialogInterfaces {
   static final instance = BaseDialog._();
   BaseDialog._();
   Widget _dialog =

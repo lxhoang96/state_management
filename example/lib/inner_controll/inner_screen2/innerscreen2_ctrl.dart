@@ -1,7 +1,7 @@
 import 'package:base/base_component.dart';
 import 'package:flutter/cupertino.dart';
 
-class InnerScreen2Controller extends DefaultController {
+final class InnerScreen2Controller extends DefaultController {
   final textCtrl = TextEditingController();
 
   @override

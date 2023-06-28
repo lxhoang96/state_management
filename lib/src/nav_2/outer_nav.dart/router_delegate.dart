@@ -8,7 +8,7 @@ import '../custom_router.dart';
 import '../nav_config.dart';
 
 /// [RouterDelegate] for main flow.
-class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
+final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final InitBinding? initBinding;
   final Widget? loadingWidget;

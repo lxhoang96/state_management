@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../nav_config.dart';
 
 /// update flow by path in Web
-class HomeRouteInformationParser
+final class HomeRouteInformationParser
     extends RouteInformationParser<RoutePathConfigure> {
   // final RouterList routerList;
   // HomeRouteInformationParser(this.routerList);
@@ -40,11 +40,11 @@ class HomeRouteInformationParser
   }
 }
 
-class RouterList {
-  final List<String>? innerRoots;
-  // final List<String> outerPaths;
-  final List<MaterialPage> outerPages;
-  final Map<String, List<MaterialPage>>? innerPaths;
+// sealed class RouterList {
+//   final List<String>? innerRoots;
+//   // final List<String> outerPaths;
+//   final List<MaterialPage> outerPages;
+//   final Map<String, List<MaterialPage>>? innerPaths;
 
-  RouterList({required this.outerPages, this.innerRoots, this.innerPaths});
-}
+//   RouterList({required this.outerPages, this.innerRoots, this.innerPaths});
+// }

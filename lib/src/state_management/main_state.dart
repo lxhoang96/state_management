@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 
 /// The heart of the package, when you control how app navigate,
 /// auto remove controller and observer
-class MainState extends MainStateInterface
-    implements DialogNavigatorInterfaces {
+class MainState implements MainStateInterface
+    , DialogNavigatorInterfaces {
   static final instance = MainState._();
   MainState._();
   bool _isIntialized = false;

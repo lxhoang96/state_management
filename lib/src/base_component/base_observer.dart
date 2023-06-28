@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
-abstract class ObserverAbs<T> {
+abstract interface class ObserverAbs<T> {
   void update();
 
   Stream<T> get stream;
@@ -22,7 +22,7 @@ abstract class ObserverAbs<T> {
 /// An observer can use in Widget tree with [ObserWidget] and [ObserListWidget].
 /// Or in controller with [ObserverCombined]
 // @Deprecated('This observer is deprecated and will be move to legacy. Use [LightObserver] instead')
-class Observer<T> extends ObserverAbs<T> {
+final class Observer<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
 
@@ -63,7 +63,7 @@ class Observer<T> extends ObserverAbs<T> {
   }
 }
 
-class InnerObserver<T> extends ObserverAbs<T> {
+final class InnerObserver<T> extends ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
 
@@ -101,7 +101,7 @@ class InnerObserver<T> extends ObserverAbs<T> {
 /// [ObserverCombined] is a combined list stream without a [StreamBuilder].
 /// [ObserverCombined] is used in Logic class for update a specific value
 /// without rebuild Widgets.
-class ObserverCombined {
+final class ObserverCombined {
   final _streamController = BehaviorSubject();
 
   ObserverCombined(List<Stream> listStream) {
@@ -115,7 +115,7 @@ class ObserverCombined {
 /// [ObserWidget] is a custom [StreamBuilder] to rebuild Widgets when
 /// a stream has updated.
 // @Deprecated('')
-class ObserWidget<T> extends StatelessWidget {
+final class ObserWidget<T> extends StatelessWidget {
   const ObserWidget({super.key, required this.value, required this.child});
   final ObserverAbs<T> value;
   final Widget Function(T value) child;
@@ -134,7 +134,7 @@ class ObserWidget<T> extends StatelessWidget {
 
 /// [ObserListWidget] is a custom[StreamBuilder] to rebuild Widgets when a stream
 /// in a List of stream has new value.
-class ObserListWidget extends StatelessWidget {
+final class ObserListWidget extends StatelessWidget {
   ObserListWidget({super.key, required this.listStream, required this.child}) {
     stream = Rx.combineLatestList(listStream);
   }
