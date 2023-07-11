@@ -1,6 +1,6 @@
-import 'package:base/base_widget.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
+import 'package:base/src/widgets/main_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

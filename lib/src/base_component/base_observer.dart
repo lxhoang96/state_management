@@ -1,19 +1,9 @@
+import 'package:base/src/interfaces/observer_interfaces.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
-abstract interface class ObserverAbs<T> {
-  void update();
-
-  Stream<T> get stream;
-
-  T get value;
-
-  set value(T valueSet);
-
-  dispose();
-}
 
 /// An observer can be used to update value in multiple place using stream.
 /// An observer can be automatically close by default and can be handled
@@ -22,11 +12,9 @@ abstract interface class ObserverAbs<T> {
 /// An observer can use in Widget tree with [ObserWidget] and [ObserListWidget].
 /// Or in controller with [ObserverCombined]
 // @Deprecated('This observer is deprecated and will be move to legacy. Use [LightObserver] instead')
-final class Observer<T> extends ObserverAbs<T> {
-  final _streamController = BehaviorSubject<T>();
-  late T _object;
-
-  Observer({required T initValue, bool autoClose = true}) {
+final class Observer<T> extends InnerObserver<T> {
+ 
+  Observer({required T initValue, bool autoClose = true}) : super(initValue: initValue) {
     _object = initValue;
     _streamController.sink.add(_object);
 
@@ -63,7 +51,7 @@ final class Observer<T> extends ObserverAbs<T> {
   }
 }
 
-final class InnerObserver<T> extends ObserverAbs<T> {
+base class InnerObserver<T> implements ObserverAbs<T> {
   final _streamController = BehaviorSubject<T>();
   late T _object;
 
@@ -134,12 +122,12 @@ final class ObserWidget<T> extends StatelessWidget {
 
 /// [ObserListWidget] is a custom[StreamBuilder] to rebuild Widgets when a stream
 /// in a List of stream has new value.
-final class ObserListWidget extends StatelessWidget {
+final class ObserListWidget<T> extends StatelessWidget {
   ObserListWidget({super.key, required this.listStream, required this.child}) {
     stream = Rx.combineLatestList(listStream);
   }
   final List<Stream> listStream;
-  final Widget Function(List<dynamic> value) child;
+  final Widget Function(T value) child;
   late final Stream stream;
   @override
   Widget build(BuildContext context) {

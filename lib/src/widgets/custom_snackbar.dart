@@ -1,19 +1,9 @@
 import 'package:base/src/base_component/base_observer.dart';
-import 'package:base/src/theme/colors.dart';
+import 'package:base/src/interfaces/widget_interfaces.dart';
 import 'package:flutter/material.dart';
 
-abstract class SnackbarInterface {
-  void showSnackbar(
-      {required SnackBarStyle style,
-      required String? message,
-      required String title,
-      Function? onTap,
-      int timeout = 3});
 
-  void showCustomSnackbar({required Widget child, int timeout = 3});
-}
-
-class SnackBarController extends SnackbarInterface {
+final class SnackBarController implements SnackbarInterface {
   static final instance = SnackBarController._();
   SnackBarController._();
   final showSnackBar = InnerObserver(initValue: false);
@@ -85,34 +75,4 @@ class SnackBarController extends SnackbarInterface {
     Future.delayed(Duration(seconds: timeout))
         .then((value) => showSnackBar.value = false);
   }
-}
-
-class AppSnackBar {
-  static final SnackbarInterface _controller = SnackBarController.instance;
-  static showSnackbar(
-          {required SnackBarStyle style,
-          required String? message,
-          required String title,
-          Function? onTap,
-          int timeout = 3}) =>
-      _controller.showSnackbar(
-          style: style,
-          message: message,
-          title: title,
-          onTap: onTap,
-          timeout: timeout);
-
-  static showCustomSnackbar({required Widget child, int timeout = 3}) =>
-      _controller.showCustomSnackbar(child: child, timeout: timeout);
-}
-
-enum SnackBarStyle {
-  success(AppColors.success, Colors.white),
-  fail(AppColors.failed, Colors.white),
-  warning(AppColors.warning, Colors.white),
-  normal(Colors.white, AppColors.grey1);
-
-  const SnackBarStyle(this.backgroundColor, this.textColor);
-  final Color backgroundColor;
-  final Color textColor;
 }

@@ -1,12 +1,12 @@
-import 'package:base/base_component.dart';
-import 'package:base/base_widget.dart';
+import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/custom_router.dart';
 import 'package:base/src/nav_dialog/custom_dialog.dart';
 import 'package:base/src/state_management/main_state.dart';
+import 'package:base/src/widgets/custom_loading.dart';
 import 'package:base/src/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 
-class GlobalWidget extends StatefulWidget {
+final class GlobalWidget extends StatefulWidget {
   const GlobalWidget(
       {Key? key,
       required this.child,
@@ -128,6 +128,6 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   }
 }
 
-abstract class InitBinding {
+abstract interface class InitBinding {
   Future dependencies();
 }

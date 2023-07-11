@@ -1,19 +1,18 @@
 import 'dart:collection';
 
-import 'package:base/base_navigation.dart';
 import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/interfaces/controller_interface.dart';
 import 'package:base/src/interfaces/dialognav_interfaces.dart';
 import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'package:base/src/nav_2/control_nav.dart';
+import 'package:base/src/nav_2/custom_router.dart';
 import 'package:base/src/nav_dialog/navigator_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// The heart of the package, when you control how app navigate,
 /// auto remove controller and observer
-class MainState implements MainStateInterface
-    , DialogNavigatorInterfaces {
+final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
   static final instance = MainState._();
   MainState._();
   bool _isIntialized = false;
@@ -231,7 +230,7 @@ class MainState implements MainStateInterface
   }
 
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
-  
+
   void goSplashScreen(String routerName) => _navApp.goSplashScreen(routerName);
 
   void setInitInnerRouter(String routerName, String parentName) =>
@@ -289,7 +288,7 @@ class MainState implements MainStateInterface
   get currentArguments => _navApp.currentArguments;
 }
 
-class InstanceRoute<T> {
+base class InstanceRoute<T> {
   final String route;
   final T instance;
   final String? parentName;
@@ -297,17 +296,18 @@ class InstanceRoute<T> {
   InstanceRoute({required this.route, required this.instance, this.parentName});
 }
 
-class ObserverRoute<Observer> extends InstanceRoute<Observer> {
+final class ObserverRoute<Observer> extends InstanceRoute<Observer> {
   ObserverRoute(
       {required super.route, required super.instance, super.parentName});
 }
 
-class LightObserverRoute<LightObserver> extends InstanceRoute<LightObserver> {
+final class LightObserverRoute<LightObserver>
+    extends InstanceRoute<LightObserver> {
   LightObserverRoute(
       {required super.route, required super.instance, super.parentName});
 }
 
-class _HistoryOrder {
+final class _HistoryOrder {
   final String functionName;
   final List<dynamic> params;
   _HistoryOrder(this.functionName, this.params);
