@@ -326,7 +326,7 @@ class AppNav implements AppNavInterfaces {
         throw Exception(['Parent not in stack']);
       }
       final childRouter = newPage;
-      lastParent.popAndAddInner(childRouter); // O(n)
+      lastParent.popAllAndPushInner(childRouter); // O(n)
       _currentRouter = childRouter;
       _streamInnerController[parentName]?.value =
           lastParent.innerRouters.getMaterialPage(); // O(n)
