@@ -41,7 +41,7 @@ class Observer<T> extends ObserverAbs<T> {
   @override
   set value(T valueSet) {
     if (_streamController.isClosed) return;
-    if (valueSet != _object) {
+    if (!testEqual(valueSet, _object)) {
       _object = valueSet;
       _streamController.sink.add(_object);
     }
@@ -157,3 +157,5 @@ class ObserListWidget extends StatelessWidget {
 bool testEqual<T>(T p, T n) {
   return const DeepCollectionEquality().equals(p, n);
 }
+
+
