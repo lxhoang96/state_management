@@ -17,12 +17,12 @@ const lostConnectedPath = '/lostConnected';
 class AppNav implements AppNavInterfaces {
   /// UnknownRouter can be update during app, so you can show different page
   /// for each unknownRouter.
-  BaseRouter unknownRouter = BaseRouter(
-      routerName: unknownPath, widget: () => Container());
+  BaseRouter unknownRouter =
+      BaseRouter(routerName: unknownPath, widget: () => Container());
 
   /// this is HomeRouter which will show when you open the app.
-  BaseRouter homeRouter = BaseRouter(
-      routerName: homePath, widget: () => const SizedBox());
+  BaseRouter homeRouter =
+      BaseRouter(routerName: homePath, widget: () => const SizedBox());
   late final BaseRouter lostConnectedRouter;
 
   /// The Navigator stack is updated with these stream
@@ -85,7 +85,7 @@ class AppNav implements AppNavInterfaces {
     if (router == null) {
       throw Exception(['Can not find a router with this name']);
     }
-    
+
     final splashRouter = router.toBaseRouter(routerName); // O(n)
     _outerRouters.add(splashRouter);
   }
@@ -119,11 +119,11 @@ class AppNav implements AppNavInterfaces {
     final router = newPage.toBaseRouter(routerName,
         arguments: arguments, parentName: parentName);
     parentRouter.innerRouters.add(router);
+    _currentRouter = router;
     _streamInnerController[parentRouter.routerName] =
         InnerObserver<List<MaterialPage>>(
       initValue: parentRouter.innerRouters.getMaterialPage(),
     );
-    _currentRouter = router;
   }
 
   /// set UnknownRouter on Web
@@ -403,7 +403,7 @@ class AppNav implements AppNavInterfaces {
 
       parentRouter.addInner(router.toBaseRouter(routerName,
           arguments: arguments, parentName: parentName));
-
+          
     }
     _streamInnerController[parentName]?.value =
         parentRouter.innerRouters.getMaterialPage(); // O(n)

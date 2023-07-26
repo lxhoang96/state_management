@@ -17,12 +17,27 @@ class MainState extends MainStateInterface
   static final instance = MainState._();
   MainState._();
   bool _isIntialized = false;
-  intialize({Function(dynamic e, String currentRouter)? onNavigationError}) {
+  intialize(
+      {Function(dynamic e, String currentRouter)? onNavigationError}) async {
     if (_isIntialized) return;
+    _isIntialized = true;
 
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
     _queueNavigate = InnerObserver(initValue: Queue<Function>());
+
+    // while (_isIntialized) {
+    //   await Future.delayed(
+    //     const Duration(milliseconds: 100),
+    //   );
+    //   if (_queueNavigate.isEmpty) continue;
+    //   final oldFunc = _queueNavigate.removeFirst();
+    //   try {
+    //     oldFunc.call();
+    //   } catch (e) {
+    //     onNavigationError?.call(e, _navApp.currentRouter);
+    //   }
+    // }
 
     _queueNavigate.stream.listen((function) {
       while (function.isNotEmpty) {
@@ -34,7 +49,6 @@ class MainState extends MainStateInterface
         }
       }
     });
-    _isIntialized = true;
   }
 
   final Map<Type, InstanceRoute> _listCtrl = {};
@@ -48,12 +62,14 @@ class MainState extends MainStateInterface
       _navApp.getInnerStream(parentName);
 
   // bool _canNavigate = true;
+  // final Queue<Function> _queueNavigate = Queue<Function>();
   late final InnerObserver<Queue<Function>> _queueNavigate;
   _HistoryOrder? _lastOrder;
 
   _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
     if (_lastOrder == newOrder) return;
     _lastOrder = newOrder;
+    // _queueNavigate.add(onNavigate);
     _queueNavigate.value.add(onNavigate);
     _queueNavigate.update();
   }
@@ -127,7 +143,6 @@ class MainState extends MainStateInterface
   }
 
   void _autoRemoveCtrl() {
-    final stopwatch = Stopwatch()..start();
     _listCtrl.removeWhere((key, value) {
       final result = _removeByInstance(value);
       if (result) {
@@ -135,12 +150,9 @@ class MainState extends MainStateInterface
       }
       return result;
     });
-    debugPrint('After deleted: ${_listCtrl.length}');
-    debugPrint('_autoRemoveCtrl() executed in ${stopwatch.elapsed}');
   }
 
   void _autoRemoveObs() {
-    final stopwatch = Stopwatch()..start();
     _listObserver.removeWhere((element) {
       final result = !_navApp.checkActiveRouter(element.route,
           parentName: element.parentName);
@@ -149,7 +161,6 @@ class MainState extends MainStateInterface
       }
       return result;
     });
-    debugPrint('_autoRemoveObs() executed in ${stopwatch.elapsed}');
 
     // _listLightObserver.removeWhere((element) {
     //   final result = !_navApp.checkActiveRouter(element.route,
@@ -186,8 +197,8 @@ class MainState extends MainStateInterface
   void pop() {
     _checkCanNavigate(() {
       _navApp.pop();
+      _autoRemove();
     }, _HistoryOrder('pop', [null]));
-    _autoRemove();
   }
 
   @override
@@ -196,10 +207,10 @@ class MainState extends MainStateInterface
     _checkCanNavigate(() {
       _navApp.popAllAndPushNamed(routerName,
           parentName: parentName, arguments: arguments);
+      _autoRemove();
     },
         _HistoryOrder(
             'popAllAndPushNamed', [routerName, parentName, arguments]));
-    _autoRemove();
   }
 
   @override
@@ -208,18 +219,18 @@ class MainState extends MainStateInterface
     _checkCanNavigate(() {
       _navApp.popAndReplaceNamed(routerName,
           parentName: parentName, arguments: arguments);
+      _autoRemove();
     },
         _HistoryOrder(
             'popAndReplaceNamed', [routerName, parentName, arguments]));
-    _autoRemove();
   }
 
   @override
   void popUntil(String routerName, {String? parentName}) {
     _checkCanNavigate(() {
       _navApp.popUntil(routerName, parentName: parentName);
+      _autoRemove();
     }, _HistoryOrder('popUntil', [routerName, parentName]));
-    _autoRemove();
   }
 
   @override
@@ -231,7 +242,7 @@ class MainState extends MainStateInterface
   }
 
   void setHomeRouter(String routerName) => _navApp.setHomeRouter(routerName);
-  
+
   void goSplashScreen(String routerName) => _navApp.goSplashScreen(routerName);
 
   void setInitInnerRouter(String routerName, String parentName) =>

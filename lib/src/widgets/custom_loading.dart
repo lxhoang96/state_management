@@ -30,7 +30,7 @@ class LoadingController extends LoadingInterface {
       SizedBox(
         width: 50,
         height: 50,
-        child: CircularProgressIndicator(), //AppImages.landingImg('icon_robot')
+        child: CircularProgressIndicator(),
       )
     ],
   );

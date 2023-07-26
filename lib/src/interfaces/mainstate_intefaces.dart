@@ -1,6 +1,6 @@
 import 'appnav_interfaces.dart';
 
-abstract class MainStateInterface extends AppNavInterfaces {
+abstract class MainStateInterface implements AppNavInterfaces {
   /// add an intance to App state
   T add<T>(T instance, {permanently= false});
 

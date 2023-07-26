@@ -1,8 +1,8 @@
-import 'package:base/base_component.dart';
 import 'package:base/base_widget.dart';
 import 'package:base/src/nav_2/custom_router.dart';
 import 'package:base/src/nav_dialog/custom_dialog.dart';
 import 'package:base/src/state_management/main_state.dart';
+import 'package:base/src/theme/sizes.dart';
 import 'package:base/src/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 
@@ -12,10 +12,6 @@ class GlobalWidget extends StatefulWidget {
       required this.child,
       this.splashRouter,
       this.initBinding,
-      this.loadingWidget,
-      this.useLoading = true,
-      this.useSnackbar = true,
-      this.isDesktop = true,
       this.backgroundImage,
       this.globalWidgets = const [],
       required this.listPages,
@@ -25,11 +21,7 @@ class GlobalWidget extends StatefulWidget {
   final String? splashRouter;
   final InitBinding? initBinding;
   final Map<String, InitRouter> listPages;
-  final Widget? loadingWidget;
-  final bool useLoading;
-  final bool useSnackbar;
 
-  final bool isDesktop;
   final DecorationImage? backgroundImage;
   final String homeRouter;
   final List<Widget> globalWidgets;
@@ -42,8 +34,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
 
   @override
   void didChangeDependencies() {
-    BaseDialog.instance.init(context);
-
+    
     super.didChangeDependencies();
   }
 
@@ -55,6 +46,8 @@ class _GlobalWidgetState extends State<GlobalWidget> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       init();
+      BaseDialog.instance.init(context);
+      BaseSizes.instance.init(context);
     });
     super.initState();
   }
@@ -69,10 +62,11 @@ class _GlobalWidgetState extends State<GlobalWidget> {
       MainState.instance.goSplashScreen(widget.splashRouter!);
       didInit = true;
     }
-    widget.initBinding?.dependencies().then((value) {
-      didInit = true;
-      MainState.instance.setHomeRouter(widget.homeRouter);
-    });
+    if (widget.initBinding != null) {
+      await widget.initBinding?.dependencies();
+    }
+    didInit = true;
+    MainState.instance.setHomeRouter(widget.homeRouter);
   }
 
   Widget buildChild() {
@@ -92,36 +86,6 @@ class _GlobalWidgetState extends State<GlobalWidget> {
     return Stack(
       children: [
         buildChild(),
-        widget.useLoading
-            ? Positioned.fill(
-                child: ObserWidget(
-                  value: LoadingController.instance.showing,
-                  child: (value) {
-                    if (value == true) {
-                      return LoadingController.instance
-                          .loadingWidget(widget.loadingWidget);
-                    }
-                    return const SizedBox();
-                  },
-                ),
-              )
-            : const SizedBox(),
-        widget.useSnackbar
-            ? ObserWidget(
-                value: SnackBarController.instance.showSnackBar,
-                child: (value) {
-                  if (value == true) {
-                    return Align(
-                        alignment: widget.isDesktop
-                            ? Alignment.topRight
-                            : Alignment.topCenter,
-                        child: SizedBox(
-                            width: widget.isDesktop ? 300 : double.infinity,
-                            child: SnackBarController.instance.snackbar));
-                  }
-                  return const SizedBox();
-                })
-            : const SizedBox(),
         ...widget.globalWidgets,
       ],
     );

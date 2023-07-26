@@ -1,5 +1,4 @@
 import 'package:base/src/base_component/base_observer.dart';
-import 'package:base/src/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 abstract class SnackbarInterface {
@@ -68,7 +67,6 @@ class SnackBarController extends SnackbarInterface {
                   style: TextStyle(
                     color: style.textColor,
                     fontSize: 12,
-                    // fontWeight: FontWeight.w300,
                   ),
                 ),
             ],
@@ -106,13 +104,18 @@ class AppSnackBar {
       _controller.showCustomSnackbar(child: child, timeout: timeout);
 }
 
-enum SnackBarStyle {
-  success(AppColors.success, Colors.white),
-  fail(AppColors.failed, Colors.white),
-  warning(AppColors.warning, Colors.white),
-  normal(Colors.white, AppColors.grey1);
-
+class SnackBarStyle {
   const SnackBarStyle(this.backgroundColor, this.textColor);
   final Color backgroundColor;
   final Color textColor;
+
+  SnackBarStyle.success()
+      : backgroundColor = const Color.fromARGB(255, 75, 181, 67),
+        textColor = Colors.white;
+  SnackBarStyle.warning()
+      : backgroundColor = const Color.fromARGB(255, 255, 204, 0),
+        textColor = Colors.white;
+  SnackBarStyle.failed()
+      : backgroundColor = const Color(0xffee0033),
+        textColor = Colors.white;
 }
