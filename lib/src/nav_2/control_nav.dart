@@ -87,7 +87,14 @@ class AppNav implements AppNavInterfaces {
     }
 
     final splashRouter = router.toBaseRouter(routerName); // O(n)
-    _outerRouters.add(splashRouter);
+    _outerRouters
+      ..clear()
+      ..add(splashRouter);
+    _updateOuter();
+    _streamInnerController.clear();
+    _streamInnerController.forEach((key, value) {
+      value.dispose();
+    });
   }
 
   /// set Homepage
@@ -158,10 +165,10 @@ class AppNav implements AppNavInterfaces {
       ..add(homeRouter);
     _currentRouter = homeRouter;
     _updateOuter();
+    _streamInnerController.clear();
     _streamInnerController.forEach((key, value) {
       value.dispose();
     });
-    _streamInnerController.clear();
   }
 
   void setLostConnectedRouter(String name) {
@@ -233,8 +240,9 @@ class AppNav implements AppNavInterfaces {
     final oldPage = _outerRouters.removeLast();
     _currentRouter = _outerRouters.last;
     _updateOuter(); // O(n)
-    _streamInnerController[oldPage.routerName]?.dispose();
-    _streamInnerController.remove(oldPage.routerName);
+    // _streamInnerController[oldPage.routerName]?.dispose();
+    final oldInner = _streamInnerController.remove(oldPage.routerName);
+    oldInner?.dispose();
   }
 
   /// remove several pages until page with routerName
@@ -403,7 +411,6 @@ class AppNav implements AppNavInterfaces {
 
       parentRouter.addInner(router.toBaseRouter(routerName,
           arguments: arguments, parentName: parentName));
-          
     }
     _streamInnerController[parentName]?.value =
         parentRouter.innerRouters.getMaterialPage(); // O(n)

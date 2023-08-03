@@ -24,17 +24,17 @@ class GlobalWidget extends StatefulWidget {
 
   final DecorationImage? backgroundImage;
   final String homeRouter;
-  final List<Widget> globalWidgets;
+  final List<Widget Function()> globalWidgets;
+
   @override
   State<GlobalWidget> createState() => _GlobalWidgetState();
 }
 
 class _GlobalWidgetState extends State<GlobalWidget> {
-  bool didInit = false;
-
+  bool _didInit = false;
+  final List<Widget> _globalWidget = [];
   @override
   void didChangeDependencies() {
-    
     super.didChangeDependencies();
   }
 
@@ -60,33 +60,38 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   init() async {
     if (widget.splashRouter != null) {
       MainState.instance.goSplashScreen(widget.splashRouter!);
-      didInit = true;
     }
-    if (widget.initBinding != null) {
-      await widget.initBinding?.dependencies();
+    await widget.initBinding?.dependencies();
+    for (final each in widget.globalWidgets) {
+      _globalWidget.add(each.call());
     }
-    didInit = true;
+    _didInit = true;
     MainState.instance.setHomeRouter(widget.homeRouter);
   }
 
-  Widget buildChild() {
-    if (didInit) {
-      return Material(
-        color: Colors.transparent,
-        child: Container(
-            decoration: BoxDecoration(image: widget.backgroundImage),
-            child: widget.child),
-      );
-    }
-    return const SizedBox();
-  }
+  // Widget buildChild() {
+  //   if (_didInit) {
+  //     return Material(
+  //       color: Colors.transparent,
+  //       child: Container(
+  //           decoration: BoxDecoration(image: widget.backgroundImage),
+  //           child: widget.child),
+  //     );
+  //   }
+  //   return const SizedBox();
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        buildChild(),
-        ...widget.globalWidgets,
+        Material(
+        color: Colors.transparent,
+        child: Container(
+            decoration: BoxDecoration(image: widget.backgroundImage),
+            child: widget.child),
+      ),
+        if (_didInit)  ..._globalWidget,
       ],
     );
   }

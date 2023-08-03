@@ -21,7 +21,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   final Map<String, InitRouter> listPages;
   final String homeRouter;
   final String? splashRouter;
-  final List<Widget> globalWidgets;
+  final List<Widget Function()> globalWidgets;
   final List<NavigatorObserver> observers;
 
   HomeRouterDelegate(

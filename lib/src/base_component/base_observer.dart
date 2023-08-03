@@ -124,7 +124,8 @@ class ObserWidget<T> extends StatelessWidget {
     return StreamBuilder<T>(
         stream: value.stream,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData &&
+              snapshot.connectionState == ConnectionState.active) {
             return child(snapshot.data as T);
           }
           return const Center(child: CircularProgressIndicator());
@@ -146,7 +147,8 @@ class ObserListWidget extends StatelessWidget {
     return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData &&
+              snapshot.connectionState == ConnectionState.active) {
             return child(snapshot.data);
           }
           return const Center(child: CircularProgressIndicator());
@@ -157,5 +159,3 @@ class ObserListWidget extends StatelessWidget {
 bool testEqual<T>(T p, T n) {
   return const DeepCollectionEquality().equals(p, n);
 }
-
-
