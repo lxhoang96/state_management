@@ -61,7 +61,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
     if (widget.splashRouter != null) {
       MainState.instance.goSplashScreen(widget.splashRouter!);
     }
-    await widget.initBinding?.dependencies();
+    await widget.initBinding?.dependencies(context);
     for (final each in widget.globalWidgets) {
       _globalWidget.add(each.call());
     }
@@ -83,20 +83,24 @@ class _GlobalWidgetState extends State<GlobalWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Material(
-        color: Colors.transparent,
-        child: Container(
-            decoration: BoxDecoration(image: widget.backgroundImage),
-            child: widget.child),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      extendBody: true,
+      body: Stack(
+        children: [
+          Material(
+          color: Colors.transparent,
+          child: Container(
+              decoration: BoxDecoration(image: widget.backgroundImage),
+              child: widget.child),
+        ),
+          if (_didInit)  ..._globalWidget,
+        ],
       ),
-        if (_didInit)  ..._globalWidget,
-      ],
     );
   }
 }
 
 abstract class InitBinding {
-  Future dependencies();
+  Future dependencies(BuildContext context);
 }
