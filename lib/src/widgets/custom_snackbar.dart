@@ -58,7 +58,6 @@ final class SnackBarController implements SnackbarInterface {
                   style: TextStyle(
                     color: style.textColor,
                     fontSize: 12,
-                    // fontWeight: FontWeight.w300,
                   ),
                 ),
             ],
@@ -75,4 +74,20 @@ final class SnackBarController implements SnackbarInterface {
     Future.delayed(Duration(seconds: timeout))
         .then((value) => showSnackBar.value = false);
   }
+}
+
+final class SnackBarStyle {
+  const SnackBarStyle(this.backgroundColor, this.textColor);
+  final Color backgroundColor;
+  final Color textColor;
+
+  SnackBarStyle.success()
+      : backgroundColor = const Color.fromARGB(255, 75, 181, 67),
+        textColor = Colors.white;
+  SnackBarStyle.warning()
+      : backgroundColor = const Color.fromARGB(255, 255, 204, 0),
+        textColor = Colors.white;
+  SnackBarStyle.failed()
+      : backgroundColor = const Color(0xffee0033),
+        textColor = Colors.white;
 }

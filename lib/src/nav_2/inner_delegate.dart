@@ -17,7 +17,7 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
     final stream = MainState.instance.innerStream(parentName);
     stream?.stream.listen((value) {
       if (!listEquals(_pages, value)) {
-        _pages = value;
+        _pages = value.toList();
         notifyListeners();
       }
     });

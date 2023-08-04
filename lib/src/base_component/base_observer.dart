@@ -29,7 +29,7 @@ final class Observer<T> extends InnerObserver<T> {
   @override
   set value(T valueSet) {
     if (_streamController.isClosed) return;
-    if (valueSet != _object) {
+    if (!testEqual(valueSet, _object)) {
       _object = valueSet;
       _streamController.sink.add(_object);
     }
@@ -112,7 +112,8 @@ final class ObserWidget<T> extends StatelessWidget {
     return StreamBuilder<T>(
         stream: value.stream,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData &&
+              snapshot.connectionState == ConnectionState.active) {
             return child(snapshot.data as T);
           }
           return const Center(child: CircularProgressIndicator());
@@ -134,7 +135,8 @@ final class ObserListWidget<T> extends StatelessWidget {
     return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData &&
+              snapshot.connectionState == ConnectionState.active) {
             return child(snapshot.data);
           }
           return const Center(child: CircularProgressIndicator());

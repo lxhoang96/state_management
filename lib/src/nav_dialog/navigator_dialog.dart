@@ -16,8 +16,7 @@ final class DialogNavigator implements DialogNavigatorInterfaces {
   showDialog({required Widget child, required String name}) {
     _streamDialogController.value.add(MaterialPage(
         child: child,
-        // fullscreenDialog: true,
-        maintainState: false,
+        fullscreenDialog: true,
         key: ValueKey(name),
         name: name));
     // _streamDialogController.value = listDialog;

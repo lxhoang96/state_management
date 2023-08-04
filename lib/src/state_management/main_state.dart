@@ -16,12 +16,27 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
   static final instance = MainState._();
   MainState._();
   bool _isIntialized = false;
-  intialize({Function(dynamic e, String currentRouter)? onNavigationError}) {
+  intialize(
+      {Function(dynamic e, String currentRouter)? onNavigationError}) async {
     if (_isIntialized) return;
+    _isIntialized = true;
 
     _navApp = AppNav();
     _dialogNav = DialogNavigator();
     _queueNavigate = InnerObserver(initValue: Queue<Function>());
+
+    // while (_isIntialized) {
+    //   await Future.delayed(
+    //     const Duration(milliseconds: 100),
+    //   );
+    //   if (_queueNavigate.isEmpty) continue;
+    //   final oldFunc = _queueNavigate.removeFirst();
+    //   try {
+    //     oldFunc.call();
+    //   } catch (e) {
+    //     onNavigationError?.call(e, _navApp.currentRouter);
+    //   }
+    // }
 
     _queueNavigate.stream.listen((function) {
       while (function.isNotEmpty) {
@@ -33,7 +48,6 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
         }
       }
     });
-    _isIntialized = true;
   }
 
   final Map<Type, InstanceRoute> _listCtrl = {};
@@ -47,12 +61,14 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
       _navApp.getInnerStream(parentName);
 
   // bool _canNavigate = true;
+  // final Queue<Function> _queueNavigate = Queue<Function>();
   late final InnerObserver<Queue<Function>> _queueNavigate;
   _HistoryOrder? _lastOrder;
 
   _checkCanNavigate(Function onNavigate, _HistoryOrder newOrder) {
     if (_lastOrder == newOrder) return;
     _lastOrder = newOrder;
+    // _queueNavigate.add(onNavigate);
     _queueNavigate.value.add(onNavigate);
     _queueNavigate.update();
   }
@@ -126,7 +142,6 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
   }
 
   void _autoRemoveCtrl() {
-    final stopwatch = Stopwatch()..start();
     _listCtrl.removeWhere((key, value) {
       final result = _removeByInstance(value);
       if (result) {
@@ -134,12 +149,9 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
       }
       return result;
     });
-    debugPrint('After deleted: ${_listCtrl.length}');
-    debugPrint('_autoRemoveCtrl() executed in ${stopwatch.elapsed}');
   }
 
   void _autoRemoveObs() {
-    final stopwatch = Stopwatch()..start();
     _listObserver.removeWhere((element) {
       final result = !_navApp.checkActiveRouter(element.route,
           parentName: element.parentName);
@@ -148,7 +160,6 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
       }
       return result;
     });
-    debugPrint('_autoRemoveObs() executed in ${stopwatch.elapsed}');
 
     // _listLightObserver.removeWhere((element) {
     //   final result = !_navApp.checkActiveRouter(element.route,
@@ -185,8 +196,8 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
   void pop() {
     _checkCanNavigate(() {
       _navApp.pop();
+      _autoRemove();
     }, _HistoryOrder('pop', [null]));
-    _autoRemove();
   }
 
   @override
@@ -195,10 +206,10 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
     _checkCanNavigate(() {
       _navApp.popAllAndPushNamed(routerName,
           parentName: parentName, arguments: arguments);
+      _autoRemove();
     },
         _HistoryOrder(
             'popAllAndPushNamed', [routerName, parentName, arguments]));
-    _autoRemove();
   }
 
   @override
@@ -207,18 +218,18 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
     _checkCanNavigate(() {
       _navApp.popAndReplaceNamed(routerName,
           parentName: parentName, arguments: arguments);
+      _autoRemove();
     },
         _HistoryOrder(
             'popAndReplaceNamed', [routerName, parentName, arguments]));
-    _autoRemove();
   }
 
   @override
   void popUntil(String routerName, {String? parentName}) {
     _checkCanNavigate(() {
       _navApp.popUntil(routerName, parentName: parentName);
+      _autoRemove();
     }, _HistoryOrder('popUntil', [routerName, parentName]));
-    _autoRemove();
   }
 
   @override
