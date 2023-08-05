@@ -3,8 +3,6 @@ import 'package:base/src/state_management/main_state.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-
-
 /// An observer can be used to update value in multiple place using stream.
 /// An observer can be automatically close by default and can be handled
 /// by hand with autoClose == false.
@@ -13,8 +11,8 @@ import 'package:rxdart/rxdart.dart';
 /// Or in controller with [ObserverCombined]
 // @Deprecated('This observer is deprecated and will be move to legacy. Use [LightObserver] instead')
 final class Observer<T> extends InnerObserver<T> {
- 
-  Observer({required T initValue, bool autoClose = true}) : super(initValue: initValue) {
+  Observer({required T initValue, bool autoClose = true})
+      : super(initValue: initValue) {
     _object = initValue;
     _streamController.sink.add(_object);
 
@@ -123,12 +121,13 @@ final class ObserWidget<T> extends StatelessWidget {
 
 /// [ObserListWidget] is a custom[StreamBuilder] to rebuild Widgets when a stream
 /// in a List of stream has new value.
-final class ObserListWidget<T> extends StatelessWidget {
+
+final class ObserListWidget<Record> extends StatelessWidget {
   ObserListWidget({super.key, required this.listStream, required this.child}) {
-    stream = Rx.combineLatestList(listStream);
+    stream = Rx.zip(listStream, (values) => (values));
   }
   final List<Stream> listStream;
-  final Widget Function(T value) child;
+  final Widget Function(Record value) child;
   late final Stream stream;
   @override
   Widget build(BuildContext context) {
@@ -136,8 +135,9 @@ final class ObserListWidget<T> extends StatelessWidget {
         stream: stream,
         builder: (context, snapshot) {
           if (snapshot.hasData &&
+              snapshot.data != null &&
               snapshot.connectionState == ConnectionState.active) {
-            return child(snapshot.data);
+            return child(snapshot.data!);
           }
           return const Center(child: CircularProgressIndicator());
         });
