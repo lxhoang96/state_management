@@ -75,7 +75,7 @@ class AppDialog {
           barrierDismissible: barrierDismissible,
           onClosed: onClosed);
 
-  static closeDialog({required String name}) => _baseDialog.closeDialog(name);
+  static closeDialog({required String name, Function? onClosed}) => _baseDialog.closeDialog(name, onClosed: onClosed);
 
   static closeAll() => MainState.instance.removeAllDialog();
 }
