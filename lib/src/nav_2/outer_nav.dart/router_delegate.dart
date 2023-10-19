@@ -1,5 +1,8 @@
+import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
+import 'package:base/src/widgets/custom_loading.dart';
+import 'package:base/src/widgets/custom_snackbar.dart';
 import 'package:base/src/widgets/main_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +22,7 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   final Map<String, InitRouter> listPages;
   final String homeRouter;
   final String? splashRouter;
-  final List<Widget> globalWidgets;
+  final List<Widget Function()> globalWidgets;
   final List<NavigatorObserver> observers;
 
   HomeRouterDelegate(
@@ -33,31 +36,28 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       this.backgroundImage,
       this.globalWidgets = const [],
       this.observers = const [],
-
-      this.isDesktop = true, Function(dynamic e, String currentRouter)? onNavigationError}) {
+      this.isDesktop = true,
+      Function(dynamic e, String currentRouter)? onNavigationError}) {
     MainState.instance.intialize(onNavigationError: onNavigationError);
     final outerStream = MainState.instance.outerStream;
-    outerStream.stream.listen((value) {
-      if (!listEquals(_pages, value)) {
-        // _pages
-        //   ..clear()
-        //   ..addAll(value);
-        _pages = value.toList();
-        notifyListeners();
-      }
-    });
+    outerStream.stream.listen(
+      (value) {
+        if (!listEquals(_pages, value)) {
+          _pages = value.toList();
+          notifyListeners();
+        }
+      },
+    );
     final dialogStream = MainState.instance.dialogStream;
 
-    dialogStream.stream.listen((value) {
-      if (!listEquals(_dialogs, value)) {
-        // _dialogs
-        //   ..clear()
-        //   ..addAll(value);
-        _dialogs = value.toList();
-        notifyListeners();
-      }
-    });
-    
+    dialogStream.stream.listen(
+      (value) {
+        if (!listEquals(_dialogs, value)) {
+          _dialogs = value.toList();
+          notifyListeners();
+        }
+      },
+    );
   }
 
   @override
@@ -70,10 +70,8 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   final _mainHeroCtrl = MaterialApp.createMaterialHeroController();
   final _dialogHeroCtrl = MaterialApp.createMaterialHeroController();
 
-
   @override
   Widget build(BuildContext context) {
-
     return Stack(
       children: [
         GlobalWidget(
@@ -81,10 +79,6 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
           homeRouter: homeRouter,
           splashRouter: splashRouter,
           initBinding: initBinding,
-          loadingWidget: loadingWidget,
-          isDesktop: isDesktop,
-          useLoading: useLoading,
-          useSnackbar: useSnackbar,
           backgroundImage: backgroundImage,
           globalWidgets: globalWidgets,
           child: HeroControllerScope(
@@ -94,17 +88,15 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
                     key: navigatorKey,
                     pages: _pages.toList(),
                     observers: observers,
-
-                    // transitionDelegate: ,
                     onPopPage: (route, result) {
                       if (!route.didPop(result)) {
                         return false;
                       }
                       MainState.instance.pop();
                       notifyListeners();
-
                       return true;
-                    })
+                    },
+                  )
                 : const SizedBox(),
           ),
         ),
@@ -120,12 +112,42 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
                     }
                     MainState.instance.removeLastDialog();
                     notifyListeners();
-
                     return true;
                   },
                 )
               : const SizedBox(),
         ),
+        useSnackbar
+            ? ObserWidget(
+                value: SnackBarController.instance.showSnackBar,
+                child: (value) {
+                  if (value == true) {
+                    return Align(
+                      alignment:
+                          isDesktop ? Alignment.topRight : Alignment.topCenter,
+                      child: SizedBox(
+                          width: isDesktop ? 300 : double.infinity,
+                          child: SnackBarController.instance.snackbar),
+                    );
+                  }
+                  return const SizedBox();
+                },
+              )
+            : const SizedBox(),
+        useLoading
+            ? Positioned.fill(
+                child: ObserWidget(
+                  value: LoadingController.instance.showing,
+                  child: (value) {
+                    if (value == true) {
+                      return LoadingController.instance
+                          .loadingWidget(loadingWidget);
+                    }
+                    return const SizedBox();
+                  },
+                ),
+              )
+            : const SizedBox(),
       ],
     );
   }
@@ -133,7 +155,9 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   @override
   RoutePathConfigure get currentConfiguration {
     if (_pages.length > 1) {
-      return RoutePathConfigure.otherPage(MainState.instance.getPath());
+      return RoutePathConfigure.otherPage(
+        MainState.instance.getPath(),
+      );
     }
     if (MainState.instance.getCurrentRouter() == unknownPath) {
       return RoutePathConfigure.unKnown();
@@ -166,11 +190,11 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
 
     if (configuration.pathName != null) {
       MainState.instance.setOuterRoutersForWeb(
-          configuration.pathName!.replaceAll('//', '/').split('/'));
+        configuration.pathName!.replaceAll('//', '/').split('/'),
+      );
       notifyListeners();
       return;
     }
-    //MainState.instance.showHomePage();
     notifyListeners();
   }
 }

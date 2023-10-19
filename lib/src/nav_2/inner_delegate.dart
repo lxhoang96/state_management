@@ -8,16 +8,20 @@ import 'nav_config.dart';
 /// Delegate for nested navigation.
 final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
+  final List<NavigatorObserver> observers;
   @override
   GlobalKey<NavigatorState> get navigatorKey =>
       GlobalObjectKey<NavigatorState>(this);
 
-  InnerDelegateRouter({required String parentName, required String initInner}) {
+  InnerDelegateRouter( {
+    required String parentName,
+    required String initInner,this.observers=const[],
+  }) {
     MainState.instance.setInitInnerRouter(initInner, parentName);
     final stream = MainState.instance.innerStream(parentName);
     stream?.stream.listen((value) {
       if (!listEquals(_pages, value)) {
-        _pages = value;
+        _pages = value.toList();
         notifyListeners();
       }
     });
@@ -30,6 +34,7 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
       return Navigator(
           key: navigatorKey,
           pages: _pages.toList(),
+          observers: observers,
           onPopPage: (route, result) {
             if (!route.didPop(result)) return false;
 

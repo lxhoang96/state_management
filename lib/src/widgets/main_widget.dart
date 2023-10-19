@@ -1,7 +1,7 @@
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/custom_router.dart';
 import 'package:base/src/nav_dialog/custom_dialog.dart';
 import 'package:base/src/state_management/main_state.dart';
+import 'package:base/src/theme/sizes.dart';
 import 'package:base/src/widgets/custom_loading.dart';
 import 'package:base/src/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +12,6 @@ final class GlobalWidget extends StatefulWidget {
       required this.child,
       this.splashRouter,
       this.initBinding,
-      this.loadingWidget,
-      this.useLoading = true,
-      this.useSnackbar = true,
-      this.isDesktop = true,
       this.backgroundImage,
       this.globalWidgets = const [],
       required this.listPages,
@@ -25,25 +21,20 @@ final class GlobalWidget extends StatefulWidget {
   final String? splashRouter;
   final InitBinding? initBinding;
   final Map<String, InitRouter> listPages;
-  final Widget? loadingWidget;
-  final bool useLoading;
-  final bool useSnackbar;
 
-  final bool isDesktop;
   final DecorationImage? backgroundImage;
   final String homeRouter;
-  final List<Widget> globalWidgets;
+  final List<Widget Function()> globalWidgets;
+
   @override
   State<GlobalWidget> createState() => _GlobalWidgetState();
 }
 
 class _GlobalWidgetState extends State<GlobalWidget> {
-  bool didInit = false;
-
+  bool _didInit = false;
+  final List<Widget> _globalWidget = [];
   @override
   void didChangeDependencies() {
-    BaseDialog.instance.init(context);
-
     super.didChangeDependencies();
   }
 
@@ -55,6 +46,8 @@ class _GlobalWidgetState extends State<GlobalWidget> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       init();
+      BaseDialog.instance.init(context);
+      BaseSizes.instance.init(context);
     });
     super.initState();
   }
@@ -67,67 +60,47 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   init() async {
     if (widget.splashRouter != null) {
       MainState.instance.goSplashScreen(widget.splashRouter!);
-      didInit = true;
     }
-    widget.initBinding?.dependencies().then((value) {
-      didInit = true;
-      MainState.instance.setHomeRouter(widget.homeRouter);
-    });
+    await widget.initBinding?.dependencies(context);
+    for (final each in widget.globalWidgets) {
+      _globalWidget.add(each.call());
+    }
+    _didInit = true;
+    MainState.instance.setHomeRouter(widget.homeRouter);
   }
 
-  Widget buildChild() {
-    if (didInit) {
-      return Material(
-        color: Colors.transparent,
-        child: Container(
-            decoration: BoxDecoration(image: widget.backgroundImage),
-            child: widget.child),
-      );
-    }
-    return const SizedBox();
-  }
+  // Widget buildChild() {
+  //   if (_didInit) {
+  //     return Material(
+  //       color: Colors.transparent,
+  //       child: Container(
+  //           decoration: BoxDecoration(image: widget.backgroundImage),
+  //           child: widget.child),
+  //     );
+  //   }
+  //   return const SizedBox();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        buildChild(),
-        widget.useLoading
-            ? Positioned.fill(
-                child: ObserWidget(
-                  value: LoadingController.instance.showing,
-                  child: (value) {
-                    if (value == true) {
-                      return LoadingController.instance
-                          .loadingWidget(widget.loadingWidget);
-                    }
-                    return const SizedBox();
-                  },
-                ),
-              )
-            : const SizedBox(),
-        widget.useSnackbar
-            ? ObserWidget(
-                value: SnackBarController.instance.showSnackBar,
-                child: (value) {
-                  if (value == true) {
-                    return Align(
-                        alignment: widget.isDesktop
-                            ? Alignment.topRight
-                            : Alignment.topCenter,
-                        child: SizedBox(
-                            width: widget.isDesktop ? 300 : double.infinity,
-                            child: SnackBarController.instance.snackbar));
-                  }
-                  return const SizedBox();
-                })
-            : const SizedBox(),
-        ...widget.globalWidgets,
-      ],
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      extendBody: true,
+      body: Stack(
+        children: [
+          Material(
+          color: Colors.transparent,
+          child: Container(
+              decoration: BoxDecoration(image: widget.backgroundImage),
+              child: widget.child),
+        ),
+          if (_didInit)  ..._globalWidget,
+        ],
+      ),
     );
   }
 }
 
-abstract interface class InitBinding {
-  Future dependencies();
+abstract class InitBinding {
+  Future dependencies(BuildContext context);
 }

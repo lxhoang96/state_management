@@ -17,12 +17,12 @@ const lostConnectedPath = '/lostConnected';
 final class AppNav implements AppNavInterfaces {
   /// UnknownRouter can be update during app, so you can show different page
   /// for each unknownRouter.
-  BaseRouter unknownRouter = BaseRouter(
-      routerName: unknownPath, widget: () => Container());
+  BaseRouter unknownRouter =
+      BaseRouter(routerName: unknownPath, widget: () => Container());
 
   /// this is HomeRouter which will show when you open the app.
-  BaseRouter homeRouter = BaseRouter(
-      routerName: homePath, widget: () => const SizedBox());
+  BaseRouter homeRouter =
+      BaseRouter(routerName: homePath, widget: () => const SizedBox());
   late final BaseRouter lostConnectedRouter;
 
   /// The Navigator stack is updated with these stream
@@ -85,9 +85,16 @@ final class AppNav implements AppNavInterfaces {
     if (router == null) {
       throw Exception(['Can not find a router with this name']);
     }
-    
+
     final splashRouter = router.toBaseRouter(routerName); // O(n)
-    _outerRouters.add(splashRouter);
+    _outerRouters
+      ..clear()
+      ..add(splashRouter);
+    _updateOuter();
+    _streamInnerController.clear();
+    _streamInnerController.forEach((key, value) {
+      value.dispose();
+    });
   }
 
   /// set Homepage
@@ -119,11 +126,11 @@ final class AppNav implements AppNavInterfaces {
     final router = newPage.toBaseRouter(routerName,
         arguments: arguments, parentName: parentName);
     parentRouter.innerRouters.add(router);
+    _currentRouter = router;
     _streamInnerController[parentRouter.routerName] =
         InnerObserver<List<MaterialPage>>(
       initValue: parentRouter.innerRouters.getMaterialPage(),
     );
-    _currentRouter = router;
   }
 
   /// set UnknownRouter on Web
@@ -158,10 +165,10 @@ final class AppNav implements AppNavInterfaces {
       ..add(homeRouter);
     _currentRouter = homeRouter;
     _updateOuter();
+    _streamInnerController.clear();
     _streamInnerController.forEach((key, value) {
       value.dispose();
     });
-    _streamInnerController.clear();
   }
 
   void setLostConnectedRouter(String name) {
@@ -233,8 +240,9 @@ final class AppNav implements AppNavInterfaces {
     final oldPage = _outerRouters.removeLast();
     _currentRouter = _outerRouters.last;
     _updateOuter(); // O(n)
-    _streamInnerController[oldPage.routerName]?.dispose();
-    _streamInnerController.remove(oldPage.routerName);
+    // _streamInnerController[oldPage.routerName]?.dispose();
+    final oldInner = _streamInnerController.remove(oldPage.routerName);
+    oldInner?.dispose();
   }
 
   /// remove several pages until page with routerName
@@ -326,7 +334,7 @@ final class AppNav implements AppNavInterfaces {
         throw Exception(['Parent not in stack']);
       }
       final childRouter = newPage;
-      lastParent.popAndAddInner(childRouter); // O(n)
+      lastParent.popAllAndPushInner(childRouter); // O(n)
       _currentRouter = childRouter;
       _streamInnerController[parentName]?.value =
           lastParent.innerRouters.getMaterialPage(); // O(n)
@@ -403,7 +411,6 @@ final class AppNav implements AppNavInterfaces {
 
       parentRouter.addInner(router.toBaseRouter(routerName,
           arguments: arguments, parentName: parentName));
-
     }
     _streamInnerController[parentName]?.value =
         parentRouter.innerRouters.getMaterialPage(); // O(n)
