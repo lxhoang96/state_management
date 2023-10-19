@@ -6,7 +6,7 @@ import 'package:base/src/widgets/custom_loading.dart';
 import 'package:base/src/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 
-final class GlobalWidget extends StatefulWidget {
+class GlobalWidget extends StatefulWidget {
   const GlobalWidget(
       {Key? key,
       required this.child,
