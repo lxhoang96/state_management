@@ -198,7 +198,7 @@ class MainState extends MainStateInterface
     _checkCanNavigate(() {
       _navApp.pop();
       _autoRemove();
-    }, _HistoryOrder('pop', [null]));
+    }, _HistoryOrder('pop', [_navApp.currentRouter]));
   }
 
   @override
