@@ -128,7 +128,10 @@ class ObserWidget<T> extends StatelessWidget {
               snapshot.connectionState == ConnectionState.active) {
             return child(snapshot.data as T);
           }
-          return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return const SizedBox();
         });
   }
 }
@@ -151,7 +154,10 @@ class ObserListWidget extends StatelessWidget {
               snapshot.connectionState == ConnectionState.active) {
             return child(snapshot.data);
           }
-          return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return const SizedBox();
         });
   }
 }

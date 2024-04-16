@@ -41,7 +41,8 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   @override
   void initState() {
     LoadingController.instance.showing.value = false;
-    SnackBarController.instance.showSnackBar.value = false;
+    SnackBarController.instance.snackbars.value.clear();
+    SnackBarController.instance.snackbars.update();
     MainState.instance.setInitRouters(widget.listPages);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -89,12 +90,12 @@ class _GlobalWidgetState extends State<GlobalWidget> {
       body: Stack(
         children: [
           Material(
-          color: Colors.transparent,
-          child: Container(
-              decoration: BoxDecoration(image: widget.backgroundImage),
-              child: widget.child),
-        ),
-          if (_didInit)  ..._globalWidget,
+            color: Colors.transparent,
+            child: Container(
+                decoration: BoxDecoration(image: widget.backgroundImage),
+                child: widget.child),
+          ),
+          if (_didInit) ..._globalWidget,
         ],
       ),
     );

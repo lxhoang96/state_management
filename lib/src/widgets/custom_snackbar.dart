@@ -15,8 +15,10 @@ abstract class SnackbarInterface {
 class SnackBarController extends SnackbarInterface {
   static final instance = SnackBarController._();
   SnackBarController._();
-  final showSnackBar = InnerObserver(initValue: false);
-  Widget snackbar = const SizedBox();
+  // final showSnackBar = InnerObserver(initValue: false);
+  // Widget snackbar = const SizedBox();
+  final snackbars = InnerObserver<List<Widget>>(initValue: []);
+  
   @override
   showSnackbar(
       {required SnackBarStyle style,
@@ -24,14 +26,13 @@ class SnackBarController extends SnackbarInterface {
       required String title,
       Function? onTap,
       int timeout = 3}) {
-    showSnackBar.value = true;
-    Future.delayed(Duration(seconds: timeout))
-        .then((value) => showSnackBar.value = false);
-    snackbar = Material(
+    // showSnackBar.value = true;
+
+    final snackbar = Material(
       color: Colors.transparent,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
@@ -74,14 +75,27 @@ class SnackBarController extends SnackbarInterface {
         ),
       ),
     );
+    snackbars.value.add(snackbar);
+    snackbars.update();
+    Future.delayed(Duration(seconds: timeout)).then((value) {
+      snackbars.value.remove(snackbar);
+      snackbars.update();
+    });
   }
 
   @override
   showCustomSnackbar({required Widget child, int timeout = 3}) {
-    snackbar = child;
-    showSnackBar.value = true;
-    Future.delayed(Duration(seconds: timeout))
-        .then((value) => showSnackBar.value = false);
+    // snackbar = child;
+    // showSnackBar.value = true;
+    // Future.delayed(Duration(seconds: timeout))
+    //     .then((value) => showSnackBar.value = false);
+
+    snackbars.value.add(child);
+    snackbars.update();
+    Future.delayed(Duration(seconds: timeout)).then((value) {
+      snackbars.value.remove(child);
+      snackbars.update();
+    });
   }
 }
 

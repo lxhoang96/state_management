@@ -21,16 +21,18 @@ class LoadingController extends LoadingInterface {
   final _defaultWidget = Stack(
     alignment: Alignment.center,
     children: const [
-      SizedBox(
-          width: 65,
-          height: 65,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          )),
+      // SizedBox(
+      //     width: 65,
+      //     height: 65,
+      //     child: CircularProgressIndicator(
+      //       color: Colors.white,
+      //     )),
       SizedBox(
         width: 50,
         height: 50,
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(
+          color: Colors.white,
+        ),
       )
     ],
   );
