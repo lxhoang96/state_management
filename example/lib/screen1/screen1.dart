@@ -1,8 +1,8 @@
 import 'package:base/base_component.dart';
 import 'package:base/base_widget.dart';
+import 'package:example/routers/router_name.dart';
 import 'package:flutter/material.dart';
 
-import 'package:example/routers/router_name.dart';
 import 'package:example/screen1/screen1_ctrl.dart';
 
 class Screen1 extends StatelessWidget {
@@ -28,26 +28,26 @@ class Screen1 extends StatelessWidget {
           ),
           TextButton(
               onPressed: () async {
-                // AppRouter.pushNamed(RouteName.screen2);
-                AppSnackBar.showSnackbar(
-                    style: SnackBarStyle.failed(),
-                    message: 'test failed',
-                    title: 'Failed');
-                await Future.delayed(const Duration(seconds: 1));
-                AppSnackBar.showSnackbar(
-                    style: SnackBarStyle.success(),
-                    message: 'test success',
-                    title: 'success');
-                await Future.delayed(const Duration(seconds: 1));
-                AppSnackBar.showSnackbar(
-                    style: SnackBarStyle.warning(),
-                    message: 'test warning',
-                    title: 'warning');
-                await Future.delayed(const Duration(seconds: 1));
-                // AppLoading.openLoading();
-                // await Future.delayed(const Duration(seconds: 3));
-                // controller.intObs.value++;
                 // Global.pushNamed(RouteName.screen2);
+                // AppSnackBar.showSnackbar(
+                //     style: SnackBarStyle.failed(),
+                //     message: 'test failed',
+                //     title: 'Failed');
+                // await Future.delayed(const Duration(seconds: 1));
+                // AppSnackBar.showSnackbar(
+                //     style: SnackBarStyle.success(),
+                //     message: 'test success',
+                //     title: 'success');
+                // await Future.delayed(const Duration(seconds: 1));
+                // AppSnackBar.showSnackbar(
+                //     style: SnackBarStyle.warning(),
+                //     message: 'test warning',
+                //     title: 'warning');
+                // await Future.delayed(const Duration(seconds: 1));
+                AppLoading.openLoading();
+                await Future.delayed(const Duration(seconds: 3));
+                controller.intObs.value++;
+                Global.pushNamed(RouteName.screen2);
               },
               child: const Text('To screen 2')),
         ],

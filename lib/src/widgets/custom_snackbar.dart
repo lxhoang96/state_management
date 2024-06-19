@@ -1,4 +1,5 @@
 import 'package:base/src/base_component/base_observer.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 abstract class SnackbarInterface {
@@ -6,7 +7,7 @@ abstract class SnackbarInterface {
       {required SnackBarStyle style,
       required String? message,
       required String title,
-      Function? onTap,
+      Function()? onTap,
       int timeout = 3});
 
   void showCustomSnackbar({required Widget child, int timeout = 3});
@@ -18,38 +19,50 @@ class SnackBarController extends SnackbarInterface {
   // final showSnackBar = InnerObserver(initValue: false);
   // Widget snackbar = const SizedBox();
   final snackbars = InnerObserver<List<Widget>>(initValue: []);
-  
+
   @override
   showSnackbar(
       {required SnackBarStyle style,
       required String? message,
       required String title,
-      Function? onTap,
+      Function()? onTap,
       int timeout = 3}) {
     // showSnackBar.value = true;
 
     final snackbar = Material(
       color: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: style.backgroundColor.withAlpha(50),
-              offset: const Offset(
-                5.0,
-                5.0,
+      child: GestureDetector(
+        behavior: onTap != null
+            ? HitTestBehavior.deferToChild
+            : HitTestBehavior.translucent,
+        // gestures: {
+        //   AllowMultipleTap:
+        //       GestureRecognizerFactoryWithHandlers<AllowMultipleTap>(
+        //     () => AllowMultipleTap(),
+        //     (AllowMultipleTap instance) {
+        //       instance.onTap = onTap;
+        //     },
+        //   )
+        // },
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: style.backgroundColor.withAlpha(50),
+                offset: const Offset(
+                  5.0,
+                  5.0,
+                ),
+                blurRadius: 10.0,
+                spreadRadius: 2.0,
               ),
-              blurRadius: 10.0,
-              spreadRadius: 2.0,
-            ),
-          ],
-          color: style.backgroundColor.withOpacity(0.8),
-        ),
-        child: InkWell(
-          onTap: () => onTap?.call(),
+            ],
+            color: style.backgroundColor.withOpacity(0.8),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -105,7 +118,7 @@ class AppSnackBar {
           {required SnackBarStyle style,
           required String? message,
           required String title,
-          Function? onTap,
+          Function()? onTap,
           int timeout = 3}) =>
       _controller.showSnackbar(
           style: style,
@@ -132,4 +145,11 @@ class SnackBarStyle {
   SnackBarStyle.failed()
       : backgroundColor = const Color(0xffee0033),
         textColor = Colors.white;
+}
+
+class AllowMultipleTap extends TapGestureRecognizer {
+  @override
+  void rejectGesture(int pointer) {
+    acceptGesture(pointer);
+  }
 }

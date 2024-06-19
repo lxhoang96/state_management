@@ -16,40 +16,41 @@ String? defaultValidator(String? value, ValidateType validateType) {
   }
 }
 
-class TextCtrl extends TextEditingController {}
-
 class CustomTextField extends StatelessWidget {
-  const CustomTextField(
-      {Key? key,
-      this.labelText,
-      this.textCtrl,
-      this.obsecureText = false,
-      this.readOnly = false,
-      this.enable = true,
-      this.maxLength,
-      this.validateType = ValidateType.none,
-      this.keyboardType = TextInputType.text,
-      // this.onFinished,
-      this.onChanged,
-      this.maxLines = 1,
-      this.minLines = 1,
-      this.style,
-      this.onTap,
-      this.onSubmited,
-      this.textAlign = TextAlign.start,
-      this.suffixIcon,
-      this.prefixIcon,
-      this.hintText,
-      this.inputFormatters,
-      this.onSaved,
-      this.labelStyle,
-      this.color,
-      this.border,
-      this.focusBorder,
-      this.errorBorder,
-      this.disabledBorder,
-      this.validator})
-      : super(key: key);
+  const CustomTextField({
+    Key? key,
+    this.labelText,
+    this.textCtrl,
+    this.obsecureText = false,
+    this.readOnly = false,
+    this.enable = true,
+    this.maxLength,
+    this.validateType = ValidateType.none,
+    this.keyboardType = TextInputType.text,
+    // this.onFinished,
+    this.onChanged,
+    this.maxLines = 1,
+    this.minLines = 1,
+    this.style,
+    this.onTap,
+    this.onSubmited,
+    this.textAlign = TextAlign.start,
+    this.suffixIcon,
+    this.prefixIcon,
+    this.hintText,
+    this.inputFormatters,
+    this.onSaved,
+    this.labelStyle,
+    this.color,
+    this.border,
+    this.focusBorder,
+    this.errorBorder,
+    this.disabledBorder,
+    this.validator,
+    this.onTapOutside,
+    this.onCompleted,
+    this.focusNode, this.initialValue,
+  }) : super(key: key);
   final TextEditingController? textCtrl;
   final String? labelText;
   final TextInputType keyboardType;
@@ -60,11 +61,14 @@ class CustomTextField extends StatelessWidget {
   final int? maxLength;
   final Function(String)? onChanged;
   final void Function(String?)? onSaved;
+  final void Function()? onTapOutside;
+  final void Function()? onCompleted;
+  final String? initialValue;
   // final Function? onFinished;
   final int? maxLines;
   final int? minLines;
   final TextStyle? style;
-  final Function? onTap;
+  final void Function()? onTap;
   final TextAlign textAlign;
   final Function(String text)? onSubmited;
   final Widget? suffixIcon;
@@ -76,6 +80,7 @@ class CustomTextField extends StatelessWidget {
   final InputBorder? border;
   final InputBorder? focusBorder;
   final InputBorder? errorBorder;
+  final FocusNode? focusNode;
   final InputBorder? disabledBorder;
   final String? Function(String?)? validator;
   @override
@@ -97,12 +102,7 @@ class CustomTextField extends StatelessWidget {
       style: style,
       onSaved: onSaved,
       onChanged: onChanged,
-      onTap: () {
-        // onTap();
-        if (onTap != null) {
-          onTap?.call();
-        }
-      },
+      onTap: onTap,
       inputFormatters: inputFormatters,
       textAlign: textAlign,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -121,6 +121,7 @@ class CustomTextField extends StatelessWidget {
         prefixIcon: prefixIcon,
       ),
       onFieldSubmitted: onSubmited,
+      onEditingComplete: onCompleted,
       validator: (String? value) =>
           validator?.call(value) ?? defaultValidator(value, validateType),
     );
