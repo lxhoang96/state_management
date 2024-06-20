@@ -17,7 +17,7 @@ final class AppSnackBar {
           {required SnackBarStyle style,
           required String? message,
           required String title,
-          Function? onTap,
+          Function()? onTap,
           int timeout = 3}) =>
       _controller.showSnackbar(
           style: style,

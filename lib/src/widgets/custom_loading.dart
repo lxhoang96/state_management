@@ -9,17 +9,19 @@ final class LoadingController implements LoadingInterface {
   final showing = InnerObserver<bool>(initValue: false);
   final _defaultWidget = const Stack(
     alignment: Alignment.center,
-    children: [
-      SizedBox(
-          width: 65,
-          height: 65,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          )),
+    children:  [
+      // SizedBox(
+      //     width: 65,
+      //     height: 65,
+      //     child: CircularProgressIndicator(
+      //       color: Colors.white,
+      //     )),
       SizedBox(
         width: 50,
         height: 50,
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(
+          color: Colors.white,
+        ),
       )
     ],
   );

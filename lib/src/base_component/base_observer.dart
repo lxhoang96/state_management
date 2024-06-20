@@ -114,7 +114,10 @@ final class ObserWidget<T> extends StatelessWidget {
               snapshot.connectionState == ConnectionState.active) {
             return child(snapshot.data as T);
           }
-          return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return const SizedBox();
         });
   }
 }
@@ -122,12 +125,12 @@ final class ObserWidget<T> extends StatelessWidget {
 /// [ObserListWidget] is a custom[StreamBuilder] to rebuild Widgets when a stream
 /// in a List of stream has new value.
 
-final class ObserListWidget<Record> extends StatelessWidget {
+final class ObserListWidget extends StatelessWidget {
   ObserListWidget({super.key, required this.listStream, required this.child}) {
-    stream = Rx.zip(listStream, (values) => (values));
+    stream = Rx.combineLatestList(listStream);
   }
   final List<Stream> listStream;
-  final Widget Function(Record value) child;
+  final Widget Function(List<dynamic> value) child;
   late final Stream stream;
   @override
   Widget build(BuildContext context) {
@@ -139,7 +142,10 @@ final class ObserListWidget<Record> extends StatelessWidget {
               snapshot.connectionState == ConnectionState.active) {
             return child(snapshot.data!);
           }
-          return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return const SizedBox();
         });
   }
 }

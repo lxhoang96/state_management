@@ -117,21 +117,34 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
               : const SizedBox(),
         ),
         useSnackbar
-            ? ObserWidget(
-                value: SnackBarController.instance.showSnackBar,
-                child: (value) {
-                  if (value == true) {
-                    return Align(
-                      alignment:
-                          isDesktop ? Alignment.topRight : Alignment.topCenter,
-                      child: SizedBox(
-                          width: isDesktop ? 300 : double.infinity,
-                          child: SnackBarController.instance.snackbar),
-                    );
-                  }
-                  return const SizedBox();
-                },
-              )
+            ? Overlay(initialEntries: [
+                OverlayEntry(
+                  builder: (context) => ObserWidget(
+                    value: SnackBarController.instance.snackbars,
+                    child: (items) {
+                      if (items.isNotEmpty) {
+                        return Align(
+                          alignment: isDesktop
+                              ? Alignment.topRight
+                              : Alignment.topCenter,
+                          child: SizedBox(
+                            width: isDesktop ? 300 : double.infinity,
+                            height: 300,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: items.length,
+                              itemBuilder: (context, index) {
+                                return items[index];
+                              },
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                  ),
+                )
+              ])
             : const SizedBox(),
         useLoading
             ? Positioned.fill(
