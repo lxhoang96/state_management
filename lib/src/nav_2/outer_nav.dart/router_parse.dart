@@ -12,26 +12,26 @@ final class HomeRouteInformationParser
   @override
   Future<RoutePathConfigure> parseRouteInformation(
       RouteInformation routeInformation) async {
-    if (routeInformation.uri.hasEmptyPath) {
-      return RoutePathConfigure.unKnown();
-    }
+    // if (routeInformation.uri.) {
+    //   return RoutePathConfigure.unKnown();
+    // }
     final uri = routeInformation.uri;
 
-    if (uri.pathSegments.isEmpty || routeInformation.uri.path == homePath) {
+    if (uri.pathSegments.isEmpty || uri.path == homePath) {
       return RoutePathConfigure.home();
     }
 
-    return RoutePathConfigure.otherPage(routeInformation.uri.path);
+    return RoutePathConfigure.otherPage(uri.path);
   }
 
   @override
   RouteInformation? restoreRouteInformation(RoutePathConfigure configuration) {
     if (configuration.isUnknown) {
-      return RouteInformation(uri:Uri.parse(unknownPath));
+      return RouteInformation(uri: Uri.parse(unknownPath));
     }
     if (configuration.isHomePage) return RouteInformation(uri: Uri.parse(homePath));
     if (configuration.isOtherPage) {
-      return RouteInformation(uri: configuration.pathName != null? Uri.tryParse(configuration.pathName!): null);
+      return RouteInformation(uri: Uri.parse(configuration.pathName??unknownPath));
     }
     if (configuration.lostConnected) {
       return RouteInformation(uri: Uri.parse(lostConnectedPath));

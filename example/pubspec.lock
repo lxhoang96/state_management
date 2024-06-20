@@ -15,7 +15,11 @@ packages:
       path: ".."
       relative: true
     source: path
+<<<<<<< HEAD
     version: "1.0.3"
+=======
+    version: "1.0.2"
+>>>>>>> d2ae2dfca123e268f57b91d834ac55c16145df25
   boolean_selector:
     dependency: transitive
     description:
@@ -44,18 +48,25 @@ packages:
     dependency: transitive
     description:
       name: collection
+<<<<<<< HEAD
       sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
+=======
+      sha256: f092b211a4319e98e5ff58223576de6c2803db36221657b46c82574721240687
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.17.2"
+>>>>>>> d2ae2dfca123e268f57b91d834ac55c16145df25
   cupertino_icons:
     dependency: "direct main"
     description:
       name: cupertino_icons
-      sha256: e35129dc44c9118cee2a5603506d823bab99c68393879edb440e0090d07586be
+      sha256: d57953e10f9f8327ce64a508a355f0b1ec902193f66288e8cb5070e7c47eeb2d
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.6"
   fake_async:
     dependency: transitive
     description:
@@ -73,15 +84,16 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: aeb0b80a8b3709709c9cc496cdc027c5b3216796bc0af0ce1007eaf24464fd4c
+      sha256: a25a15ebbdfc33ab1cd26c63a6ee519df92338a9c10f122adda92938253bef04
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.3"
   flutter_test:
     dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
+<<<<<<< HEAD
   leak_tracker:
     dependency: transitive
     description:
@@ -106,14 +118,16 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+=======
+>>>>>>> d2ae2dfca123e268f57b91d834ac55c16145df25
   lints:
     dependency: transitive
     description:
       name: lints
-      sha256: "5e4a9cd06d447758280a8ac2405101e0e2094d2a1dbdd3756aec3fe7775ba593"
+      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.1"
   matcher:
     dependency: transitive
     description:
@@ -126,10 +140,17 @@ packages:
     dependency: transitive
     description:
       name: material_color_utilities
+<<<<<<< HEAD
       sha256: "0e0a020085b65b6083975e499759762399b4475f766c21668c4ecca34ea74e5a"
       url: "https://pub.dev"
     source: hosted
     version: "0.8.0"
+=======
+      sha256: "9528f2f296073ff54cb9fee677df673ace1218163c3bc7628093e7eed5203d41"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
+>>>>>>> d2ae2dfca123e268f57b91d834ac55c16145df25
   meta:
     dependency: transitive
     description:
@@ -142,10 +163,17 @@ packages:
     dependency: transitive
     description:
       name: path
+<<<<<<< HEAD
       sha256: "087ce49c3f0dc39180befefc60fdb4acd8f8620e5682fe2476afd0b3688bb4af"
       url: "https://pub.dev"
     source: hosted
     version: "1.9.0"
+=======
+      sha256: "8829d8a55c13fc0e37127c29fedf290c102f4e40ae94ada574091fe0ff96c917"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.8.3"
+>>>>>>> d2ae2dfca123e268f57b91d834ac55c16145df25
   rxdart:
     dependency: transitive
     description:
@@ -215,6 +243,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+<<<<<<< HEAD
   vm_service:
     dependency: transitive
     description:
@@ -223,5 +252,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "13.0.0"
+=======
+  web:
+    dependency: transitive
+    description:
+      name: web
+      sha256: dc8ccd225a2005c1be616fe02951e2e342092edf968cf0844220383757ef8f10
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.4-beta"
+>>>>>>> d2ae2dfca123e268f57b91d834ac55c16145df25
 sdks:
   dart: ">=3.2.0-0 <3.10.0"
