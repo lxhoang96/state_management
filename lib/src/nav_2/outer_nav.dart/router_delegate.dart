@@ -1,8 +1,9 @@
-import 'package:base/base_widget.dart';
 import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
+import 'package:base/src/widgets/custom_loading.dart';
 import 'package:base/src/widgets/custom_snackbar.dart';
+import 'package:base/src/widgets/main_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +11,7 @@ import '../custom_router.dart';
 import '../nav_config.dart';
 
 /// [RouterDelegate] for main flow.
-class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
+final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final InitBinding? initBinding;
   final Widget? loadingWidget;

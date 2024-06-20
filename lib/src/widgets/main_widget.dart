@@ -1,8 +1,8 @@
-import 'package:base/base_widget.dart';
 import 'package:base/src/nav_2/custom_router.dart';
 import 'package:base/src/nav_dialog/custom_dialog.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:base/src/theme/sizes.dart';
+import 'package:base/src/widgets/custom_loading.dart';
 import 'package:base/src/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 

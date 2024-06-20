@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'nav_config.dart';
 
 /// Delegate for nested navigation.
-class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
+final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final List<NavigatorObserver> observers;
   final Map<String, InitRouter> listPages;

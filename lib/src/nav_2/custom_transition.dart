@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// An example for transition animation in Navigator 2.0
-class CustomTransitionBuilder extends PageTransitionsBuilder {
+final class CustomTransitionBuilder extends PageTransitionsBuilder {
   @override
   Widget buildTransitions<T>(
       PageRoute<T> route,
