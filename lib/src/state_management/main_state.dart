@@ -34,7 +34,7 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
     //   try {
     //     oldFunc.call();
     //   } catch (e) {
-    //     onNavigationError?.call(e, _navApp.currentRouter);
+    //     onNavigationError?.call(e, _navApp.currentRouterName);
     //   }
     // }
 
@@ -44,7 +44,7 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
         try {
           oldFunc.call();
         } catch (e) {
-          onNavigationError?.call(e, _navApp.currentRouter);
+          onNavigationError?.call(e, _navApp.currentRouterName);
         }
       }
     });
@@ -80,9 +80,9 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
       return controller as T;
     } else {
       _listCtrl[T] = InstanceRoute(
-          route: permanently ? '/' : _navApp.currentRouter,
+          route: permanently ? '/' : _navApp.currentRouterName,
           instance: instance,
-          parentName: _navApp.parentRouter);
+          parentName: _navApp.parentRouterName);
       if (instance is BaseController) {
         instance.init();
       }
@@ -97,9 +97,9 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
     remove<T>();
 
     _listCtrl[T] = InstanceRoute(
-        route: permanently ? '/' : _navApp.currentRouter,
+        route: permanently ? '/' : _navApp.currentRouterName,
         instance: instance,
-        parentName: _navApp.parentRouter);
+        parentName: _navApp.parentRouterName);
     debugPrint("Added New Controller Type:$T");
     if (instance is BaseController) {
       instance.init();
@@ -175,14 +175,14 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
   // @Deprecated('')
   void addObs(Observer observer) {
     _listObserver.add(ObserverRoute(
-        route: _navApp.currentRouter,
+        route: _navApp.currentRouterName,
         instance: observer,
-        parentName: _navApp.parentRouter));
+        parentName: _navApp.parentRouterName));
   }
 
   // void addLightObs(Observer observer) {
   //   _listLightObserver.add(LightObserverRoute(
-  //       route: _navApp.currentRouter,
+  //       route: _navApp.currentRouterName,
   //       instance: observer,
   //       parentName: _navApp.parentRouter));
   // }
@@ -197,28 +197,50 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
     _checkCanNavigate(() {
       _navApp.pop();
       _autoRemove();
-    }, _HistoryOrder('pop', [_navApp.currentRouter]));
+    }, _HistoryOrder('pop', [_navApp.currentRouterName]));
   }
 
   @override
-  void popAllAndPushNamed(String routerName,
+  void popAllAndPushNamed<T>(String routerName,
       {String? parentName, dynamic arguments}) {
-    _checkCanNavigate(() {
-      _navApp.popAllAndPushNamed(routerName,
-          parentName: parentName, arguments: arguments);
-      _autoRemove();
-    },
-        _HistoryOrder(
-            'popAllAndPushNamed', [routerName, parentName, arguments]));
+    _checkCanNavigate(
+      () {
+        _navApp.popAllAndPushNamed(routerName,
+            parentName: parentName, arguments: arguments);
+        _autoRemove();
+        final controller = _navApp.currentRouter?.controller;
+        if (controller != null) {
+          add<T>(controller.call(),
+              permanently: _navApp.currentRouter?.permanently);
+        }
+        if (parentName == null) {
+          _navApp.updateOuter();
+        } else {
+          _navApp.updateInner(parentName);
+        }
+      },
+      _HistoryOrder('popAllAndPushNamed', [routerName, parentName, arguments]),
+    );
   }
 
   @override
-  void popAndReplaceNamed(String routerName,
+  void popAndReplaceNamed<T>(String routerName,
       {String? parentName, dynamic arguments}) {
     _checkCanNavigate(() {
       _navApp.popAndReplaceNamed(routerName,
           parentName: parentName, arguments: arguments);
       _autoRemove();
+      final controller = _navApp.currentRouter?.controller;
+      if (controller != null) {
+        // final type = controller.runtimeType;
+        add<T>(controller.call(),
+            permanently: _navApp.currentRouter?.permanently);
+      }
+      if (parentName == null) {
+        _navApp.updateOuter();
+      } else {
+        _navApp.updateInner(parentName);
+      }
     },
         _HistoryOrder(
             'popAndReplaceNamed', [routerName, parentName, arguments]));
@@ -233,10 +255,19 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
   }
 
   @override
-  void pushNamed(String routerName, {String? parentName, dynamic arguments}) {
+  void pushNamed<T>(String routerName, {String? parentName, dynamic arguments}) {
     _checkCanNavigate(() {
       _navApp.pushNamed(routerName,
           parentName: parentName, arguments: arguments);
+      final controller = _navApp.currentRouter?.controller;
+      if (controller != null) {
+        add<T>(controller.call(), permanently: _navApp.currentRouter?.permanently);
+      }
+      if (parentName == null) {
+        _navApp.updateOuter();
+      } else {
+        _navApp.updateInner(parentName);
+      }
     }, _HistoryOrder('pushNamed', [routerName, parentName, arguments]));
   }
 
@@ -266,7 +297,7 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
 
   void showUnknownRouter() => _navApp.showUnknownRouter();
 
-  String getCurrentRouter() => _navApp.currentRouter;
+  String getCurrentRouter() => _navApp.currentRouterName;
 
   String getPath() => _navApp.getPath();
 

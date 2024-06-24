@@ -1,16 +1,15 @@
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/interfaces/widget_interfaces.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
+import 'package:rxdart/rxdart.dart';
 
 final class SnackBarController implements SnackbarInterface {
   static final instance = SnackBarController._();
   SnackBarController._();
   // final showSnackBar = InnerObserver(initValue: false);
   // Widget snackbar = const SizedBox();
-  final snackbars = InnerObserver<List<Widget>>(initValue: []);
-
+  final snackbarSubject = BehaviorSubject<List<Widget>>.seeded([]);
+  final snackbars = <Widget>[];
   @override
   showSnackbar(
       {required SnackBarStyle style,
@@ -79,11 +78,13 @@ final class SnackBarController implements SnackbarInterface {
         ),
       ),
     );
-    snackbars.value.add(snackbar);
-    snackbars.update();
+    snackbars.add(snackbar);
+    snackbarSubject.sink.add(snackbars);
+    // snackbars.update();
     Future.delayed(Duration(seconds: timeout)).then((value) {
-      snackbars.value.remove(snackbar);
-      snackbars.update();
+      snackbars.remove(snackbar);
+      snackbarSubject.sink.add(snackbars);
+      // snackbars.update();
     });
   }
 
@@ -94,11 +95,14 @@ final class SnackBarController implements SnackbarInterface {
     // Future.delayed(Duration(seconds: timeout))
     //     .then((value) => showSnackBar.value = false);
 
-    snackbars.value.add(child);
-    snackbars.update();
+    snackbars.add(child);
+    snackbarSubject.sink.add(snackbars);
+    // snackbars.update();
     Future.delayed(Duration(seconds: timeout)).then((value) {
-      snackbars.value.remove(child);
-      snackbars.update();
+      snackbars.remove(child);
+      snackbarSubject.sink.add(snackbars);
+
+      // snackbars.update();
     });
   }
 }

@@ -1,18 +1,22 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-
 /// It is where your navigator flow starts.
 /// Each [InitRouter] present a router later.
 /// It contains a function returns Widget, [argumentNav] and [parentName] (optional)
 final class InitRouter {
   final Widget Function() widget;
+  final Function()? controller;
+  final bool permanently;
   final dynamic argumentNav;
   // final String? parentName;
   InitRouter({
     required this.widget,
+    this.controller,
+    this.permanently = false,
     // this.parentName,
     this.argumentNav,
+    
   });
 
   BaseRouter toBaseRouter(String routerName,
@@ -21,6 +25,8 @@ final class InitRouter {
       routerName: routerName,
       widget: widget,
       parentName: parentName,
+      controller: controller,
+      permanently: permanently,
       argumentNav: argumentNav,
       arguments: arguments,
     );
@@ -38,9 +44,13 @@ final class BaseRouter {
   final List<BaseRouter> innerRouters = [];
   final Widget Function() widget;
   final dynamic argumentNav;
+  final Function()? controller;
+  final bool permanently;
   BaseRouter({
     required this.routerName,
     required this.widget,
+    this.controller,
+    this.permanently = false,
     this.parentName,
     this.arguments,
     this.argumentNav,

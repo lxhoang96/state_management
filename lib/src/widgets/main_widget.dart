@@ -41,8 +41,8 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   @override
   void initState() {
     LoadingController.instance.showing.value = false;
-    SnackBarController.instance.snackbars.value.clear();
-    SnackBarController.instance.snackbars.update();
+    SnackBarController.instance.snackbarSubject.value = [];
+    // SnackBarController.instance.snackbars.update();
     MainState.instance.setInitRouters(widget.listPages);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {

@@ -1,4 +1,3 @@
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:base/src/widgets/custom_loading.dart';
@@ -120,9 +119,16 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         useSnackbar
             ? Overlay(initialEntries: [
                 OverlayEntry(
-                  builder: (context) => ObserWidget(
-                    value: SnackBarController.instance.snackbars,
-                    child: (items) {
+                  builder: (context) => StreamBuilder(
+                    stream: SnackBarController.instance.snackbarSubject,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const SizedBox();
+                      }
+                      final items = snapshot.data;
+                      if (items == null) {
+                        return const SizedBox();
+                      }
                       if (items.isNotEmpty) {
                         return Align(
                           alignment: isDesktop
@@ -149,9 +155,16 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
             : const SizedBox(),
         useLoading
             ? Positioned.fill(
-                child: ObserWidget(
-                  value: LoadingController.instance.showing,
-                  child: (value) {
+                child: StreamBuilder(
+                  stream: LoadingController.instance.showing,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox();
+                    }
+                    final value = snapshot.data;
+                    if (value == null) {
+                      return const SizedBox();
+                    }
                     if (value == true) {
                       return LoadingController.instance
                           .loadingWidget(loadingWidget);

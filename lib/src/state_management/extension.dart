@@ -1,8 +1,7 @@
-import 'package:base/src/interfaces/mainstate_intefaces.dart';
 import 'main_state.dart';
 
 class Global {
-  static final MainStateInterface _mainState = MainState.instance;
+  static final _mainState = MainState.instance;
 
   static T add<T>(T instance, {permanently = false}) =>
       _mainState.add(instance, permanently: permanently);
@@ -14,24 +13,36 @@ class Global {
   static T addNew<T>(T newController, {permanently = false}) =>
       _mainState.addNew<T>(newController, permanently: permanently);
 
-  static void popAndReplaceNamed(String routerName,
-          {String? parentName, dynamic arguments}) =>
-      _mainState.popAndReplaceNamed(routerName,
-          parentName: parentName, arguments: arguments);
+  static void popAndReplaceNamed<T>(String routerName,
+          {
+          String? parentName,
+          dynamic arguments}) =>
+      _mainState.popAndReplaceNamed<T>(routerName,
+          
+          parentName: parentName,
+          arguments: arguments);
 
   static void pop() => _mainState.pop();
 
-  static void popAllAndPushNamed(String routerName,
-          {String? parentName, dynamic arguments}) =>
-      _mainState.popAllAndPushNamed(routerName,
-          parentName: parentName, arguments: arguments);
+  static void popAllAndPushNamed<T>(String routerName,
+          {
+          String? parentName,
+          dynamic arguments}) =>
+      _mainState.popAllAndPushNamed<T>(routerName,
+          
+          parentName: parentName,
+          arguments: arguments);
 
   static void popUntil(String routerName) => _mainState.popUntil(routerName);
 
-  static void pushNamed(String routerName,
-          {String? parentName, dynamic arguments}) =>
-      _mainState.pushNamed(routerName,
-          parentName: parentName, arguments: arguments);
+  static void pushNamed<T>(String routerName,
+          {
+          String? parentName,
+          dynamic arguments}) =>
+      _mainState.pushNamed<T>(routerName,
+          
+          parentName: parentName,
+          arguments: arguments);
 
   static dynamic get currentArgumentNav => _mainState.navigationArg;
 

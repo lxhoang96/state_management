@@ -1,12 +1,13 @@
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/interfaces/widget_interfaces.dart';
 // import 'package:base/src/interfaces/widget_interfaces.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 final class LoadingController implements LoadingInterface {
   static final instance = LoadingController._();
   LoadingController._();
-  final showing = InnerObserver<bool>(initValue: false);
+  // final showing = InnerObserver<bool>(initValue: false);
+  final showing = BehaviorSubject<bool>.seeded(false);
   final _defaultWidget = const Stack(
     alignment: Alignment.center,
     children:  [
