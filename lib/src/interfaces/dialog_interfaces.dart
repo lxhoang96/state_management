@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-abstract class DialogInterfaces {
+abstract interface class DialogInterfaces {
   showDialog({
     required Widget Function(BuildContext context) child,
     required String name,

@@ -1,4 +1,4 @@
-abstract class AppNavInterfaces {
+abstract interface class AppNavInterfaces {
   /// push a page
   void pushNamed(String routerName, {String? parentName, dynamic arguments});
 

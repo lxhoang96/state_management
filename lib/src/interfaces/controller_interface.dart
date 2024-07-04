@@ -1,5 +1,5 @@
 /// controller interface
-abstract class BaseController {
+abstract interface class BaseController {
   init();
 
   onReady();

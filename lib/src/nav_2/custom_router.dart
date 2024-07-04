@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// It is where your navigator flow starts.
 /// Each [InitRouter] present a router later.
 /// It contains a function returns Widget, [argumentNav] and [parentName] (optional)
-class InitRouter {
+final class InitRouter {
   final Widget Function() widget;
   final dynamic argumentNav;
   // final String? parentName;
@@ -29,7 +29,7 @@ class InitRouter {
 
 /// A BaseRouter extends InitRouter to return a Router with
 /// String [routerName] and List of BaseRouter [innerRouters] (optional)
-class BaseRouter {
+final class BaseRouter {
   final String routerName;
   MaterialPage? page;
   late final LocalKey _key;

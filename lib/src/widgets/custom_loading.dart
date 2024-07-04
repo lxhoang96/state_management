@@ -1,26 +1,15 @@
 import 'package:base/src/base_component/base_observer.dart';
+import 'package:base/src/interfaces/widget_interfaces.dart';
+// import 'package:base/src/interfaces/widget_interfaces.dart';
 import 'package:flutter/material.dart';
 
-abstract class LoadingInterface {
-  void closeLoading();
-
-  void openLoading();
-}
-
-class AppLoading {
-  static final LoadingInterface _controller = LoadingController.instance;
-  static closeLoading() => _controller.closeLoading();
-
-  static openLoading() => _controller.openLoading();
-}
-
-class LoadingController extends LoadingInterface {
+final class LoadingController implements LoadingInterface {
   static final instance = LoadingController._();
   LoadingController._();
   final showing = InnerObserver<bool>(initValue: false);
-  final _defaultWidget = Stack(
+  final _defaultWidget = const Stack(
     alignment: Alignment.center,
-    children: const [
+    children:  [
       // SizedBox(
       //     width: 65,
       //     height: 65,

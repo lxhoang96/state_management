@@ -33,10 +33,10 @@ void main() {
   });
 }
 
-class TestController1 extends DefaultController {}
+final class TestController1 extends DefaultController {}
 
-class TestController2 extends DefaultController {}
+final class TestController2 extends DefaultController {}
 
-class TestController3 extends DefaultController {}
+final class TestController3 extends DefaultController {}
 
-class TestController4 extends DefaultController {}
+final class TestController4 extends DefaultController {}

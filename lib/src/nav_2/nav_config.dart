@@ -1,4 +1,4 @@
-class RoutePathConfigure {
+final class RoutePathConfigure {
   final String? _pathName;
   final bool _isUnknown;
   final bool _lostConnected;
