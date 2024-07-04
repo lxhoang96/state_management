@@ -129,7 +129,7 @@ class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
                               : Alignment.topCenter,
                           child: SizedBox(
                             width: isDesktop ? 300 : double.infinity,
-                            height: 300,
+                            height: 150,
                             child: ListView.builder(
                               shrinkWrap: true,
                               itemCount: items.length,

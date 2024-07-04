@@ -61,7 +61,7 @@ class SnackBarController extends SnackbarInterface {
                 spreadRadius: 2.0,
               ),
             ],
-            color: style.backgroundColor.withOpacity(0.8),
+            color: style.backgroundColor.withOpacity(0.7),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

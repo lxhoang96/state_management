@@ -40,11 +40,16 @@ class _GlobalWidgetState extends State<GlobalWidget> {
 
   @override
   void initState() {
+    // LoadingController.instance.showing.value = false;
+    // SnackBarController.instance.snackbars.value.clear();
+    // SnackBarController.instance.snackbars.update();
+    MainState.instance.setInitRouters(widget.listPages);
+    if (widget.splashRouter != null) {
+      MainState.instance.goSplashScreen(widget.splashRouter!);
+    }
     LoadingController.instance.showing.value = false;
     SnackBarController.instance.snackbars.value.clear();
     SnackBarController.instance.snackbars.update();
-    MainState.instance.setInitRouters(widget.listPages);
-
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       init();
       BaseDialog.instance.init(context);
@@ -59,9 +64,9 @@ class _GlobalWidgetState extends State<GlobalWidget> {
   }
 
   init() async {
-    if (widget.splashRouter != null) {
-      MainState.instance.goSplashScreen(widget.splashRouter!);
-    }
+    // if (widget.splashRouter != null) {
+    //   MainState.instance.goSplashScreen(widget.splashRouter!);
+    // }
     await widget.initBinding?.dependencies(context);
     for (final each in widget.globalWidgets) {
       _globalWidget.add(each.call());
