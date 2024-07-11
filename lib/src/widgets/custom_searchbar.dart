@@ -3,23 +3,24 @@ import 'package:base/src/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 
 class CustomSearchBar<T> extends StatefulWidget {
-  const CustomSearchBar(
-      {Key? key,
-      required this.onChanged,
-      this.onTap,
-      this.readOnly = true,
-      required this.text,
-      this.style,
-      required this.onSelected,
-      this.suffixIcon,
-      this.prefixIcon,
-      this.hintText,
-      this.textCtrl,
-      this.timeOutSearch = 1,
-      this.waitTextSearch = 2,
-      this.showDialog = true,
-      this.initialValue, this.noDataWidget})
-      : super(key: key);
+  const CustomSearchBar({
+    Key? key,
+    required this.onChanged,
+    this.onTap,
+    this.readOnly = true,
+    required this.text,
+    this.style,
+    required this.onSelected,
+    this.suffixIcon,
+    this.prefixIcon,
+    this.hintText,
+    this.textCtrl,
+    this.timeOutSearch = 1,
+    this.waitTextSearch = 2,
+    this.showDialog = true,
+    this.initialValue,
+    this.noDataWidget,
+  }) : super(key: key);
   final Function(T value) onSelected;
   final FutureOr<List<T>> Function(String? value) onChanged;
   final List<T> Function()? onTap;
@@ -47,10 +48,10 @@ class _CustomSearchBarState<T> extends State<CustomSearchBar<T>> {
   List<T> data = [];
   Timer? timer;
   Widget? suffixIcon;
-  final _focusNode = FocusNode();
   OverlayEntry? _dialog;
 
   onTapDrowdown() async {
+    if (_dialog != null) return;
     final offset = _box.localToGlobal(Offset(0, _box.size.height));
     final halfHeight = MediaQuery.of(context).size.height / 2;
     double verticalPos = offset.dy + MediaQuery.of(context).viewInsets.bottom;
@@ -136,7 +137,6 @@ class _CustomSearchBarState<T> extends State<CustomSearchBar<T>> {
     if (timer != null) {
       timer?.cancel();
     }
-    _focusNode.dispose();
     super.dispose();
   }
 
@@ -181,39 +181,39 @@ class _CustomSearchBarState<T> extends State<CustomSearchBar<T>> {
       ),
       color: Colors.white,
     );
-    return data.isNotEmpty
-        ? Container(
-            width: _box.size.width,
-            decoration: boxDecoration,
-            constraints: BoxConstraints(
-              // minHeight: 38,
-              maxHeight: MediaQuery.of(context).size.height / 4,
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-            child: ListView.separated(
-              itemCount: data.length,
-              padding: const EdgeInsets.all(0),
-              // shrinkWrap: true,
-              itemBuilder: (context, index) {
-                final item = data[index];
-                if (item == null) return const SizedBox();
-                return InkWell(
-                  onTap: () => onPickItem(index),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      widget.text(data[index]),
-                      style: style,
+    return Container(
+        width: _box.size.width,
+        decoration: boxDecoration,
+        constraints: BoxConstraints(
+          // minHeight: 38,
+          maxHeight: MediaQuery.of(context).size.height / 4,
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        child: data.isNotEmpty
+            ? ListView.separated(
+                itemCount: data.length,
+                padding: const EdgeInsets.all(0),
+                // shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  final item = data[index];
+                  if (item == null) return const SizedBox();
+                  return InkWell(
+                    onTap: () => onPickItem(index),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        widget.text(data[index]),
+                        style: style,
+                      ),
                     ),
-                  ),
-                );
-              },
-              separatorBuilder: (context, index) {
-                return const Divider(
-                  thickness: 1,
-                );
-              },
-            ))
-        : widget.noDataWidget?? const SizedBox();
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider(
+                    thickness: 1,
+                  );
+                },
+              )
+            : widget.noDataWidget ?? const SizedBox());
   }
 }

@@ -129,7 +129,7 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
     }
   }
 
-  _removeByInstance(InstanceRoute instanceInput) {
+  bool _removeByInstance(InstanceRoute instanceInput) {
     final result = !_navApp.checkActiveRouter(instanceInput.route,
         parentName: instanceInput.parentName);
     if (result) {
@@ -142,13 +142,20 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
   }
 
   void _autoRemoveCtrl() {
-    _listCtrl.removeWhere((key, value) {
-      final result = _removeByInstance(value);
-      if (result) {
-        debugPrint("Removed Controller Type:$key");
-      }
-      return result;
-    });
+    // try {
+    //   _listCtrl.removeWhere((key, value) => _removeByInstance(value));
+    // } catch (e) {
+    //   debugPrint(e.toString());
+    // }
+    _listCtrl.removeWhere(
+      (key, value) {
+        final result = _removeByInstance(value);
+        if (result) {
+          debugPrint("Removed Controller Type:$key");
+        }
+        return result;
+      },
+    );
   }
 
   void _autoRemoveObs() {

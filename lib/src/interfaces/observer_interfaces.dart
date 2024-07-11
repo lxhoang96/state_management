@@ -1,3 +1,5 @@
+import 'dart:async';
+
 abstract interface class ObserverAbs<T> {
   void update();
 
@@ -7,5 +9,5 @@ abstract interface class ObserverAbs<T> {
 
   set value(T valueSet);
 
-  dispose();
+  FutureOr<void> dispose();
 }

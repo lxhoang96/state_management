@@ -3,6 +3,7 @@ import 'package:base/src/state_management/main_state.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+
 /// An observer can be used to update value in multiple place using stream.
 /// An observer can be automatically close by default and can be handled
 /// by hand with autoClose == false.
@@ -43,8 +44,9 @@ final class Observer<T> extends InnerObserver<T> {
   Stream<T> get stream => _streamController.stream;
 
   @override
-  dispose() {
+  dispose() async {
     debugPrint('$this disposing');
+    await _streamController.drain();
     _streamController.close();
   }
 }
@@ -78,8 +80,9 @@ base class InnerObserver<T> implements ObserverAbs<T> {
   Stream<T> get stream => _streamController.stream;
 
   @override
-  dispose() {
+  dispose() async {
     debugPrint('$this disposing');
+    await _streamController.drain();
     _streamController.close();
   }
 }
@@ -95,7 +98,10 @@ final class ObserverCombined {
   }
   Stream get value => _streamController.stream;
 
-  dispose() => _streamController.close();
+  dispose() async {
+    await _streamController.drain();
+    _streamController.close();
+  }
 }
 
 /// [ObserWidget] is a custom [StreamBuilder] to rebuild Widgets when
