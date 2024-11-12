@@ -3,7 +3,6 @@ import 'package:base/src/interfaces/widget_interfaces.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-
 final class SnackBarController implements SnackbarInterface {
   static final instance = SnackBarController._();
   SnackBarController._();
@@ -17,7 +16,7 @@ final class SnackBarController implements SnackbarInterface {
       required String? message,
       required String title,
       Function()? onTap,
-      int timeout = 3}) {
+      int timeout = 2}) {
     // showSnackBar.value = true;
 
     final snackbar = Material(
@@ -88,7 +87,7 @@ final class SnackBarController implements SnackbarInterface {
   }
 
   @override
-  showCustomSnackbar({required Widget child, int timeout = 3}) {
+  showCustomSnackbar({required Widget child, int timeout = 2}) {
     // snackbar = child;
     // showSnackBar.value = true;
     // Future.delayed(Duration(seconds: timeout))

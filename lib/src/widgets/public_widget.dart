@@ -10,7 +10,6 @@ final class AppLoading {
   static openLoading() => _controller.openLoading();
 }
 
-
 final class AppSnackBar {
   static final SnackbarInterface _controller = SnackBarController.instance;
   static showSnackbar(
@@ -18,7 +17,7 @@ final class AppSnackBar {
           required String? message,
           required String title,
           Function()? onTap,
-          int timeout = 3}) =>
+          int timeout = 2}) =>
       _controller.showSnackbar(
           style: style,
           message: message,
@@ -26,6 +25,6 @@ final class AppSnackBar {
           onTap: onTap,
           timeout: timeout);
 
-  static showCustomSnackbar({required Widget child, int timeout = 3}) =>
+  static showCustomSnackbar({required Widget child, int timeout = 2}) =>
       _controller.showCustomSnackbar(child: child, timeout: timeout);
 }

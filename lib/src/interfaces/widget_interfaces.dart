@@ -15,7 +15,7 @@ abstract interface class SnackbarInterface {
       required String? message,
       required String title,
       Function()? onTap,
-      int timeout = 3});
+      required int timeout});
 
-  void showCustomSnackbar({required Widget child, int timeout = 3});
+  void showCustomSnackbar({required Widget child, required int timeout});
 }
