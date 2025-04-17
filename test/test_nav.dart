@@ -1,42 +1,67 @@
-import 'package:base/src/base_component/base_controller.dart';
-import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:base/src/nav_2/control_nav.dart';
+import 'package:base/src/nav_2/custom_router.dart';
 
 void main() {
-  test('test add controller', () {
-    WidgetsFlutterBinding.ensureInitialized();
-    final mainState = MainState.instance;
-    mainState.add(TestController1());
-    expect(mainState.find<TestController1>() == TestController1(), true);
-    expect(() => mainState.find<TestController2>(), throwsA(isA<Exception>()));
-  });
+  group('AppNav Tests', () {
+    late AppNav appNav;
 
-  test('add new controller', () {
-    WidgetsFlutterBinding.ensureInitialized();
-    final mainState = MainState.instance;
-    final test1Ctrl = mainState.add(TestController1());
-    final test1NewCtrl = mainState.addNew(TestController1());
-    expect(identical(test1Ctrl, test1NewCtrl), false);
-    expect(mainState.find<TestController1>(), test1NewCtrl);
-  });
+    setUp(() {
+      appNav = AppNav();
+      appNav.setInitRouters({
+        '/home': InitRouter(widget: () => const SizedBox()),
+        '/about': InitRouter(widget: () => const SizedBox()),
+        '/contact': InitRouter(widget: () => const SizedBox()),
+      });
+      appNav.setHomeRouter('/home');
+    });
 
-  test('remove a controller', () {
-    WidgetsFlutterBinding.ensureInitialized();
-    final mainState = MainState.instance;
-    mainState.add(TestController1());
-    // Global.remove<TestController2>();
-    // expect(Global.find<TestController1>(), test1Ctrl);
-    mainState.remove<TestController1>();
-    Future.delayed(const Duration(seconds: 1)).then((value) => expect(
-        () => mainState.find<TestController1>(), throwsA(isA<Exception>())));
+    test('pushNamed adds a new router to the stack', () {
+      appNav.pushNamed('/about');
+      expect(appNav.currentRouter, '/about');
+    });
+
+    test('pop removes the last router from the stack', () {
+      appNav.pushNamed('/about');
+      appNav.pop();
+      expect(appNav.currentRouter, '/home');
+    });
+
+    test('popUntil removes routers until the specified router is reached', () {
+      appNav.pushNamed('/about');
+      appNav.pushNamed('/contact');
+      appNav.popUntil('/about');
+      expect(appNav.currentRouter, '/about');
+    });
+
+    test('popAndReplaceNamed replaces the last router with a new one', () {
+      appNav.pushNamed('/about');
+      appNav.popAndReplaceNamed('/contact');
+      expect(appNav.currentRouter, '/contact');
+    });
+
+    test('popAllAndPushNamed clears the stack and adds a new router', () {
+      appNav.pushNamed('/about');
+      appNav.popAllAndPushNamed('/contact');
+      expect(appNav.currentRouter, '/contact');
+    });
+
+    test('setHomeRouter updates the home router', () {
+      appNav.setHomeRouter('/contact');
+      expect(appNav.currentRouter, '/contact');
+    });
+
+    test('showUnknownRouter sets the unknown router', () {
+      appNav.setUnknownRouter('/about');
+      appNav.showUnknownRouter();
+      expect(appNav.currentRouter, '/unknown');
+    });
+
+    test('checkActiveRouter verifies if a router is active', () {
+      appNav.pushNamed('/about');
+      expect(appNav.checkActiveRouter('/about'), true);
+      expect(appNav.checkActiveRouter('/contact'), false);
+    });
   });
 }
-
-final class TestController1 extends DefaultController {}
-
-final class TestController2 extends DefaultController {}
-
-final class TestController3 extends DefaultController {}
-
-final class TestController4 extends DefaultController {}

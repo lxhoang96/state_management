@@ -93,11 +93,7 @@ extension BaseRouterExtension on BaseRouter {
 
 extension ConvertBaseRouter on List<BaseRouter> {
   List<MaterialPage> getMaterialPage() {
-    final List<MaterialPage> routers = [];
-    forEach((element) {
-      routers.add(element.getRouter());
-    });
-    return routers;
+    return map((element) => element.getRouter()).toList();
   }
 
   BaseRouter? getByName(String routerName) =>

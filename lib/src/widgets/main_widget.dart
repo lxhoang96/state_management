@@ -8,15 +8,14 @@ import 'package:flutter/material.dart';
 
 class GlobalWidget extends StatefulWidget {
   const GlobalWidget(
-      {Key? key,
+      {super.key,
       required this.child,
       this.splashRouter,
       this.initBinding,
       this.backgroundImage,
       this.globalWidgets = const [],
       required this.listPages,
-      required this.homeRouter})
-      : super(key: key);
+      required this.homeRouter});
   final Widget child;
   final String? splashRouter;
   final InitBinding? initBinding;

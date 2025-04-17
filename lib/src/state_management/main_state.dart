@@ -297,6 +297,11 @@ final class MainState implements MainStateInterface, DialogNavigatorInterfaces {
 
   @override
   get currentArguments => _navApp.currentArguments;
+  
+  @override
+  bool isDialogOpen(String name) {
+    return _dialogNav.isDialogOpen(name);
+  }
 }
 
 base class InstanceRoute<T> {

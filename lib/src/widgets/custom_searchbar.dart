@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class CustomSearchBar<T> extends StatefulWidget {
   const CustomSearchBar(
-      {Key? key,
+      {super.key,
       required this.onChanged,
       this.onTap,
       this.readOnly = true,
@@ -18,8 +18,7 @@ class CustomSearchBar<T> extends StatefulWidget {
       this.timeOutSearch = 1,
       this.waitTextSearch = 2,
       this.showDialog = true,
-      this.initialValue, this.noDataWidget})
-      : super(key: key);
+      this.initialValue, this.noDataWidget});
   final Function(T value) onSelected;
   final FutureOr<List<T>> Function(String? value) onChanged;
   final List<T> Function()? onTap;

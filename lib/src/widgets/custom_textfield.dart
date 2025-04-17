@@ -18,7 +18,7 @@ String? defaultValidator(String? value, ValidateType validateType) {
 
 class CustomTextField extends StatelessWidget {
   const CustomTextField({
-    Key? key,
+    super.key,
     this.labelText,
     this.textCtrl,
     this.obsecureText = false,
@@ -50,7 +50,7 @@ class CustomTextField extends StatelessWidget {
     this.onTapOutside,
     this.onCompleted,
     this.focusNode, this.initialValue,
-  }) : super(key: key);
+  });
   final TextEditingController? textCtrl;
   final String? labelText;
   final TextInputType keyboardType;

@@ -83,85 +83,98 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
           globalWidgets: globalWidgets,
           child: HeroControllerScope(
             controller: _mainHeroCtrl,
-            child: _pages.isNotEmpty
-                ? Navigator(
-                    key: navigatorKey,
-                    pages: _pages.toList(),
-                    observers: observers,
-                    onPopPage: (route, result) {
-                      if (!route.didPop(result)) {
-                        return false;
-                      }
-                      MainState.instance.pop();
-                      notifyListeners();
-                      return true;
-                    },
-                  )
-                : const SizedBox(),
+            child: _buildMainNavigator(),
           ),
         ),
         HeroControllerScope(
           controller: _dialogHeroCtrl,
-          child: _dialogs.isNotEmpty
-              ? Navigator(
-                  key: _dialogKey,
-                  pages: _dialogs.toList(),
-                  onPopPage: (route, result) {
-                    if (!route.didPop(result)) {
-                      return false;
-                    }
-                    MainState.instance.removeLastDialog();
-                    notifyListeners();
-                    return true;
-                  },
-                )
-              : const SizedBox(),
+          child: _buildDialogNavigator(),
         ),
-        useSnackbar
-            ? Overlay(initialEntries: [
-                OverlayEntry(
-                  builder: (context) => ObserWidget(
-                    value: SnackBarController.instance.snackbars,
-                    child: (items) {
-                      if (items.isNotEmpty) {
-                        return Align(
-                          alignment: isDesktop
-                              ? Alignment.topRight
-                              : Alignment.topCenter,
-                          child: SizedBox(
-                            width: isDesktop ? 300 : double.infinity,
-                            height: 300,
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: items.length,
-                              itemBuilder: (context, index) {
-                                return items[index];
-                              },
-                            ),
-                          ),
-                        );
-                      }
-                      return const SizedBox();
-                    },
-                  ),
-                )
-              ])
-            : const SizedBox(),
-        useLoading
-            ? Positioned.fill(
-                child: ObserWidget(
-                  value: LoadingController.instance.showing,
-                  child: (value) {
-                    if (value == true) {
-                      return LoadingController.instance
-                          .loadingWidget(loadingWidget);
-                    }
-                    return const SizedBox();
-                  },
-                ),
-              )
-            : const SizedBox(),
+        if (useSnackbar) _buildSnackbarOverlay(),
+        if (useLoading) _buildLoadingOverlay(),
       ],
+    );
+  }
+
+  Widget _buildMainNavigator() {
+    return _pages.isNotEmpty
+        ? Navigator(
+            key: navigatorKey,
+            pages: _pages,
+            observers: observers,
+            onPopPage: (route, result) {
+              if (!route.didPop(result)) {
+                return false;
+              }
+              MainState.instance.pop();
+              notifyListeners();
+              return true;
+            },
+          )
+        : const SizedBox();
+  }
+
+  Widget _buildDialogNavigator() {
+    return _dialogs.isNotEmpty
+        ? Navigator(
+            key: _dialogKey,
+            pages: _dialogs,
+            onPopPage: (route, result) {
+              if (!route.didPop(result)) {
+                return false;
+              }
+              MainState.instance.removeLastDialog();
+              notifyListeners();
+              return true;
+            },
+          )
+        : const SizedBox();
+  }
+
+  Widget _buildSnackbarOverlay() {
+    return Overlay(
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) => ObserWidget(
+            value: SnackBarController.instance.snackbars,
+            child: (items) {
+              if (items.isNotEmpty) {
+                return Align(
+                  alignment: isDesktop
+                      ? Alignment.topRight
+                      : Alignment.topCenter,
+                  child: SizedBox(
+                    width: isDesktop ? 300 : double.infinity,
+                    height: 300,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        return items[index];
+                      },
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox();
+            },
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildLoadingOverlay() {
+    return Positioned.fill(
+      child: ObserWidget(
+        value: LoadingController.instance.showing,
+        child: (value) {
+          if (value == true) {
+            return LoadingController.instance.loadingWidget(loadingWidget);
+          }
+          return const SizedBox();
+        },
+      ),
     );
   }
 

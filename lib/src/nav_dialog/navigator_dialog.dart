@@ -43,4 +43,10 @@ final class DialogNavigator implements DialogNavigatorInterfaces {
     _streamDialogController.value.removeLast();
     _streamDialogController.update();
   }
+  
+  @override
+  bool isDialogOpen(String name) {
+    return _streamDialogController.value
+        .any((element) => element.name == name);
+  }
 }

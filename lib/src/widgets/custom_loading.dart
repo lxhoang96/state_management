@@ -49,4 +49,9 @@ final class LoadingController implements LoadingInterface {
     showing.value = true;
     debugPrint("Loading On Screen");
   }
+  
+  @override
+  bool isLoading() {
+    return showing.value;
+  }
 }

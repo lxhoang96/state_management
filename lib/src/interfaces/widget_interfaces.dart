@@ -5,6 +5,8 @@ abstract interface class LoadingInterface {
   void closeLoading();
 
   void openLoading();
+
+  bool isLoading();
 }
 
 
@@ -18,4 +20,6 @@ abstract interface class SnackbarInterface {
       int timeout = 3});
 
   void showCustomSnackbar({required Widget child, int timeout = 3});
+
+  void dissmissSnackbar({Function? onClosed});
 }

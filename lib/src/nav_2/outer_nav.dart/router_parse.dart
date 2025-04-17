@@ -12,14 +12,20 @@ final class HomeRouteInformationParser
   @override
   Future<RoutePathConfigure> parseRouteInformation(
       RouteInformation routeInformation) async {
-    // if (routeInformation.uri.) {
-    //   return RoutePathConfigure.unKnown();
-    // }
     final uri = routeInformation.uri;
 
+    // Validate the URI path
     if (uri.pathSegments.isEmpty || uri.path == homePath) {
       return RoutePathConfigure.home();
     }
+
+    // Handle invalid or unexpected paths
+    if (uri.path.isEmpty || uri.path == '/') {
+      return RoutePathConfigure.unKnown();
+    }
+
+    // Log unexpected paths for debugging
+    debugPrint('Parsing route: ${uri.path}');
 
     return RoutePathConfigure.otherPage(uri.path);
   }
@@ -27,13 +33,19 @@ final class HomeRouteInformationParser
   @override
   RouteInformation? restoreRouteInformation(RoutePathConfigure configuration) {
     if (configuration.isUnknown) {
+      debugPrint('Restoring unknown route');
       return RouteInformation(uri: Uri.parse(unknownPath));
     }
-    if (configuration.isHomePage) return RouteInformation(uri: Uri.parse(homePath));
+    if (configuration.isHomePage) {
+      debugPrint('Restoring home route');
+      return RouteInformation(uri: Uri.parse(homePath));
+    }
     if (configuration.isOtherPage) {
-      return RouteInformation(uri: Uri.parse(configuration.pathName??unknownPath));
+      debugPrint('Restoring other page route: ${configuration.pathName}');
+      return RouteInformation(uri: Uri.parse(configuration.pathName ?? unknownPath));
     }
     if (configuration.lostConnected) {
+      debugPrint('Restoring lost connection route');
       return RouteInformation(uri: Uri.parse(lostConnectedPath));
     }
     return null;

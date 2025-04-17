@@ -101,6 +101,19 @@ final class SnackBarController implements SnackbarInterface {
       snackbars.update();
     });
   }
+  
+  @override
+  void dissmissSnackbar({Function? onClosed}) {
+    // showSnackBar.value = false;
+    // snackbar = const SizedBox();
+    if (snackbars.value.isNotEmpty) {
+      snackbars.value.clear();
+      snackbars.update();
+      onClosed?.call();
+    } else {
+      debugPrint("Snackbar already closed");
+    }
+  }
 }
 
 final class SnackBarStyle {
