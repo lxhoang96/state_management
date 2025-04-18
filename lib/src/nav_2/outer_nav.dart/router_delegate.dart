@@ -102,13 +102,13 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
             key: navigatorKey,
             pages: _pages,
             observers: observers,
-            onPopPage: (route, result) {
-              if (!route.didPop(result)) {
-                return false;
+            onDidRemovePage: (page){
+                // Perform custom logic when a page is removed
+              if (page.name != null) {
+                debugPrint('Page removed: ${page.name}');
               }
               MainState.instance.pop();
               notifyListeners();
-              return true;
             },
           )
         : const SizedBox();
@@ -119,13 +119,13 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         ? Navigator(
             key: _dialogKey,
             pages: _dialogs,
-            onPopPage: (route, result) {
-              if (!route.didPop(result)) {
-                return false;
+            onDidRemovePage: (page){
+                // Perform custom logic when a page is removed
+              if (page.name != null) {
+                debugPrint('Page removed: ${page.name}');
               }
               MainState.instance.removeLastDialog();
               notifyListeners();
-              return true;
             },
           )
         : const SizedBox();

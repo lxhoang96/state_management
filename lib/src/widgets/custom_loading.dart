@@ -31,7 +31,7 @@ final class LoadingController implements LoadingInterface {
       closeLoading();
     });
     return Material(
-      color: Colors.black.withOpacity(0.5),
+      color: Colors.black.withAlpha(120),
       child: Center(child: child ?? _defaultWidget),
     );
   }

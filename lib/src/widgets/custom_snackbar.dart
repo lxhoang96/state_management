@@ -52,7 +52,7 @@ final class SnackBarController implements SnackbarInterface {
                 spreadRadius: 2.0,
               ),
             ],
-            color: style.backgroundColor.withOpacity(0.8),
+            color: style.backgroundColor.withAlpha(200),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

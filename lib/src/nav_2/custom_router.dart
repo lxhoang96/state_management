@@ -83,8 +83,8 @@ extension BaseRouterExtension on BaseRouter {
     if (innerRouters.length <= 1) return false;
     final index =
         innerRouters.indexWhere((element) => element.routerName == innerName);
-    if (index > 0) {
-      innerRouters.length = index;
+    if (index >= 0) {
+      innerRouters.length = index+1;
       return true;
     }
     return false;

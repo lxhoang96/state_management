@@ -260,16 +260,12 @@ final class AppNav implements AppNavInterfaces {
   
     final newRouter = initRouter.toBaseRouter(routerName,
         arguments: arguments, parentName: parentName);
-      print(_currentRouter?.routerName);
     if (parentName == null) {
       if (_outerRouters.isEmpty) {
         throw Exception('No routers to replace in outer stack');
       }
-      print(_currentRouter?.routerName);
       _outerRouters.removeLast();
-      print(_currentRouter?.routerName);
       _updateRouterStack(newRouter);
-      print(_currentRouter?.routerName);
     } else {
       final parentRouter = _outerRouters.getByName(parentName);
       if (parentRouter == null) {
@@ -347,10 +343,14 @@ final class AppNav implements AppNavInterfaces {
     // case 1:
 
     final lastParent = _outerRouters.last;
+    
+    
     // case 2:
     if (parentName != null &&
         _outerRouters.getByName(parentName)?.popUntil(routerName) == true) {
       // O(n)
+    
+    
       _currentRouter = lastParent.innerRouters.last;
       _streamInnerController[parentName]?.value =
           lastParent.innerRouters.getMaterialPage(); // O(n)

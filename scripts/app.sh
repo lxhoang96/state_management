@@ -43,8 +43,8 @@ class RouteName {
 echo "
 import 'package:base/base_navigation.dart';
 
-Map<String, InitPage> listPages = {
- // RouterName.landing: InitPage(widget: () => LandingScreen()),
+Map<String, InitRouter> listPages = {
+ // RouterName.landing: InitRouter(widget: () => LandingScreen()),
 };
 " >> app_routers.dart
 cd ..
