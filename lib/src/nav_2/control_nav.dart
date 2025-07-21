@@ -1,7 +1,6 @@
 import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/interfaces/appnav_interfaces.dart';
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
 
 import 'custom_router.dart';
 
@@ -9,429 +8,480 @@ String homePath = '/';
 const unknownPath = '/unknown';
 const lostConnectedPath = '/lostConnected';
 
-/// This is the place you can controll your app flow with Navigation 2.0
-/// [AppNav] have to be used with [HomeRouterDelegate],
-/// [HomeRouteInformationParser] and [InnerDelegateRouter]
-/// for controlling your entire app.
-///
 final class AppNav implements AppNavInterfaces {
-  /// UnknownRouter can be update during app, so you can show different page
-  /// for each unknownRouter.
-  BaseRouter unknownRouter =
-      BaseRouter(routerName: unknownPath, widget: () => Container());
-
-  /// this is HomeRouter which will show when you open the app.
-  BaseRouter homeRouter =
-      BaseRouter(routerName: homePath, widget: () => const SizedBox());
+  // ✅ Cache routers by name for O(1) lookup
+  final Map<String, BaseRouter> _outerRouterMap = {};
+  final Map<String, InitRouter> _initRouters = {};
+  
+  // ✅ Keep ordered list for navigation stack
+  final List<String> _outerRouterOrder = [];
+  
+  // ✅ Cache for MaterialPages to avoid recreation
+  final Map<String, List<MaterialPage>> _materialPageCache = {};
+  bool _outerCacheInvalid = true;
+  
+  BaseRouter unknownRouter = BaseRouter(
+    routerName: unknownPath, 
+    widget: () => Container()
+  );
+  
+  BaseRouter homeRouter = BaseRouter(
+    routerName: homePath, 
+    widget: () => const SizedBox()
+  );
+  
   late final BaseRouter lostConnectedRouter;
 
-  /// The Navigator stack is updated with these stream
-  /// [_streamOuterController] for main flow and [_streamInnerController] for nested stack
-  final _streamOuterController =
-      InnerObserver<List<MaterialPage>>(initValue: []);
-  final Map<String, InnerObserver<List<MaterialPage>>> _streamInnerController =
-      {};
+  final _streamOuterController = InnerObserver<List<MaterialPage>>(initValue: []);
+  final Map<String, InnerObserver<List<MaterialPage>>> _streamInnerController = {};
 
-  /// This is routers will be shown in Navigator.
-  final List<BaseRouter> _outerRouters = [];
-  final Map<String, InitRouter> _initRouters = {};
+  BaseRouter? _currentRouter;
 
   InnerObserver<List<MaterialPage>> get outerStream => _streamOuterController;
+  
   InnerObserver<List<MaterialPage>>? getInnerStream(String routerName) =>
       _streamInnerController[routerName];
-
-  /// currentRouter, this can be in main flow or nested flow
-  BaseRouter? _currentRouter;
 
   String get currentRouter => _currentRouter?.routerName ?? homePath;
   String? get parentRouter => _currentRouter?.parentName;
 
-  /// argument when navigation.
   @override
   dynamic get navigationArg => _currentRouter?.argumentNav;
 
   @override
   dynamic get currentArguments => _currentRouter?.arguments;
 
-  _removeDuplicate(String routerName, {String? parentName}) {
-    // O(n)
+  // ✅ O(1) duplicate removal using Map
+  void _removeDuplicate(String routerName, {String? parentName}) {
     if (parentName == null) {
-      _outerRouters
-          .removeWhere((element) => element.routerName == routerName); // O(n)
-
+      if (_outerRouterMap.containsKey(routerName)) {
+        _outerRouterMap.remove(routerName);
+        _outerRouterOrder.remove(routerName);
+        _outerCacheInvalid = true;
+      }
       return;
     }
-    final router = _outerRouters.getByName(parentName); // O(n)
+    
+    final router = _outerRouterMap[parentName];
     if (router == null) {
-      throw Exception(['Can not find a router with this name']);
+      throw Exception('Can not find a router with this name');
     }
-    router.innerRouters
-        .removeWhere((element) => element.routerName == routerName); // O(n)
+    
+    if (router.removeInnerRouter(routerName)) {
+      _invalidateInnerCache(parentName);
+    }
   }
 
-  /// Validates the router name and throws an exception if it is invalid.
+  // ✅ O(1) router validation
   InitRouter _validateRouterName(String routerName) {
-    if (!_initRouters.containsKey(routerName)) {
+    final router = _initRouters[routerName];
+    if (router == null) {
       throw Exception('Router not found: $routerName');
     }
-    return _initRouters[routerName]!;
+    return router;
   }
 
-  /// Validates the parent router and throws an exception if it is invalid.
+  // ✅ O(1) parent validation
   BaseRouter _validateParentRouter(String parentName) {
-    final parentRouter = _outerRouters.getByName(parentName);
+    final parentRouter = _outerRouterMap[parentName];
     if (parentRouter == null) {
       throw Exception('Parent router not found: $parentName');
     }
     return parentRouter;
   }
 
-  /// Ensures the navigation stack is not empty before popping.
   void _ensureStackNotEmpty({String? parentName}) {
-    if (parentName == null && _outerRouters.length <= 1) {
+    if (parentName == null && _outerRouterOrder.length <= 1) {
       throw Exception('Cannot pop: no backward router available.');
     }
   }
 
-  /// Prevents circular references in the navigation stack.
+  // ✅ O(1) circular reference check
   void _preventCircularReference(String routerName, {String? parentName}) {
     if (parentName == null) {
-      if (_outerRouters.any((router) => router.routerName == routerName)) {
+      if (_outerRouterMap.containsKey(routerName)) {
         throw Exception('Circular reference detected for router: $routerName');
       }
     } else {
       final parentRouter = _validateParentRouter(parentName);
-      if (parentRouter.innerRouters.any((router) => router.routerName == routerName)) {
+      if (parentRouter.hasInnerRouter(routerName)) {
         throw Exception('Circular reference detected for router: $routerName in parent: $parentName');
       }
     }
   }
 
-  /// Set routers will display in App
   void setInitRouters(Map<String, InitRouter> initRouters) {
     _initRouters.addAll(initRouters);
   }
 
-  _updateOuter(BaseRouter router) {
-    // O(n)
+  // ✅ Optimized cache management
+  void _invalidateOuterCache() {
+    _outerCacheInvalid = true;
+    _materialPageCache.remove('_outer');
+  }
+
+  void _invalidateInnerCache(String parentName) {
+    _materialPageCache.remove(parentName);
+  }
+
+  // ✅ Cached MaterialPage generation
+  List<MaterialPage> _getOuterMaterialPages() {
+    if (_outerCacheInvalid || !_materialPageCache.containsKey('_outer')) {
+      final pages = _outerRouterOrder
+          .map((name) => _outerRouterMap[name]!)
+          .map((router) => router.getRouter())
+          .toList(growable: false);
+      
+      _materialPageCache['_outer'] = pages;
+      _outerCacheInvalid = false;
+    }
+    
+    return _materialPageCache['_outer']!;
+  }
+
+  List<MaterialPage> _getInnerMaterialPages(String parentName) {
+    if (!_materialPageCache.containsKey(parentName)) {
+      final parentRouter = _outerRouterMap[parentName];
+      if (parentRouter != null) {
+        final pages = parentRouter.innerRouters
+            .map((router) => router.getRouter())
+            .toList(growable: false);
+        _materialPageCache[parentName] = pages;
+      }
+    }
+    
+    return _materialPageCache[parentName] ?? [];
+  }
+
+  void _updateOuter(BaseRouter router) {
     _currentRouter = router;
-    _streamOuterController.value = _outerRouters.getMaterialPage(); // O(n)
+    _streamOuterController.value = _getOuterMaterialPages();
   }
 
-  /// set Splash screen
+  void _updateInner(String parentName) {
+    final stream = _streamInnerController[parentName];
+    if (stream != null) {
+      stream.value = _getInnerMaterialPages(parentName);
+    }
+  }
+
+  // ✅ Optimized methods with caching
   void goSplashScreen(String routerName) {
-    final router = _initRouters[routerName];
-    if (router == null) {
-      throw Exception(['Can not find a router with this name']);
+    final router = _validateRouterName(routerName);
+    final splashRouter = router.toBaseRouter(routerName);
+    
+    // Clear all routers
+    _outerRouterMap.clear();
+    _outerRouterOrder.clear();
+    _materialPageCache.clear();
+    
+    // Dispose inner streams
+    for (final stream in _streamInnerController.values) {
+      stream.dispose();
     }
-
-    final splashRouter = router.toBaseRouter(routerName); // O(n)
-    _outerRouters
-      ..clear()
-      ..add(splashRouter);
-    _updateOuter(splashRouter);
     _streamInnerController.clear();
-    _streamInnerController.forEach((key, value) {
-      value.dispose();
-    });
+    
+    // Add splash router
+    _outerRouterMap[routerName] = splashRouter;
+    _outerRouterOrder.add(routerName);
+    _updateOuter(splashRouter);
   }
 
-  /// set Homepage
   void setHomeRouter(String routerName) {
-    final router = _initRouters[routerName];
-    if (router == null) {
-      throw Exception(['Can not find a router with this name']);
-    }
+    final router = _validateRouterName(routerName);
     homePath = routerName;
-    homeRouter = router.toBaseRouter(homePath); // O(n)
+    homeRouter = router.toBaseRouter(homePath);
     showHomeRouter();
   }
 
-  /// set HomeRouter of nested routers if has any
-  void setInitInnerRouter(String routerName, String parentName,
-      {dynamic arguments}) {
-    // O(n)
-    final newPage = _initRouters[routerName];
-    if (newPage == null) {
-      throw Exception(['Can not find this router']);
-    }
-    final parentRouter = _outerRouters.getByName(parentName); // O(n)
-    if (parentRouter == null) {
-      throw Exception(['Parent is not in outer routing']);
-    }
+  void setInitInnerRouter(String routerName, String parentName, {dynamic arguments}) {
+    final newPage = _validateRouterName(routerName);
+    final parentRouter = _validateParentRouter(parentName);
 
-    if (parentRouter.innerRouters.isNotEmpty) return;
+    if (parentRouter.hasInnerRouters) return;
 
-    final router = newPage.toBaseRouter(routerName,
-        arguments: arguments, parentName: parentName);
-    parentRouter.innerRouters.add(router);
+    final router = newPage.toBaseRouter(
+      routerName,
+      arguments: arguments,
+      parentName: parentName,
+    );
+    
+    parentRouter.addInner(router);
     _currentRouter = router;
-    _streamInnerController[parentRouter.routerName] =
-        InnerObserver<List<MaterialPage>>(
-      initValue: parentRouter.innerRouters.getMaterialPage(),
+    
+    _streamInnerController[parentRouter.routerName] = InnerObserver<List<MaterialPage>>(
+      initValue: _getInnerMaterialPages(parentRouter.routerName),
     );
   }
 
-  /// set UnknownRouter on Web
   void setUnknownRouter(String name) {
-    final router = _initRouters[name];
-    if (router == null) {
-      throw Exception(['Can not find a router with this name']);
-    }
-
+    final router = _validateRouterName(name);
     unknownRouter = router.toBaseRouter(unknownPath);
   }
 
-  /// show UnknownRouter
   void showUnknownRouter() {
-    // O(n)
-    _outerRouters
-      ..clear()
-      ..add(unknownRouter);
-    _updateOuter(unknownRouter);
-    _streamInnerController.forEach((key, value) {
-      value.dispose();
-    });
+    _outerRouterMap.clear();
+    _outerRouterOrder.clear();
+    _materialPageCache.clear();
+    
+    for (final stream in _streamInnerController.values) {
+      stream.dispose();
+    }
     _streamInnerController.clear();
+    
+    _outerRouterMap[unknownPath] = unknownRouter;
+    _outerRouterOrder.add(unknownPath);
+    _updateOuter(unknownRouter);
   }
 
-  /// show HomeRouter
   void showHomeRouter() {
-    // O(n)
-    _outerRouters
-      ..clear()
-      ..add(homeRouter);
-    _updateOuter(homeRouter);
+    _outerRouterMap.clear();
+    _outerRouterOrder.clear();
+    _materialPageCache.clear();
+    
+    for (final stream in _streamInnerController.values) {
+      stream.dispose();
+    }
     _streamInnerController.clear();
-    _streamInnerController.forEach((key, value) {
-      value.dispose();
-    });
+    
+    _outerRouterMap[homePath] = homeRouter;
+    _outerRouterOrder.add(homePath);
+    _updateOuter(homeRouter);
   }
 
   void setLostConnectedRouter(String name) {
-    // O(n)
-    final router = _initRouters[name];
-    if (router == null) {
-      throw Exception(['Can not find a router with this name']);
-    }
+    final router = _validateRouterName(name);
     lostConnectedRouter = router.toBaseRouter(lostConnectedPath);
   }
 
   void showLostConnectedRouter() {
-    // O(n)
     _removeDuplicate(lostConnectedPath);
-    _outerRouters.add(lostConnectedRouter);
+    _outerRouterMap[lostConnectedPath] = lostConnectedRouter;
+    _outerRouterOrder.add(lostConnectedPath);
+    _invalidateOuterCache();
     _updateOuter(lostConnectedRouter);
   }
 
   void _updateRouterStack(BaseRouter newRouter, {String? parentName}) {
     if (parentName == null) {
-      _outerRouters.add(newRouter);
-      _updateOuter(newRouter );
+      _outerRouterMap[newRouter.routerName] = newRouter;
+      _outerRouterOrder.add(newRouter.routerName);
+      _invalidateOuterCache();
+      _updateOuter(newRouter);
     } else {
-      final parentRouter = _outerRouters.getByName(parentName);
-      if (parentRouter == null) {
-        throw Exception('Parent router not found: $parentName');
-      }
-      parentRouter.innerRouters.add(newRouter);
-      _streamInnerController[parentName]?.value =
-          parentRouter.innerRouters.getMaterialPage();
+      final parentRouter = _validateParentRouter(parentName);
+      parentRouter.addInner(newRouter);
+      _invalidateInnerCache(parentName);
+      _updateInner(parentName);
     }
   }
 
-  /// push a page
   @override
   void pushNamed(String routerName, {String? parentName, dynamic arguments}) {
     final initRouter = _validateRouterName(routerName);
     _preventCircularReference(routerName, parentName: parentName);
     _removeDuplicate(routerName, parentName: parentName);
-    final newRouter = initRouter.toBaseRouter(routerName,
-        arguments: arguments, parentName: parentName);
+    
+    final newRouter = initRouter.toBaseRouter(
+      routerName,
+      arguments: arguments,
+      parentName: parentName,
+    );
+    
     _currentRouter = newRouter;
     _updateRouterStack(newRouter, parentName: parentName);
   }
 
-  /// remove last page and replace this with new one
   @override
-  void popAndReplaceNamed(String routerName,
-      {String? parentName, dynamic arguments}) {
+  void popAndReplaceNamed(String routerName, {String? parentName, dynamic arguments}) {
     final initRouter = _validateRouterName(routerName);
-    // _ensureStackNotEmpty(parentName: parentName);
-  
-    final newRouter = initRouter.toBaseRouter(routerName,
-        arguments: arguments, parentName: parentName);
+    
+    final newRouter = initRouter.toBaseRouter(
+      routerName,
+      arguments: arguments,
+      parentName: parentName,
+    );
+    
     if (parentName == null) {
-      if (_outerRouters.isEmpty) {
+      if (_outerRouterOrder.isEmpty) {
         throw Exception('No routers to replace in outer stack');
       }
-      _outerRouters.removeLast();
+      
+      final lastRouterName = _outerRouterOrder.removeLast();
+      _outerRouterMap.remove(lastRouterName);
+      _invalidateOuterCache();
       _updateRouterStack(newRouter);
     } else {
-      final parentRouter = _outerRouters.getByName(parentName);
-      if (parentRouter == null) {
-        throw Exception('Parent router not found: $parentName');
-      }
+      final parentRouter = _validateParentRouter(parentName);
       parentRouter.popAndAddInner(newRouter);
-      _streamInnerController[parentName]?.value =
-          parentRouter.innerRouters.getMaterialPage();
+      _invalidateInnerCache(parentName);
+      _updateInner(parentName);
     }
   }
 
-  /// remove all and add a page
   @override
-  void popAllAndPushNamed(String routerName,
-      {String? parentName, dynamic arguments}) {
+  void popAllAndPushNamed(String routerName, {String? parentName, dynamic arguments}) {
     final initRouter = _validateRouterName(routerName);
     _preventCircularReference(routerName, parentName: parentName);
-     final newRouter = initRouter.toBaseRouter(routerName,
-        arguments: arguments, parentName: parentName);
+    
+    final newRouter = initRouter.toBaseRouter(
+      routerName,
+      arguments: arguments,
+      parentName: parentName,
+    );
+    
     if (parentName == null) {
-      _outerRouters.clear();
-      _updateRouterStack(newRouter);
-      _streamInnerController.forEach((key, value) => value.dispose());
-      _streamInnerController.clear();
-    } else {
-      final parentRouter = _outerRouters.getByName(parentName);
-      if (parentRouter == null) {
-        throw Exception('Parent router not found: $parentName');
+      _outerRouterMap.clear();
+      _outerRouterOrder.clear();
+      _materialPageCache.clear();
+      
+      for (final stream in _streamInnerController.values) {
+        stream.dispose();
       }
+      _streamInnerController.clear();
+      
+      _updateRouterStack(newRouter);
+    } else {
+      final parentRouter = _validateParentRouter(parentName);
       parentRouter.popAllAndPushInner(newRouter);
-      _streamInnerController[parentName]?.value =
-          parentRouter.innerRouters.getMaterialPage();
+      _invalidateInnerCache(parentName);
+      _updateInner(parentName);
     }
   }
 
-  /// remove last page
   @override
   void pop() {
     _ensureStackNotEmpty();
-    // O(n)
-    // there are 3 cases:
-    // 1. This is outer routing and there are only 1 router, solution: can not pop
-    // 2. This is inner routing and can pop.
-    // 3. This is inner routing but has only one inner router, solution: pop parent router
+    
     final parentName = _currentRouter?.parentName;
-    // case 1:
-
-    final lastParent = _outerRouters.last;
-    // case 2:
-    if (parentName != null && lastParent.pop()) {
-      // O(n)
-      _currentRouter = lastParent.innerRouters.last;
-      _streamInnerController[parentName]?.value =
-          lastParent.innerRouters.getMaterialPage();
-      return;
+    
+    if (_outerRouterOrder.isNotEmpty) {
+      final lastRouterName = _outerRouterOrder.last;
+      final lastParent = _outerRouterMap[lastRouterName]!;
+      
+      if (parentName != null && lastParent.pop()) {
+        _currentRouter = lastParent.innerRouters.last;
+        _invalidateInnerCache(parentName);
+        _updateInner(parentName);
+        return;
+      }
+      
+      final removedName = _outerRouterOrder.removeLast();
+      _outerRouterMap.remove(removedName);
+      
+      final oldInner = _streamInnerController.remove(removedName);
+      oldInner?.dispose();
+      
+      _invalidateOuterCache();
+      if (_outerRouterOrder.isNotEmpty) {
+        final newLastName = _outerRouterOrder.last;
+        _updateOuter(_outerRouterMap[newLastName]!);
+      }
     }
-    // case 3:
-    final oldPage = _outerRouters.removeLast();
-    _updateOuter(_outerRouters.last); // O(n)
-    // _streamInnerController[oldPage.routerName]?.dispose();
-    final oldInner = _streamInnerController.remove(oldPage.routerName);
-    oldInner?.dispose();
   }
 
-  /// remove several pages until page with routerName
   @override
   void popUntil(String routerName, {String? parentName}) {
     _validateRouterName(routerName);
     _ensureStackNotEmpty(parentName: parentName);
-    // O(n)
-    // there are 3 cases:
-    // 1. This is outer routing and there are only 1 router, solution: can not pop
-    // 2. This is inner routing and can pop.
-    // 3. This is outer routing.
-    // case 1:
-
-    final lastParent = _outerRouters.last;
     
-    
-    // case 2:
-    if (parentName != null &&
-        _outerRouters.getByName(parentName)?.popUntil(routerName) == true) {
-      // O(n)
-    
-    
-      _currentRouter = lastParent.innerRouters.last;
-      _streamInnerController[parentName]?.value =
-          lastParent.innerRouters.getMaterialPage(); // O(n)
-      return;
+    if (parentName != null) {
+      final parentRouter = _validateParentRouter(parentName);
+      if (parentRouter.popUntil(routerName)) {
+        _currentRouter = parentRouter.innerRouters.last;
+        _invalidateInnerCache(parentName);
+        _updateInner(parentName);
+        return;
+      }
     }
-    // case 3:
-    _outerRouters.length = _outerRouters
-            .indexWhere((element) => element.routerName == routerName) +
-        1; // O(n)
-    _updateOuter(_outerRouters.last); // O(n)
+    
+    final targetIndex = _outerRouterOrder.indexOf(routerName);
+    if (targetIndex >= 0) {
+      // Remove routers after target
+      final routersToRemove = _outerRouterOrder.sublist(targetIndex + 1);
+      for (final name in routersToRemove) {
+        _outerRouterMap.remove(name);
+        _streamInnerController.remove(name)?.dispose();
+      }
+      
+      _outerRouterOrder.length = targetIndex + 1;
+      _invalidateOuterCache();
+      
+      if (_outerRouterOrder.isNotEmpty) {
+        final lastRouterName = _outerRouterOrder.last;
+        _updateOuter(_outerRouterMap[lastRouterName]!);
+      }
+    }
   }
 
-  /// check a router is active or not
+  // ✅ O(1) router checking
   bool checkActiveRouter(String routerName, {String? parentName}) {
-    // O(n)
     if (routerName == '/') return true;
-
+    
     if (parentName == null) {
-      return _outerRouters.firstWhereOrNull(
-              (element) => element.routerName == routerName) !=
-          null; // O(n)
+      return _outerRouterMap.containsKey(routerName);
     }
-
-    return _outerRouters
-            .firstWhereOrNull((element) => element.routerName == parentName)
-            ?.innerRouters
-            .firstWhereOrNull((element) => element.routerName == routerName) !=
-        null; // O(n)
+    
+    final parentRouter = _outerRouterMap[parentName];
+    return parentRouter?.hasInnerRouter(routerName) ?? false;
   }
 
-  /// only for web with path on browser
   void setOuterRoutersForWeb(List<String> listRouter) {
-    // O(n)
-    listRouter.removeWhere((element) => element == '');
-    _outerRouters.clear();
+    listRouter.removeWhere((element) => element.isEmpty);
+    
+    _outerRouterMap.clear();
+    _outerRouterOrder.clear();
+    _materialPageCache.clear();
+    
     for (var routerName in listRouter) {
-      // O(n)
       if (!routerName.startsWith('/')) {
         routerName = '/$routerName';
       }
+      
       final router = _initRouters[routerName];
       if (router == null) {
-        _outerRouters
-          ..clear()
-          ..add(unknownRouter);
+        _outerRouterMap.clear();
+        _outerRouterOrder.clear();
+        _outerRouterMap[unknownPath] = unknownRouter;
+        _outerRouterOrder.add(unknownPath);
         return;
       }
-final newRouter = router.toBaseRouter(routerName, arguments: currentArguments);
-      _outerRouters
-          .add(newRouter);
+      
+      final newRouter = router.toBaseRouter(routerName, arguments: currentArguments);
+      _outerRouterMap[routerName] = newRouter;
+      _outerRouterOrder.add(routerName);
     }
-    _updateOuter(_outerRouters.last); // O(n)
+    
+    if (_outerRouterOrder.isNotEmpty) {
+      final lastRouterName = _outerRouterOrder.last;
+      _updateOuter(_outerRouterMap[lastRouterName]!);
+    }
   }
 
-  /// only for web with path on browser
-  void setInnerRoutersForWeb(
-      // O(n)
-      {required String parentName,
-      List<String> listRouter = const [],
-      dynamic arguments}) {
-    final parentRouter = _outerRouters.getByName(parentName); // O(n)
+  void setInnerRoutersForWeb({
+    required String parentName,
+    List<String> listRouter = const [],
+    dynamic arguments,
+  }) {
+    final parentRouter = _outerRouterMap[parentName];
     if (parentRouter == null) return;
+    
     for (var routerName in listRouter) {
-      // O(n)
       final router = _initRouters[routerName];
-      if (router == null) {
-        return;
-      }
-
-      parentRouter.addInner(router.toBaseRouter(routerName,
-          arguments: arguments, parentName: parentName));
+      if (router == null) return;
+      
+      parentRouter.addInner(router.toBaseRouter(
+        routerName,
+        arguments: arguments,
+        parentName: parentName,
+      ));
     }
-    _streamInnerController[parentName]?.value =
-        parentRouter.innerRouters.getMaterialPage(); // O(n)
+    
+    _invalidateInnerCache(parentName);
+    _updateInner(parentName);
   }
 
-  getPath() {
-    String path = '';
-    for (var element in _outerRouters) {
-      path += element.routerName;
-    }
-    return path;
+  String getPath() {
+    return _outerRouterOrder.join('');
   }
 }

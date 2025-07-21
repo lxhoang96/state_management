@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'custom_textfield.dart';
 
 class CustomDropdown<T> extends StatefulWidget {
@@ -14,7 +13,10 @@ class CustomDropdown<T> extends StatefulWidget {
     this.style,
     this.onSaved,
     this.noDataWidget,
+    this.maxHeight, // ✅ Add configurable max height
+    this.itemPadding = const EdgeInsets.all(8.0), // ✅ Configurable padding
   });
+  
   final List<T> data;
   final Function(T value)? onChanged;
   final Function(T? value)? onSaved;
@@ -24,6 +26,8 @@ class CustomDropdown<T> extends StatefulWidget {
   final TextStyle? style;
   final String fieldName;
   final Widget? noDataWidget;
+  final double? maxHeight; // ✅ Configurable max height
+  final EdgeInsets itemPadding; // ✅ Configurable padding
 
   @override
   State<CustomDropdown<T>> createState() => _CustomDropdownState<T>();
@@ -33,86 +37,107 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
   final _dropdownKey = GlobalKey();
   final _textCtrl = TextEditingController();
   T? _currentValue;
-  late RenderBox _box;
-
-  TextStyle style = const TextStyle();
+  RenderBox? _box; // ✅ Make nullable to handle initialization properly
+  
+  // ✅ Cache text style
+  late final TextStyle _effectiveStyle;
+  
+  // ✅ Cache decoration
+  late final BoxDecoration _dropdownDecoration;
 
   OverlayEntry? _dialog;
-
-  onTapDrowdown() async {
-    final offset = _box.localToGlobal(Offset(0, _box.size.height));
-    final height = MediaQuery.of(context).size.height;
-    double? bottomPos;
-    double? topPos = offset.dy + MediaQuery.of(context).viewInsets.bottom;
-    if (topPos > height / 2) {
-      // topPos = topPos -
-      //     height / 4 -
-      //     50 -
-      //     MediaQuery.of(context).viewInsets.bottom;
-      // if (topPos < 0) topPos = 0;
-      bottomPos = height - offset.dy + 50;
-      topPos = null;
-    }
-    _onRemoveDialog();
-    _dialog = OverlayEntry(builder: (context) {
-      return Positioned(
-        top: topPos,
-        bottom: bottomPos,
-        left: offset.dx,
-        child: TapRegion(
-          onTapOutside: (details) => _onRemoveDialog(),
-          child: _buildDropdown(),
-        ),
-      );
-    });
-    Overlay.of(context).insert(_dialog!);
-  }
-
-  _onRemoveDialog() {
-    if (_dialog == null || _dialog?.mounted == false) return;
-    _dialog?.remove();
-    _dialog = null;
-  }
-
-  onPickItem(int index) {
-    _currentValue = widget.data[index];
-    if (_currentValue == null) {
-      return;
-    }
-    widget.onChanged?.call(_currentValue as T);
-    setState(() {
-      _textCtrl.text = widget.text(widget.data[index]);
-      _onRemoveDialog();
-    });
-  }
+  bool _isInitialized = false; // ✅ Track initialization
 
   @override
   void initState() {
-    // _dropdownKey = GlobalObjectKey(widget.hashCode);
-
-    if (widget.style != null) {
-      style = widget.style!;
-    }
-
-    final value = widget.initValue;
-
-    if (value != null) {
-      _textCtrl.text = widget.text(value);
-    }
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        _box = _dropdownKey.currentContext?.findRenderObject() as RenderBox;
-
-        setState(() {});
-      },
-    );
     super.initState();
+    
+    // ✅ Initialize style and decoration once
+    _effectiveStyle = widget.style ?? const TextStyle();
+    _dropdownDecoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(width: 1),
+      color: Colors.white,
+    );
+    
+    // ✅ Set initial value
+    _currentValue = widget.initValue;
+    if (widget.initValue != null) {
+      _textCtrl.text = widget.text(widget.initValue as T);
+    }
+    
+    // ✅ Get render box after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _dropdownKey.currentContext;
+      if (context != null) {
+        _box = context.findRenderObject() as RenderBox?;
+        if (mounted) {
+          setState(() => _isInitialized = true);
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
+    _onRemoveDialog(); // ✅ Clean up overlay before disposing
     _textCtrl.dispose();
     super.dispose();
+  }
+
+  // ✅ Optimized dropdown positioning
+  void _onTapDropdown() {
+    if (!_isInitialized || _box == null || _dialog != null) return;
+    
+    final offset = _box!.localToGlobal(Offset(0, _box!.size.height));
+    final screenHeight = MediaQuery.of(context).size.height;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    
+    double? topPos;
+    double? bottomPos;
+    
+    final availableSpaceBelow = screenHeight - offset.dy - keyboardHeight;
+    final availableSpaceAbove = offset.dy;
+    
+    // ✅ Smart positioning based on available space
+    if (availableSpaceBelow > 200 || availableSpaceBelow > availableSpaceAbove) {
+      topPos = offset.dy;
+    } else {
+      bottomPos = screenHeight - offset.dy + 4;
+    }
+    
+    _dialog = OverlayEntry(
+      builder: (context) => Positioned(
+        top: topPos,
+        bottom: bottomPos,
+        left: offset.dx,
+        child: TapRegion(
+          onTapOutside: (_) => _onRemoveDialog(),
+          child: _buildDropdown(),
+        ),
+      ),
+    );
+    
+    Overlay.of(context).insert(_dialog!);
+  }
+
+  void _onRemoveDialog() {
+    if (_dialog?.mounted == true) {
+      _dialog!.remove();
+    }
+    _dialog = null;
+  }
+
+  // ✅ Optimized item selection
+  void _onPickItem(int index) {
+    if (index < 0 || index >= widget.data.length) return;
+    
+    final selectedItem = widget.data[index];
+    _currentValue = selectedItem;
+    _textCtrl.text = widget.text(selectedItem);
+    
+    widget.onChanged?.call(selectedItem);
+    _onRemoveDialog();
   }
 
   @override
@@ -122,56 +147,52 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
       textCtrl: _textCtrl,
       labelText: widget.fieldName,
       readOnly: widget.readOnly,
-      onTap: () => onTapDrowdown(),
-      style: style,
-      onSaved: (value) {
-        widget.onSaved?.call(_currentValue);
-      },
-      suffixIcon: const Icon(
-        Icons.arrow_drop_down_outlined,
-        size: 24,
+      onTap: _onTapDropdown,
+      style: _effectiveStyle,
+      onSaved: (_) => widget.onSaved?.call(_currentValue),
+      suffixIcon: const Icon(Icons.arrow_drop_down_outlined, size: 24),
+    );
+  }
+
+  // ✅ Optimized dropdown builder
+  Widget _buildDropdown() {
+    final maxHeight = widget.maxHeight ?? MediaQuery.of(context).size.height / 4;
+    
+    return Material(
+      elevation: 8, // ✅ Add elevation for better visual hierarchy
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: _box!.size.width,
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        decoration: _dropdownDecoration,
+        child: widget.data.isNotEmpty
+            ? _buildItemList()
+            : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: widget.noDataWidget ?? const SizedBox(),
+              ),
       ),
     );
   }
 
-  _buildDropdown() {
-    final boxDecoration = BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          width: 1,
-        ),
-        color: Colors.white);
-    return Material(
-      // color: ,
-      child: Container(
-          width: _box.size.width,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height / 4,
+  // ✅ Separate item list builder for better performance
+  Widget _buildItemList() {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      shrinkWrap: true,
+      itemCount: widget.data.length,
+      itemBuilder: (context, index) => InkWell( // ✅ Use InkWell for better touch feedback
+        onTap: () => _onPickItem(index),
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: widget.itemPadding,
+          child: Text(
+            widget.text(widget.data[index]),
+            style: _effectiveStyle,
           ),
-          decoration: boxDecoration,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          child: widget.data.isNotEmpty
-              ? ListView.separated(
-                  itemCount: widget.data.length,
-                  shrinkWrap: true,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemBuilder: (context, index) => GestureDetector(
-                    onTap: () => onPickItem(index),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        widget.text(widget.data[index]),
-                        style: style,
-                      ),
-                    ),
-                  ),
-                  separatorBuilder: (context, index) {
-                    return const Divider(
-                      thickness: 1,
-                    );
-                  },
-                )
-              : widget.noDataWidget ?? const SizedBox()),
+        ),
+      ),
+      separatorBuilder: (_, __) => const Divider(height: 1, thickness: 0.5),
     );
   }
 }

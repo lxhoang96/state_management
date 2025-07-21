@@ -1,5 +1,4 @@
 import 'package:base/src/nav_2/custom_router.dart';
-import 'package:base/src/nav_dialog/custom_dialog.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:base/src/theme/sizes.dart';
 import 'package:base/src/widgets/custom_loading.dart';
@@ -51,7 +50,7 @@ class _GlobalWidgetState extends State<GlobalWidget> {
     SnackBarController.instance.snackbars.update();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       init();
-      BaseDialog.instance.init(context);
+      // BaseDialog.instance.init(context);
       BaseSizes.instance.init(context);
     });
     super.initState();

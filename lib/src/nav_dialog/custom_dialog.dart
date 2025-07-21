@@ -1,59 +1,55 @@
-import 'package:base/src/interfaces/dialog_interfaces.dart';
-import 'package:base/src/state_management/main_state.dart';
 import 'package:flutter/material.dart';
 
-final class BaseDialog implements DialogInterfaces {
-  static final instance = BaseDialog._();
-  BaseDialog._();
-  Widget _dialog =
-      Container(color: Colors.black.withAlpha(120), child: const SizedBox());
-  late final BuildContext _dialogContext;
-  bool _isInit = false;
-  init(BuildContext context) {
-    if (_isInit) return;
-    _dialogContext = context;
-    _isInit = true;
-  }
-
-  @override
-  showDialog({
-    required Widget Function(BuildContext context) child,
-    required String name,
+/// This is just a utility class for creating custom dialog styles
+/// Not a singleton - just style/UI helpers
+class CustomDialogStyles {
+  
+  static Widget createStyledDialog({
+    required Widget child,
     Color? backgroundColor,
     bool barrierDismissible = true,
-    Function? onClosed,
+    Function? onBarrierTap,
   }) {
-    _dialog = Scaffold(
-      // type: MaterialType.transparency,
+    return Scaffold(
       backgroundColor: backgroundColor ?? Colors.black.withAlpha(90),
-      // backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // Barrier
           InkWell(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
             onTap: () {
               if (barrierDismissible) {
-                closeDialog(name, onClosed: onClosed);
+                onBarrierTap?.call();
               }
             },
           ),
+          // Dialog content
           Align(
             alignment: Alignment.center,
-            child: child.call(_dialogContext),
+            child: child,
           ),
         ],
       ),
     );
-    MainState.instance.showDialog(child: _dialog, name: name);
   }
 
-  @override
-  closeDialog(
-    String name, {
-    Function? onClosed,
+  static Widget createBottomSheetDialog({
+    required Widget child,
+    Color? backgroundColor,
   }) {
-    MainState.instance.removeDialog(name);
-    onClosed?.call();
+    return Scaffold(
+      backgroundColor: Colors.black.withAlpha(90),
+      body: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          decoration: BoxDecoration(
+            color: backgroundColor ?? Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 }

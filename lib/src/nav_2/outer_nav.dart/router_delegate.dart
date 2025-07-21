@@ -1,9 +1,8 @@
+import 'package:base/base_widget.dart';
 import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
 import 'package:base/src/widgets/custom_loading.dart';
-import 'package:base/src/widgets/custom_snackbar.dart';
-import 'package:base/src/widgets/main_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -48,7 +47,7 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         }
       },
     );
-    final dialogStream = MainState.instance.dialogStream;
+    final dialogStream = AppDialog.instance.dialogStream;
 
     dialogStream.stream.listen(
       (value) {
@@ -124,7 +123,7 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
               if (page.name != null) {
                 debugPrint('Page removed: ${page.name}');
               }
-              MainState.instance.removeLastDialog();
+              AppDialog.closeLastDialog();
               notifyListeners();
             },
           )
@@ -150,7 +149,7 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
                       shrinkWrap: true,
                       itemCount: items.length,
                       itemBuilder: (context, index) {
-                        return items[index];
+                        return items[index].widget;
                       },
                     ),
                   ),

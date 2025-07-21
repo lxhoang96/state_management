@@ -1,17 +1,15 @@
 import 'dart:async';
 import 'package:base/src/interfaces/observer_interfaces.dart';
-import 'package:base/src/state_management/main_state.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-/// Abstract interface for Observer implementations.
+// Cache the equality checker to avoid recreating it
+const _equality = DeepCollectionEquality();
 
-
-/// Base class for managing state using streams.
-/// Implements the `ObserverAbs` interface.
 base class InnerObserver<T> implements ObserverAbs<T> {
   final _streamController = StreamController<T>.broadcast();
   late T _object;
+  bool _isDisposed = false; // ✅ Add disposal flag
 
   InnerObserver({required T initValue}) {
     _object = initValue;
@@ -23,7 +21,8 @@ base class InnerObserver<T> implements ObserverAbs<T> {
 
   @override
   set value(T valueSet) {
-    if (valueSet != _object) {
+    if (_isDisposed) return; // ✅ Quick disposal check
+    if (valueSet != _object) { // ✅ Use simple equality first
       _object = valueSet;
       _streamController.sink.add(_object);
     }
@@ -31,6 +30,7 @@ base class InnerObserver<T> implements ObserverAbs<T> {
 
   @override
   void update() {
+    if (_isDisposed) return;
     _streamController.sink.add(_object);
   }
 
@@ -39,35 +39,33 @@ base class InnerObserver<T> implements ObserverAbs<T> {
 
   @override
   void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
     debugPrint('$this disposing');
     _streamController.close();
   }
 }
 
-/// An observer can be used to update value in multiple places using streams.
-/// An observer can be automatically closed by default and can be handled manually
-/// with `autoClose == false`.
-/// An observer can get and set value with `.value`.
-/// An observer can be used in the Widget tree with [ObserWidget] and [ObserListWidget].
-/// Or in controllers with [ObserverCombined].
 final class Observer<T> extends InnerObserver<T> {
-  Observer({required T initValue, bool autoClose = true})
-      : super(initValue: initValue) {
-    _object = initValue;
-    _streamController.sink.add(_object);
+  final bool _useDeepEquality;
 
-    if (autoClose) {
-      MainState.instance.addObs(this); // Assuming MainState handles auto-closing.
-    }
-  }
-
-  @override
-  T get value => _object;
+  Observer({
+    required T initValue, 
+    bool autoClose = true,
+    bool useDeepEquality = false, // ✅ Optional deep equality
+  }) : _useDeepEquality = useDeepEquality,
+       super(initValue: initValue);
 
   @override
   set value(T valueSet) {
-    if (_streamController.isClosed) return;
-    if (!testEqual(valueSet, _object)) {
+    if (_isDisposed) return;
+    
+    // ✅ Optimized equality check
+    bool isEqual = _useDeepEquality 
+        ? _equality.equals(valueSet, _object)
+        : valueSet == _object;
+        
+    if (!isEqual) {
       _object = valueSet;
       _streamController.sink.add(_object);
     }
@@ -75,17 +73,8 @@ final class Observer<T> extends InnerObserver<T> {
 
   @override
   void update() {
-    if (_streamController.isClosed) return;
+    if (_isDisposed) return;
     _streamController.sink.add(_object);
-  }
-
-  @override
-  Stream<T> get stream => _streamController.stream;
-
-  @override
-  void dispose() {
-    debugPrint('$this disposing');
-    _streamController.close();
   }
 }
 
@@ -95,26 +84,36 @@ final class Observer<T> extends InnerObserver<T> {
 final class ObserverCombined {
   final _streamController = StreamController<List<dynamic>>.broadcast();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
+  final List<dynamic> _latestValues; // ✅ Cache latest values
+  bool _isDisposed = false;
 
-  ObserverCombined(List<Stream<dynamic>> listStream) {
-    for (var stream in listStream) {
+  ObserverCombined(List<Stream<dynamic>> listStream) 
+      : _latestValues = List.filled(listStream.length, null) {
+    
+    for (int i = 0; i < listStream.length; i++) {
       _subscriptions.add(
-        stream.listen((_) => _combineLatest(listStream)),
+        listStream[i].listen((value) {
+          if (_isDisposed) return;
+          _latestValues[i] = value;
+          // ✅ Only emit when all values are available
+          if (_latestValues.every((element) => element != null)) {
+            _streamController.sink.add(List.from(_latestValues));
+          }
+        }),
       );
     }
   }
 
   Stream<List<dynamic>> get value => _streamController.stream;
 
-  void _combineLatest(List<Stream<dynamic>> listStream) async {
-    final values = await Future.wait(listStream.map((stream) => stream.first));
-    _streamController.sink.add(values);
-  }
-
   void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    
     for (var subscription in _subscriptions) {
       subscription.cancel();
     }
+    _subscriptions.clear();
     _streamController.close();
   }
 }
@@ -145,23 +144,43 @@ final class ObserWidget<T> extends StatelessWidget {
 }
 /// [ObserListWidget] is a custom [StreamBuilder] to rebuild Widgets when a stream
 /// in a List of streams has new value.
-final class ObserListWidget extends StatelessWidget {
-  ObserListWidget({super.key, required this.listStream, required this.child}) {
-    stream = _combineLatest(listStream);
-  }
+final class ObserListWidget extends StatefulWidget {
+  const ObserListWidget({
+    super.key, 
+    required this.listStream, 
+    required this.child
+  });
+  
   final List<Stream<dynamic>> listStream;
   final Widget Function(List<dynamic> value) child;
-  late final Stream<List<dynamic>> stream;
+
+  @override
+  State<ObserListWidget> createState() => _ObserListWidgetState();
+}
+
+class _ObserListWidgetState extends State<ObserListWidget> {
+  late final ObserverCombined _combined;
+
+  @override
+  void initState() {
+    super.initState();
+    _combined = ObserverCombined(widget.listStream);
+  }
+
+  @override
+  void dispose() {
+    _combined.dispose(); // ✅ Proper cleanup
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<dynamic>>(
-      stream: stream,
+      stream: _combined.value,
       builder: (context, snapshot) {
-        if (snapshot.hasData &&
-            snapshot.data != null &&
+        if (snapshot.hasData && 
             snapshot.connectionState == ConnectionState.active) {
-          return child(snapshot.data!);
+          return widget.child(snapshot.data!);
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -170,25 +189,4 @@ final class ObserListWidget extends StatelessWidget {
       },
     );
   }
-
-  /// Combines multiple streams into a single stream of lists.
-  Stream<List<dynamic>> _combineLatest(List<Stream<dynamic>> streams) async* {
-    final latestValues = List<dynamic>.filled(streams.length, null);
-    final controller = StreamController<List<dynamic>>.broadcast();
-
-    for (int i = 0; i < streams.length; i++) {
-      streams[i].listen((value) {
-        latestValues[i] = value;
-        if (latestValues.every((element) => element != null)) {
-          controller.add(List<dynamic>.from(latestValues));
-        }
-      });
-    }
-
-    yield* controller.stream;
-  }
-}
-/// Utility function to test equality between two objects.
-bool testEqual<T>(T p, T n) {
-  return const DeepCollectionEquality().equals(p, n);
 }
