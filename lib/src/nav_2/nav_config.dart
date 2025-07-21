@@ -29,4 +29,9 @@ final class RoutePathConfigure {
   bool get lostConnected => _lostConnected == true;
 
   String? get pathName => _pathName;
+
+  @override
+  String toString() {
+    return 'RoutePathConfigure(pathName: $_pathName, isUnknown: $_isUnknown, lostConnected: $_lostConnected)';
+  }
 }

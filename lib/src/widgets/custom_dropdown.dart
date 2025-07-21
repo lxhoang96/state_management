@@ -79,7 +79,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
     if (_currentValue == null) {
       return;
     }
-    widget.onChanged?.call(_currentValue!);
+    widget.onChanged?.call(_currentValue as T);
     setState(() {
       _textCtrl.text = widget.text(widget.data[index]);
       _onRemoveDialog();

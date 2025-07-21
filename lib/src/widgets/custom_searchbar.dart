@@ -3,24 +3,22 @@ import 'package:base/src/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 
 class CustomSearchBar<T> extends StatefulWidget {
-  const CustomSearchBar({
-    Key? key,
-    required this.onChanged,
-    this.onTap,
-    this.readOnly = true,
-    required this.text,
-    this.style,
-    required this.onSelected,
-    this.suffixIcon,
-    this.prefixIcon,
-    this.hintText,
-    this.textCtrl,
-    this.timeOutSearch = 1,
-    this.waitTextSearch = 2,
-    this.showDialog = true,
-    this.initialValue,
-    this.noDataWidget,
-  }) : super(key: key);
+  const CustomSearchBar(
+      {super.key,
+      required this.onChanged,
+      this.onTap,
+      this.readOnly = true,
+      required this.text,
+      this.style,
+      required this.onSelected,
+      this.suffixIcon,
+      this.prefixIcon,
+      this.hintText,
+      this.textCtrl,
+      this.timeOutSearch = 1,
+      this.waitTextSearch = 2,
+      this.showDialog = true,
+      this.initialValue, this.noDataWidget});
   final Function(T value) onSelected;
   final FutureOr<List<T>> Function(String? value) onChanged;
   final List<T> Function()? onTap;

@@ -8,4 +8,6 @@ abstract interface class DialogNavigatorInterfaces {
   removeAllDialog();
 
   removeLastDialog();
+
+  bool isDialogOpen(String name);
 }

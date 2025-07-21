@@ -17,7 +17,7 @@ final class AppSnackBar {
           required String? message,
           required String title,
           Function()? onTap,
-          int timeout = 2}) =>
+          int timeout = 3}) =>
       _controller.showSnackbar(
           style: style,
           message: message,
@@ -25,6 +25,6 @@ final class AppSnackBar {
           onTap: onTap,
           timeout: timeout);
 
-  static showCustomSnackbar({required Widget child, int timeout = 2}) =>
+  static showCustomSnackbar({required Widget child, int timeout = 3}) =>
       _controller.showCustomSnackbar(child: child, timeout: timeout);
 }

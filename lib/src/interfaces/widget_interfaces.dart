@@ -5,6 +5,8 @@ abstract interface class LoadingInterface {
   void closeLoading();
 
   void openLoading();
+
+  bool isLoading();
 }
 
 
@@ -15,7 +17,9 @@ abstract interface class SnackbarInterface {
       required String? message,
       required String title,
       Function()? onTap,
-      required int timeout});
+      int timeout = 3});
 
-  void showCustomSnackbar({required Widget child, required int timeout});
+  void showCustomSnackbar({required Widget child, int timeout = 3});
+
+  void dissmissSnackbar({Function? onClosed});
 }

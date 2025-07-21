@@ -6,7 +6,7 @@ final class BaseDialog implements DialogInterfaces {
   static final instance = BaseDialog._();
   BaseDialog._();
   Widget _dialog =
-      Container(color: Colors.black.withOpacity(0.5), child: const SizedBox());
+      Container(color: Colors.black.withAlpha(120), child: const SizedBox());
   late final BuildContext _dialogContext;
   bool _isInit = false;
   init(BuildContext context) {
@@ -25,7 +25,7 @@ final class BaseDialog implements DialogInterfaces {
   }) {
     _dialog = Scaffold(
       // type: MaterialType.transparency,
-      backgroundColor: backgroundColor ?? Colors.black.withOpacity(0.3),
+      backgroundColor: backgroundColor ?? Colors.black.withAlpha(90),
       // backgroundColor: Colors.black,
       body: Stack(
         children: [

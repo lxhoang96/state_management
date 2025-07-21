@@ -2,7 +2,7 @@ import 'dart:async';
 
 /// controller interface
 abstract interface class BaseController {
-  FutureOr<void> init();
+  init();
 
   FutureOr<void> onReady();
 

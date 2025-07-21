@@ -83,8 +83,8 @@ extension BaseRouterExtension on BaseRouter {
     if (innerRouters.length <= 1) return false;
     final index =
         innerRouters.indexWhere((element) => element.routerName == innerName);
-    if (index > 0) {
-      innerRouters.length = index;
+    if (index >= 0) {
+      innerRouters.length = index+1;
       return true;
     }
     return false;
@@ -93,11 +93,7 @@ extension BaseRouterExtension on BaseRouter {
 
 extension ConvertBaseRouter on List<BaseRouter> {
   List<MaterialPage> getMaterialPage() {
-    final List<MaterialPage> routers = [];
-    forEach((element) {
-      routers.add(element.getRouter());
-    });
-    return routers;
+    return map((element) => element.getRouter()).toList();
   }
 
   BaseRouter? getByName(String routerName) =>

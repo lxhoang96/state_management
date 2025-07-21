@@ -51,7 +51,7 @@ final class SnackBarController implements SnackbarInterface {
                 spreadRadius: 2.0,
               ),
             ],
-            color: style.backgroundColor.withOpacity(0.7),
+            color: style.backgroundColor.withAlpha(200),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,6 +99,19 @@ final class SnackBarController implements SnackbarInterface {
       snackbars.value.remove(child);
       snackbars.update();
     });
+  }
+  
+  @override
+  void dissmissSnackbar({Function? onClosed}) {
+    // showSnackBar.value = false;
+    // snackbar = const SizedBox();
+    if (snackbars.value.isNotEmpty) {
+      snackbars.value.clear();
+      snackbars.update();
+      onClosed?.call();
+    } else {
+      debugPrint("Snackbar already closed");
+    }
   }
 }
 

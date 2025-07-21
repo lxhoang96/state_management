@@ -35,20 +35,21 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
   List<Page> _pages = [];
   @override
   Widget build(BuildContext context) {
-    if (_pages.isNotEmpty) {
-      return Navigator(
-          key: navigatorKey,
-          pages: _pages.toList(),
-          observers: observers,
-          onPopPage: (route, result) {
-            if (!route.didPop(result)) return false;
-
-            MainState.instance.pop();
-
-            return true;
-          });
-    }
-    return const SizedBox();
+    return _pages.isNotEmpty
+        ? Navigator(
+            key: navigatorKey,
+            pages: _pages,
+            observers: observers,
+            onDidRemovePage: (page){
+              // Perform custom logic when a page is removed
+            if (page.name != null) {
+              debugPrint('Page removed: ${page.name}');
+            }
+              MainState.instance.pop();
+            },
+          
+          )
+        : const SizedBox();
   }
 
   @override
