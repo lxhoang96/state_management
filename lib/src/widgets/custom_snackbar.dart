@@ -8,7 +8,7 @@ final class SnackBarController implements SnackbarInterface {
   static final instance = SnackBarController._();
   SnackBarController._();
   
-  final snackbars = Observer<List<_SnackbarItem>>(initValue: []); // ✅ Use custom item class
+  final snackbars = InnerObserver<List<_SnackbarItem>>(initValue: []); // ✅ Use custom item class
   final Map<String, Timer> _timers = {}; // ✅ Track timers for better cleanup
 
   @override

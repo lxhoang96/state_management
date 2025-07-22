@@ -27,6 +27,7 @@ final class MainState implements MainStateInterface {
         try {
           oldFunc.call();
         } catch (e) {
+          debugPrint('Error in queued navigation: $e');
           onNavigationError?.call(e, _navApp.currentRouter);
         }
       }
@@ -107,7 +108,7 @@ final class MainState implements MainStateInterface {
       if (instance is BaseController) {
         instance.dispose();
       }
-      _listCtrl.remove(instance);
+      _listCtrl.remove(T);
       debugPrint("Removed Controller Type:$T");
     }
   }
@@ -124,22 +125,44 @@ final class MainState implements MainStateInterface {
     return result;
   }
 
+  // void _autoRemoveCtrl() {
+  //   // try {
+  //   //   _listCtrl.removeWhere((key, value) => _removeByInstance(value));
+  //   // } catch (e) {
+  //   //   debugPrint(e.toString());
+  //   // }
+  //   _listCtrl.removeWhere(
+  //     (key, value) {
+  //       final result = _removeByInstance(value);
+  //       if (result) {
+  //         debugPrint("Removed Controller Type:$key");
+  //       }
+  //       return result;
+  //     },
+  //   );
+  // }
+
   void _autoRemoveCtrl() {
-    // try {
-    //   _listCtrl.removeWhere((key, value) => _removeByInstance(value));
-    // } catch (e) {
-    //   debugPrint(e.toString());
-    // }
-    _listCtrl.removeWhere(
-      (key, value) {
-        final result = _removeByInstance(value);
-        if (result) {
-          debugPrint("Removed Controller Type:$key");
-        }
-        return result;
-      },
-    );
+  final toRemove = <Type>[];
+  
+  // ✅ First, collect which controllers should be removed
+  _listCtrl.forEach((key, value) {
+    final shouldRemove = _removeByInstance(value);
+    if (shouldRemove) {
+      toRemove.add(key);
+    }
+  });
+  
+  // ✅ Then remove them
+  for (final type in toRemove) {
+    final instance = _listCtrl[type]?.instance;
+    if (instance is BaseController) {
+      instance.dispose();
+    }
+    _listCtrl.remove(type);
+    debugPrint("Removed Controller Type:$type");
   }
+}
 
   // void _autoRemoveObs() {
   //   _listObserver.removeWhere((element) {

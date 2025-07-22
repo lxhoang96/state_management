@@ -6,6 +6,7 @@ import 'package:base/src/widgets/custom_loading.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../widgets/main_widget.dart';
 import '../custom_router.dart';
 import '../nav_config.dart';
 
@@ -89,8 +90,14 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
           controller: _dialogHeroCtrl,
           child: _buildDialogNavigator(),
         ),
-        if (useSnackbar) _buildSnackbarOverlay(),
-        if (useLoading) _buildLoadingOverlay(),
+        // if (useSnackbar) _buildSnackbarOverlay(),
+        // if (useLoading) _buildLoadingOverlay(),
+        // ✅ Isolated overlays with keys and RepaintBoundary
+      // ✅ Move Positioned inside the overlay widgets, not outside
+      if (useSnackbar) 
+        _SnackbarOverlay(isDesktop: isDesktop),
+      if (useLoading)
+        _LoadingOverlay(loadingWidget: loadingWidget),
       ],
     );
   }
@@ -106,8 +113,8 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
               if (page.name != null) {
                 debugPrint('Page removed: ${page.name}');
               }
-              MainState.instance.pop();
-              notifyListeners();
+              // MainState.instance.pop();
+              // notifyListeners();
             },
           )
         : const SizedBox();
@@ -118,13 +125,13 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         ? Navigator(
             key: _dialogKey,
             pages: _dialogs,
-            onDidRemovePage: (page){
+            onDidRemovePage: (dialog){
                 // Perform custom logic when a page is removed
-              if (page.name != null) {
-                debugPrint('Page removed: ${page.name}');
+              if (dialog.name != null) {
+                debugPrint('Dialog removed: ${dialog.name}');
               }
               AppDialog.closeLastDialog();
-              notifyListeners();
+              // notifyListeners();
             },
           )
         : const SizedBox();
@@ -193,23 +200,23 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   @override
   Future<void> setNewRoutePath(RoutePathConfigure configuration) async {
     if (!kIsWeb) {
-      notifyListeners();
+      // notifyListeners();
       return;
     }
     if (configuration.isUnknown) {
       MainState.instance.showUnknownRouter();
-      notifyListeners();
+      // notifyListeners();
       return;
     }
     if (configuration.lostConnected) {
       MainState.instance.showLostConnectedRouter();
-      notifyListeners();
+      // notifyListeners();
       return;
     }
 
     if (configuration.isHomePage) {
       MainState.instance.showHomeRouter();
-      notifyListeners();
+      // notifyListeners();
       return;
     }
 
@@ -217,9 +224,76 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
       MainState.instance.setOuterRoutersForWeb(
         configuration.pathName!.replaceAll('//', '/').split('/'),
       );
-      notifyListeners();
+      // notifyListeners();
       return;
     }
-    notifyListeners();
+    // notifyListeners();
+  }
+}
+
+
+
+
+class _SnackbarOverlay extends StatelessWidget {
+  final bool isDesktop;
+  
+  const _SnackbarOverlay({required this.isDesktop});
+
+  @override
+  Widget build(BuildContext context) {
+    debugPrint('Building snackbar overlay with isDesktop: $isDesktop');
+    return Positioned.fill(
+      child: RepaintBoundary(
+        key: const ValueKey('snackbar_overlay'),
+        child: ObserWidget(
+          value: SnackBarController.instance.snackbars,
+          child: (items) {
+            if (items.isNotEmpty) {
+              return Align(
+                alignment: isDesktop ? Alignment.topRight : Alignment.topCenter,
+                child: SizedBox(
+                  width: isDesktop ? 300 : double.infinity,
+                  height: 300,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    reverse: true, // Show newest on top
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      return items[index].widget;
+                    },
+                  ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadingOverlay extends StatelessWidget {
+  final Widget? loadingWidget;
+  
+  const _LoadingOverlay({this.loadingWidget});
+
+  @override
+  Widget build(BuildContext context) {
+    debugPrint('Building loading overlay with widget: $loadingWidget');
+    return Positioned.fill(
+      child: RepaintBoundary(
+        key: const ValueKey('loading_overlay'),
+        child: ObserWidget(
+          value: LoadingController.instance.showing,
+          child: (value) {
+            if (value == true) {
+              return LoadingController.instance.loadingWidget(loadingWidget);
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
   }
 }

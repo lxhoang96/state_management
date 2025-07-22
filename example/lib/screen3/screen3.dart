@@ -29,7 +29,7 @@ class Screen3 extends StatelessWidget {
             onPressed: () {
               controller.controller1.intObs.value++;
               // AppRouter.popUntilNamed(RouteName.screen1);
-              Global.popAllAndPushNamed(RouteName.screen1);
+              Global.popUntil(RouteName.screen1);
             },
             child: const Text('To screen 1')),
       ],

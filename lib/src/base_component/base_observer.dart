@@ -13,7 +13,9 @@ base class InnerObserver<T> implements ObserverAbs<T> {
 
   InnerObserver({required T initValue}) {
     _object = initValue;
+    debugPrint('$this initialized with value: $_object');
     _streamController.sink.add(_object);
+    debugPrint('$this stream initialized');
   }
 
   @override
@@ -50,11 +52,10 @@ final class Observer<T> extends InnerObserver<T> {
   final bool _useDeepEquality;
 
   Observer({
-    required T initValue, 
+    required super.initValue, 
     bool autoClose = true,
     bool useDeepEquality = false, // ✅ Optional deep equality
-  }) : _useDeepEquality = useDeepEquality,
-       super(initValue: initValue);
+  }) : _useDeepEquality = useDeepEquality;
 
   @override
   set value(T valueSet) {
@@ -87,12 +88,13 @@ final class ObserverCombined {
   final List<dynamic> _latestValues; // ✅ Cache latest values
   bool _isDisposed = false;
 
-  ObserverCombined(List<Stream<dynamic>> listStream) 
+  ObserverCombined(List<ObserverAbs<dynamic>> listStream) 
       : _latestValues = List.filled(listStream.length, null) {
-    
+        
     for (int i = 0; i < listStream.length; i++) {
+      _latestValues[i] = listStream[i].value; // ✅ Initialize with current value
       _subscriptions.add(
-        listStream[i].listen((value) {
+        listStream[i].stream.listen((value) {
           if (_isDisposed) return;
           _latestValues[i] = value;
           // ✅ Only emit when all values are available
@@ -129,14 +131,14 @@ final class ObserWidget<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder<T>(
       stream: value.stream,
+      initialData: value.value,
       builder: (context, snapshot) {
-        if (snapshot.hasData &&
-            snapshot.connectionState == ConnectionState.active) {
+        if (snapshot.hasData && snapshot.data != null) {
           return child(snapshot.data as T);
         }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //   return const Center(child: CircularProgressIndicator());
+        // }
         return const SizedBox();
       },
     );
@@ -151,7 +153,7 @@ final class ObserListWidget extends StatefulWidget {
     required this.child
   });
   
-  final List<Stream<dynamic>> listStream;
+  final List<Observer<dynamic>> listStream;
   final Widget Function(List<dynamic> value) child;
 
   @override
@@ -178,13 +180,12 @@ class _ObserListWidgetState extends State<ObserListWidget> {
     return StreamBuilder<List<dynamic>>(
       stream: _combined.value,
       builder: (context, snapshot) {
-        if (snapshot.hasData && 
-            snapshot.connectionState == ConnectionState.active) {
+        if (snapshot.hasData && snapshot.data != null) {
           return widget.child(snapshot.data!);
         }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //   return const Center(child: CircularProgressIndicator());
+        // }
         return const SizedBox();
       },
     );

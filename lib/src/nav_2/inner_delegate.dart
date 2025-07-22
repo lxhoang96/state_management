@@ -50,9 +50,11 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
           _onPagesChanged,
           onError: _onStreamError,
         );
+        _onPagesChanged(stream.value);
       } else {
         debugPrint('Warning: No inner stream found for parent: $parentName');
       }
+
     } catch (e) {
       debugPrint('Error initializing InnerDelegateRouter: $e');
     }
@@ -114,7 +116,7 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
       if (page.name != null) {
         debugPrint('Inner page removed: ${page.name} (parent: $parentName)');
       }
-      MainState.instance.pop();
+      // MainState.instance.pop();
     } catch (e) {
       debugPrint('Error removing page: $e');
     }

@@ -121,8 +121,34 @@ final class AppNav implements AppNavInterfaces {
   }
 
   void _invalidateInnerCache(String parentName) {
+    // remove if no inner routers exist
     _materialPageCache.remove(parentName);
   }
+
+//   void _invalidateInnerCache(String parentName) {
+//   // ✅ Check if parent router still has inner routers
+//   final parentRouter = _outerRouterMap[parentName];
+//   if (parentRouter != null && !parentRouter.hasInnerRouters) {
+//     // ✅ Parent has no more inner routers, remove it completely
+//     _outerRouterOrder.remove(parentName);
+//     _outerRouterMap.remove(parentName);
+    
+//     // ✅ Dispose and remove the inner stream controller
+//     final oldInner = _streamInnerController.remove(parentName);
+//     oldInner?.dispose();
+    
+//     // ✅ Update current router to the new last router
+//     if (_outerRouterOrder.isNotEmpty) {
+//       final newLastName = _outerRouterOrder.last;
+//       _currentRouter = _outerRouterMap[newLastName]!;
+//       _invalidateOuterCache();
+//       _updateOuter(_currentRouter!);
+//     }
+//   }
+  
+//   // ✅ Always remove the cache regardless
+//   _materialPageCache.remove(parentName);
+// }
 
   // ✅ Cached MaterialPage generation
   List<MaterialPage> _getOuterMaterialPages() {
@@ -314,6 +340,7 @@ final class AppNav implements AppNavInterfaces {
     } else {
       final parentRouter = _validateParentRouter(parentName);
       parentRouter.popAndAddInner(newRouter);
+      _currentRouter = newRouter;
       _invalidateInnerCache(parentName);
       _updateInner(parentName);
     }
