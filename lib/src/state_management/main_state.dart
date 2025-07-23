@@ -60,9 +60,10 @@ final class MainState implements MainStateInterface {
   @override
   T add<T>(T instance, {permanently = false}) {
     final controller = _listCtrl[T]?.instance;
-    if (controller != null) {
+    if (controller != null ) {
       return controller as T;
-    } else {
+    } 
+
       _listCtrl[T] = InstanceRoute(
           route: permanently ? '/' : _navApp.currentRouter,
           instance: instance,
@@ -71,7 +72,7 @@ final class MainState implements MainStateInterface {
         instance.init();
       }
       debugPrint("Added Controller Type:$T");
-    }
+    
 
     return instance;
   }
@@ -113,17 +114,19 @@ final class MainState implements MainStateInterface {
     }
   }
 
-  bool _removeByInstance(InstanceRoute instanceInput) {
-    final result = !_navApp.checkActiveRouter(instanceInput.route,
-        parentName: instanceInput.parentName);
-    if (result) {
-      final instance = instanceInput.instance;
-      if (instance is BaseController) {
-        instance.dispose();
-      }
-    }
-    return result;
-  }
+  // bool _removeByInstance(InstanceRoute instanceInput) {
+  //   final result = !_navApp.checkActiveRouter(instanceInput.route,
+  //       parentName: instanceInput.parentName);
+  //   if (result) {
+  //     final instance = instanceInput.instance;
+  //     if (instance is BaseController) {
+  //       instance.dispose();
+  //     }
+  //   }
+  //   return result;
+  // }
+
+  
 
   // void _autoRemoveCtrl() {
   //   // try {
@@ -141,26 +144,42 @@ final class MainState implements MainStateInterface {
   //     },
   //   );
   // }
-
+  bool _shouldRemoveInstance(InstanceRoute instanceInput) {
+    // ✅ Only check, don't dispose here
+    return !_navApp.checkActiveRouter(instanceInput.route,
+        parentName: instanceInput.parentName);
+  }
+  
   void _autoRemoveCtrl() {
   final toRemove = <Type>[];
   
-  // ✅ First, collect which controllers should be removed
   _listCtrl.forEach((key, value) {
-    final shouldRemove = _removeByInstance(value);
+    final shouldRemove = _shouldRemoveInstance(value);
     if (shouldRemove) {
       toRemove.add(key);
     }
   });
   
-  // ✅ Then remove them
+  // ✅ Remove and dispose properly
   for (final type in toRemove) {
-    final instance = _listCtrl[type]?.instance;
-    if (instance is BaseController) {
-      instance.dispose();
+    final instanceRoute = _listCtrl[type];
+    if (instanceRoute != null) {
+      final instance = instanceRoute.instance;
+      
+      // ✅ Dispose first
+      if (instance is BaseController) {
+        try {
+          instance.dispose();
+          debugPrint("Disposed Controller Type:$type");
+        } catch (e) {
+          debugPrint('Error disposing controller $type: $e');
+        }
+      }
+      
+      // ✅ Then remove from map
+      _listCtrl.remove(type);
+      debugPrint("Removed Controller Type:$type");
     }
-    _listCtrl.remove(type);
-    debugPrint("Removed Controller Type:$type");
   }
 }
 

@@ -43,6 +43,7 @@ base class DefaultController implements BaseController {
       observer.dispose();
     }
     _observers.clear();
+    debugPrint('$this disposed');
   }
 
   @override
@@ -53,4 +54,7 @@ base class DefaultController implements BaseController {
 
   @override
   onReady() {}
+
+  @override
+  bool get isDisposed => _isDisposed;
 }

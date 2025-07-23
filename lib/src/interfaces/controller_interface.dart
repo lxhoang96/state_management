@@ -7,4 +7,6 @@ abstract interface class BaseController {
   FutureOr<void> onReady();
 
   FutureOr<void> dispose();
+
+  bool get isDisposed;
 }

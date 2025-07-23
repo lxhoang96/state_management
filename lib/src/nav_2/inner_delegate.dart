@@ -24,7 +24,7 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
   StreamSubscription<List<MaterialPage>>? _streamSubscription;
   
   // ✅ Disposal flag to prevent operations after disposal
-  bool _isDisposed = false;
+  // bool _isDisposed = false;
   
   @override
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
@@ -64,14 +64,14 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
   
   // ✅ Optimized page change handler
   void _onPagesChanged(List<MaterialPage> value) {
-    if (_isDisposed) return;
+    // if (_isDisposed) return;
     
     // ✅ More efficient list comparison - check length first
     if (_pages.length != value.length || !listEquals(_pages, value)) {
       _pages = List.from(value); // ✅ Create new list to avoid reference issues
-      if (!_isDisposed) {
+      // if (!_isDisposed) {
         notifyListeners();
-      }
+      // }
     }
   }
   
@@ -98,8 +98,8 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
    // ✅ Proper disposal
   @override
   void dispose() {
-    if (_isDisposed) return;
-    _isDisposed = true;
+    // if (_isDisposed) return;
+    // _isDisposed = true;
     
     _streamSubscription?.cancel();
     _streamSubscription = null;
@@ -110,7 +110,7 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
   
   // ✅ Separate page removal handler
   void _onPageRemoved(Page page) {
-    if (_isDisposed) return;
+    // if (_isDisposed) return;
     
     try {
       if (page.name != null) {
@@ -124,7 +124,7 @@ final class InnerDelegateRouter extends RouterDelegate<RoutePathConfigure>
 
   @override
   Future<void> setNewRoutePath(RoutePathConfigure configuration) async {
-    if (_isDisposed) return;
+    // if (_isDisposed) return;
 
     if (!kIsWeb) return;
 

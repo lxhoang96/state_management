@@ -8,5 +8,6 @@ final class InnerScreen1Controller extends DefaultController {
   @override
   void dispose() {
     textCtrl.dispose();
+    super.dispose();
   }
 }

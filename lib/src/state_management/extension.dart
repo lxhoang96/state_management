@@ -7,7 +7,7 @@ class Global {
   static T add<T>(T instance, {permanently = false}) =>
       _mainState.add(instance, permanently: permanently);
 
-  static void remove<T>() => _mainState.remove<T>();
+  // static void remove<T>() => _mainState.remove<T>();
 
   static T find<T>() => _mainState.find<T>();
 

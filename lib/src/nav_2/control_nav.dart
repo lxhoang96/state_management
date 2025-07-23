@@ -376,36 +376,94 @@ final class AppNav implements AppNavInterfaces {
     }
   }
 
-  @override
-  void pop() {
-    _ensureStackNotEmpty();
+  // @override
+  // void pop() {
+  //   _ensureStackNotEmpty();
     
-    final parentName = _currentRouter?.parentName;
+  //   final parentName = _currentRouter?.parentName;
     
-    if (_outerRouterOrder.isNotEmpty) {
-      final lastRouterName = _outerRouterOrder.last;
-      final lastParent = _outerRouterMap[lastRouterName]!;
+  //   if (_outerRouterOrder.isNotEmpty) {
+  //     final lastRouterName = _outerRouterOrder.last;
+  //     final lastParent = _outerRouterMap[lastRouterName]!;
       
-      if (parentName != null && lastParent.pop()) {
-        _currentRouter = lastParent.innerRouters.last;
-        _invalidateInnerCache(parentName);
-        _updateInner(parentName);
-        return;
+  //     if (parentName != null && lastParent.pop()) {
+  //       _currentRouter = lastParent.innerRouters.last;
+  //       _invalidateInnerCache(parentName);
+  //       _updateInner(parentName);
+  //       return;
+  //     }
+      
+  //     final removedName = _outerRouterOrder.removeLast();
+  //     _outerRouterMap.remove(removedName);
+      
+  //     final oldInner = _streamInnerController.remove(removedName);
+  //     oldInner?.dispose();
+      
+  //     _invalidateOuterCache();
+  //     if (_outerRouterOrder.isNotEmpty) {
+  //       final newLastName = _outerRouterOrder.last;
+  //       _updateOuter(_outerRouterMap[newLastName]!);
+  //     }
+  //   }
+  // }
+
+  // In your AppNav class
+@override
+void pop() {
+  _ensureStackNotEmpty();
+  
+  if (_outerRouterOrder.isNotEmpty) {
+    final lastRouterName = _outerRouterOrder.last;
+    final lastRouter = _outerRouterMap[lastRouterName];
+    
+    // ✅ Check if router exists before operations
+    if (lastRouter == null) {
+      debugPrint('Warning: Trying to pop non-existent router: $lastRouterName');
+      return;
+    }
+    
+    final parentName = lastRouter.parentName;
+    
+    if (parentName != null && lastRouter.pop()) {
+      _currentRouter = lastRouter.innerRouters.last;
+      _invalidateInnerCache(parentName);
+      _updateInner(parentName);
+      return;
+    }
+    
+    // ✅ Remove router only once
+    final removedName = _outerRouterOrder.removeLast();
+    final removedRouter = _outerRouterMap.remove(removedName);
+    
+    if (removedRouter != null) {
+      // ✅ Dispose controller if it exists
+      try {
+        removedRouter.dispose();
+      } catch (e) {
+        debugPrint('Error disposing router $removedName: $e');
       }
-      
-      final removedName = _outerRouterOrder.removeLast();
-      _outerRouterMap.remove(removedName);
-      
-      final oldInner = _streamInnerController.remove(removedName);
-      oldInner?.dispose();
-      
-      _invalidateOuterCache();
-      if (_outerRouterOrder.isNotEmpty) {
-        final newLastName = _outerRouterOrder.last;
-        _updateOuter(_outerRouterMap[newLastName]!);
+    }
+    
+    // ✅ Clean up inner stream only if it exists
+    final oldInner = _streamInnerController.remove(removedName);
+    if (oldInner != null) {
+      try {
+        oldInner.dispose();
+      } catch (e) {
+        debugPrint('Error disposing inner stream $removedName: $e');
+      }
+    }
+    
+    _invalidateOuterCache();
+    if (_outerRouterOrder.isNotEmpty) {
+      final newLastName = _outerRouterOrder.last;
+      final newLastRouter = _outerRouterMap[newLastName];
+      if (newLastRouter != null) {
+        _updateOuter(newLastRouter);
       }
     }
   }
+}
 
   @override
   void popUntil(String routerName, {String? parentName}) {

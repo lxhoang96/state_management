@@ -1,63 +1,38 @@
 import 'package:base/base_widget.dart';
-import 'package:base/src/base_component/base_observer.dart';
 import 'package:base/src/nav_2/control_nav.dart';
 import 'package:base/src/state_management/main_state.dart';
-import 'package:base/src/widgets/custom_loading.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../base_component.dart';
+import '../../widgets/custom_loading.dart';
 import '../../widgets/main_widget.dart';
 import '../custom_router.dart';
 import '../nav_config.dart';
 
-/// [RouterDelegate] for main flow.
+/// [RouterDelegate] for main flow - focused only on navigation
 final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RoutePathConfigure> {
   final InitBinding? initBinding;
-  final Widget? loadingWidget;
-  final bool useLoading;
-  final bool useSnackbar;
   final DecorationImage? backgroundImage;
-  final bool isDesktop;
   final Map<String, InitRouter> listPages;
   final String homeRouter;
   final String? splashRouter;
   final List<Widget Function()> globalWidgets;
   final List<NavigatorObserver> observers;
 
-  HomeRouterDelegate(
-      {required this.listPages,
-      required this.homeRouter,
-      this.splashRouter,
-      this.initBinding,
-      this.loadingWidget,
-      this.useLoading = true,
-      this.useSnackbar = true,
-      this.backgroundImage,
-      this.globalWidgets = const [],
-      this.observers = const [],
-      this.isDesktop = true,
-      Function(dynamic e, String currentRouter)? onNavigationError}) {
+  HomeRouterDelegate({
+    required this.listPages,
+    required this.homeRouter,
+    this.splashRouter,
+    this.initBinding,
+    this.backgroundImage,
+    this.globalWidgets = const [],
+    this.observers = const [],
+    Function(dynamic e, String currentRouter)? onNavigationError,
+  }) {
     MainState.instance.intialize(onNavigationError: onNavigationError);
-    final outerStream = MainState.instance.outerStream;
-    outerStream.stream.listen(
-      (value) {
-        if (!listEquals(_pages, value)) {
-          _pages = value.toList();
-          notifyListeners();
-        }
-      },
-    );
-    final dialogStream = AppDialog.instance.dialogStream;
-
-    dialogStream.stream.listen(
-      (value) {
-        if (!listEquals(_dialogs, value)) {
-          _dialogs = value.toList();
-          notifyListeners();
-        }
-      },
-    );
+    _setupStreamListeners();
   }
 
   @override
@@ -70,8 +45,25 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
   final _mainHeroCtrl = MaterialApp.createMaterialHeroController();
   final _dialogHeroCtrl = MaterialApp.createMaterialHeroController();
 
+  void _setupStreamListeners() {
+    MainState.instance.outerStream.stream.listen((value) {
+      if (!listEquals(_pages, value)) {
+        _pages = value.toList();
+        notifyListeners();
+      }
+    });
+
+    AppDialog.instance.dialogStream.stream.listen((value) {
+      if (!listEquals(_dialogs, value)) {
+        _dialogs = value.toList();
+        notifyListeners();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // ✅ Only navigation logic - no overlays!
     return Stack(
       children: [
         GlobalWidget(
@@ -90,14 +82,6 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
           controller: _dialogHeroCtrl,
           child: _buildDialogNavigator(),
         ),
-        // if (useSnackbar) _buildSnackbarOverlay(),
-        // if (useLoading) _buildLoadingOverlay(),
-        // ✅ Isolated overlays with keys and RepaintBoundary
-      // ✅ Move Positioned inside the overlay widgets, not outside
-      if (useSnackbar) 
-        _SnackbarOverlay(isDesktop: isDesktop),
-      if (useLoading)
-        _LoadingOverlay(loadingWidget: loadingWidget),
       ],
     );
   }
@@ -108,13 +92,10 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
             key: navigatorKey,
             pages: _pages,
             observers: observers,
-            onDidRemovePage: (page){
-                // Perform custom logic when a page is removed
+            onDidRemovePage: (page) {
               if (page.name != null) {
                 debugPrint('Page removed: ${page.name}');
               }
-              // MainState.instance.pop();
-              // notifyListeners();
             },
           )
         : const SizedBox();
@@ -125,71 +106,20 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
         ? Navigator(
             key: _dialogKey,
             pages: _dialogs,
-            onDidRemovePage: (dialog){
-                // Perform custom logic when a page is removed
+            onDidRemovePage: (dialog) {
               if (dialog.name != null) {
                 debugPrint('Dialog removed: ${dialog.name}');
               }
               AppDialog.closeLastDialog();
-              // notifyListeners();
             },
           )
         : const SizedBox();
   }
 
-  Widget _buildSnackbarOverlay() {
-    return Overlay(
-      initialEntries: [
-        OverlayEntry(
-          builder: (context) => ObserWidget(
-            value: SnackBarController.instance.snackbars,
-            child: (items) {
-              if (items.isNotEmpty) {
-                return Align(
-                  alignment: isDesktop
-                      ? Alignment.topRight
-                      : Alignment.topCenter,
-                  child: SizedBox(
-                    width: isDesktop ? 300 : double.infinity,
-                    height: 300,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        return items[index].widget;
-                      },
-                    ),
-                  ),
-                );
-              }
-              return const SizedBox();
-            },
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget _buildLoadingOverlay() {
-    return Positioned.fill(
-      child: ObserWidget(
-        value: LoadingController.instance.showing,
-        child: (value) {
-          if (value == true) {
-            return LoadingController.instance.loadingWidget(loadingWidget);
-          }
-          return const SizedBox();
-        },
-      ),
-    );
-  }
-
   @override
   RoutePathConfigure get currentConfiguration {
     if (_pages.length > 1) {
-      return RoutePathConfigure.otherPage(
-        MainState.instance.getPath(),
-      );
+      return RoutePathConfigure.otherPage(MainState.instance.getPath());
     }
     if (MainState.instance.getCurrentRouter() == unknownPath) {
       return RoutePathConfigure.unKnown();
@@ -199,73 +129,86 @@ final class HomeRouterDelegate extends RouterDelegate<RoutePathConfigure>
 
   @override
   Future<void> setNewRoutePath(RoutePathConfigure configuration) async {
-    if (!kIsWeb) {
-      // notifyListeners();
-      return;
-    }
+    if (!kIsWeb) return;
+
     if (configuration.isUnknown) {
       MainState.instance.showUnknownRouter();
-      // notifyListeners();
       return;
     }
     if (configuration.lostConnected) {
       MainState.instance.showLostConnectedRouter();
-      // notifyListeners();
       return;
     }
-
     if (configuration.isHomePage) {
       MainState.instance.showHomeRouter();
-      // notifyListeners();
       return;
     }
-
     if (configuration.pathName != null) {
       MainState.instance.setOuterRoutersForWeb(
         configuration.pathName!.replaceAll('//', '/').split('/'),
       );
-      // notifyListeners();
-      return;
     }
-    // notifyListeners();
   }
 }
 
 
+/// Private builder function for app overlays
+Widget _buildAppWithOverlays(
+  BuildContext context,
+  Widget? child, {
+  bool useSnackbar = true,
+  bool useLoading = true,
+  bool isDesktop = false,
+  Widget? customLoadingWidget,
+}) {
+  return Stack(
+    children: [
+      // ✅ Main app content
+      child ?? const SizedBox.shrink(),
+      
+      // ✅ Global overlays
+      if (useSnackbar) 
+        _GlobalSnackbarOverlay(isDesktop: isDesktop),
+      if (useLoading)
+        _GlobalLoadingOverlay(loadingWidget: customLoadingWidget),
+    ],
+  );
+}
 
-
-class _SnackbarOverlay extends StatelessWidget {
+/// Global snackbar overlay
+class _GlobalSnackbarOverlay extends StatelessWidget {
   final bool isDesktop;
   
-  const _SnackbarOverlay({required this.isDesktop});
+  const _GlobalSnackbarOverlay({required this.isDesktop});
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Building snackbar overlay with isDesktop: $isDesktop');
-    return Positioned.fill(
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 10,
+      left: isDesktop ? null : 10,
+      right: 10,
       child: RepaintBoundary(
-        key: const ValueKey('snackbar_overlay'),
+        key: const ValueKey('global_snackbar'),
         child: ObserWidget(
           value: SnackBarController.instance.snackbars,
           child: (items) {
-            if (items.isNotEmpty) {
-              return Align(
-                alignment: isDesktop ? Alignment.topRight : Alignment.topCenter,
-                child: SizedBox(
-                  width: isDesktop ? 300 : double.infinity,
-                  height: 300,
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    reverse: true, // Show newest on top
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      return items[index].widget;
-                    },
-                  ),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
+            if (items.isEmpty) return const SizedBox.shrink();
+            
+            return SizedBox(
+              width: isDesktop ? 300 : null,
+              child: Column(
+                crossAxisAlignment: isDesktop 
+                    ? CrossAxisAlignment.end 
+                    : CrossAxisAlignment.center,
+                children: items
+                    .take(5) // ✅ Limit to 5 snackbars max
+                    .map((item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: item.widget,
+                        ))
+                    .toList(),
+              ),
+            );
           },
         ),
       ),
@@ -273,27 +216,68 @@ class _SnackbarOverlay extends StatelessWidget {
   }
 }
 
-class _LoadingOverlay extends StatelessWidget {
+/// Global loading overlay
+class _GlobalLoadingOverlay extends StatelessWidget {
   final Widget? loadingWidget;
   
-  const _LoadingOverlay({this.loadingWidget});
+  const _GlobalLoadingOverlay({this.loadingWidget});
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Building loading overlay with widget: $loadingWidget');
     return Positioned.fill(
       child: RepaintBoundary(
-        key: const ValueKey('loading_overlay'),
+        key: const ValueKey('global_loading'),
         child: ObserWidget(
           value: LoadingController.instance.showing,
-          child: (value) {
-            if (value == true) {
-              return LoadingController.instance.loadingWidget(loadingWidget);
-            }
-            return const SizedBox.shrink();
+          child: (isShowing) {
+            if (!isShowing) return const SizedBox.shrink();
+            
+            return Container(
+              color: Colors.black54,
+              child: LoadingController.instance.loadingWidget(loadingWidget),
+            );
           },
         ),
       ),
+    );
+  }
+}
+
+/// Public factory class for app builders
+final class AppBuilderFactory {
+  AppBuilderFactory._();
+  
+  /// Create a builder function for MaterialApp.router
+  static Widget Function(BuildContext, Widget?) createMaterialAppBuilder({
+    bool useSnackbar = true,
+    bool useLoading = true,
+    bool isDesktop = false,
+    Widget? customLoadingWidget,
+  }) {
+    return (context, child) => _buildAppWithOverlays(
+      context,
+      child,
+      useSnackbar: useSnackbar,
+      useLoading: useLoading,
+      isDesktop: isDesktop,
+      customLoadingWidget: customLoadingWidget,
+    );
+  }
+  
+  /// Create a builder function for CupertinoApp.router
+  static Widget Function(BuildContext, Widget?) createCupertinoAppBuilder({
+    bool useSnackbar = true,
+    bool useLoading = true,
+    bool isDesktop = false,
+    Widget? customLoadingWidget,
+  }) {
+    return (context, child) => _buildAppWithOverlays(
+      context,
+      child,
+      useSnackbar: useSnackbar,
+      useLoading: useLoading,
+      isDesktop: isDesktop,
+      customLoadingWidget: customLoadingWidget,
     );
   }
 }
