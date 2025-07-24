@@ -3,7 +3,7 @@ abstract interface class AppNavInterfaces {
   void pushNamed(String routerName, {String? parentName, dynamic arguments});
 
   /// remove last page
-  void pop();
+  void pop({String? parentName});
 
   /// remove several pages until page with routerName
   void popUntil(String routerName, {String? parentName});

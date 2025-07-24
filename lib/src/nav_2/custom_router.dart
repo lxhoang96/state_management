@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
+import '../base_component/base_observer.dart';
+
 /// It is where your navigator flow starts.
 /// Each [InitRouter] present a router later.
 /// It contains a function returns Widget, [argumentNav] and [parentName] (optional)
@@ -26,7 +28,7 @@ final class InitRouter {
 }
 
 /// A BaseRouter extends InitRouter to return a Router with
-/// String [routerName] and List of BaseRouter [innerRouters] (optional)
+/// String [routerName] and inner navigation stream control
 final class BaseRouter {
   final String routerName;
   final String? parentName;
@@ -41,7 +43,12 @@ final class BaseRouter {
   MaterialPage? _cachedPage;
   bool _isPageInvalidated = false;
   
-  // ✅ Use a more efficient data structure for inner routers
+  // ✅ Only one stream controller for MaterialPages - this is what UI needs
+  final  _innerPageController = InnerObserver<List<MaterialPage>>(
+    initValue: [],
+  );
+  
+  // ✅ Internal list to track routers - not exposed via stream
   final List<BaseRouter> _innerRouters = [];
   
   BaseRouter({
@@ -52,7 +59,7 @@ final class BaseRouter {
     this.argumentNav,
   }) : _widget = widget;
 
-  // ✅ Getter for inner routers (read-only access)
+  // ✅ Getter for inner routers (read-only)
   List<BaseRouter> get innerRouters => List.unmodifiable(_innerRouters);
   
   // ✅ Check if router has inner routes
@@ -60,6 +67,12 @@ final class BaseRouter {
   
   // ✅ Get inner router count efficiently
   int get innerRouterCount => _innerRouters.length;
+  
+  // ✅ Get current inner router
+  BaseRouter? get currentInnerRouter => _innerRouters.isNotEmpty ? _innerRouters.last : null;
+  
+  // ✅ Get inner stream for MaterialPages - this is what AppNav will use
+  InnerObserver<List<MaterialPage>>? get innerStream => _innerPageController;
 
   MaterialPage _createPage() {
     return MaterialPage(
@@ -71,7 +84,6 @@ final class BaseRouter {
   }
 
   MaterialPage getRouter() {
-    // ✅ Only recreate page if invalidated or not cached
     if (_cachedPage == null || _isPageInvalidated) {
       _cachedPage = _createPage();
       _isPageInvalidated = false;
@@ -79,19 +91,36 @@ final class BaseRouter {
     return _cachedPage!;
   }
   
-  // ✅ Invalidate cached page when needed
+  // ✅ Generate MaterialPages from inner routers
+  List<MaterialPage> _getInnerMaterialPages() {
+    return _innerRouters
+        .map((router) => router.getRouter())
+        .toList(growable: false);
+  }
+  
+  // ✅ Update inner stream with current MaterialPages
+  void _updateInnerStream() {
+    _innerPageController.value = _getInnerMaterialPages();
+  }
+  
   void invalidatePage() {
     _isPageInvalidated = true;
   }
   
-  // ✅ Dispose of cached resources
   void dispose() {
     _cachedPage = null;
+    
+    // Dispose all inner routers
+    for (final router in _innerRouters) {
+      router.dispose();
+    }
     _innerRouters.clear();
+    
+    _innerPageController.dispose();
   }
 }
 
-// ✅ Improved extension with better performance and validation
+// ✅ Updated extension to work with single stream
 extension BaseRouterExtension on BaseRouter {
   /// Add inner router with validation
   bool addInner(BaseRouter innerRouter) {
@@ -99,35 +128,45 @@ extension BaseRouterExtension on BaseRouter {
     if (_innerRouters.any((router) => router.routerName == innerRouter.routerName)) {
       return false;
     }
+    
     _innerRouters.add(innerRouter);
+    
+    _updateInnerStream();
     return true;
   }
   
   /// Pop last inner router
-  bool pop() {
-    if (_innerRouters.length <= 1) return false;
+  BaseRouter? popInner() {
+    if (_innerRouters.length <= 1) return null;
+    
     final removed = _innerRouters.removeLast();
-    removed.dispose(); // ✅ Clean up removed router
-    return true;
+    _updateInnerStream();
+    
+    removed.dispose();
+    return removed;
   }
 
   /// Pop all and push new inner router
   void popAllAndPushInner(BaseRouter innerRouter) {
-    // ✅ Dispose all existing routers
+    // Dispose all existing routers
     for (final router in _innerRouters) {
       router.dispose();
     }
     _innerRouters.clear();
     _innerRouters.add(innerRouter);
+    
+    _updateInnerStream();
   }
 
   /// Pop last and add new inner router
   void popAndAddInner(BaseRouter innerRouter) {
     if (_innerRouters.isNotEmpty) {
       final removed = _innerRouters.removeLast();
-      removed.dispose(); // ✅ Clean up removed router
+      removed.dispose();
     }
+    
     _innerRouters.add(innerRouter);
+    _updateInnerStream();
   }
 
   /// Pop until specific inner router name
@@ -139,25 +178,28 @@ extension BaseRouterExtension on BaseRouter {
     );
     
     if (index >= 0 && index < _innerRouters.length - 1) {
-      // ✅ Dispose routers that will be removed
       final routersToRemove = _innerRouters.sublist(index + 1);
+      
+      // Dispose routers that will be removed
       for (final router in routersToRemove) {
         router.dispose();
       }
+      
       _innerRouters.length = index + 1;
+      _updateInnerStream();
       return true;
     }
     return false;
   }
   
-  /// ✅ Find inner router by name efficiently
+  /// Find inner router by name efficiently
   BaseRouter? findInnerRouter(String routerName) {
     return _innerRouters.firstWhereOrNull(
       (element) => element.routerName == routerName
     );
   }
   
-  /// ✅ Remove specific inner router by name
+  /// Remove specific inner router by name
   bool removeInnerRouter(String routerName) {
     final index = _innerRouters.indexWhere(
       (element) => element.routerName == routerName
@@ -165,95 +207,24 @@ extension BaseRouterExtension on BaseRouter {
     
     if (index >= 0) {
       final removed = _innerRouters.removeAt(index);
+      _updateInnerStream();
       removed.dispose();
       return true;
     }
     return false;
   }
   
-  /// ✅ Check if inner router exists
+  /// Check if inner router exists
   bool hasInnerRouter(String routerName) {
     return _innerRouters.any((element) => element.routerName == routerName);
   }
-}
-
-// ✅ Improved list extension with better performance
-extension ConvertBaseRouter on List<BaseRouter> {
-  /// Convert to MaterialPage list with caching
-  List<MaterialPage> getMaterialPage() {
-    // ✅ Use map directly without toList() for better performance
-    return map((element) => element.getRouter()).toList(growable: false);
-  }
-
-  /// Get router by name with early termination
-  BaseRouter? getByName(String routerName) {
-    return firstWhereOrNull((element) => element.routerName == routerName);
-  }
   
-  /// ✅ Batch operations for better performance
-  void disposeAll() {
-    for (final router in this) {
-      router.dispose();
+  /// Enhanced pop method that handles inner navigation priority
+  bool pop() {
+    // If has inner routers, pop from inner first
+    if (hasInnerRouters && _innerRouters.length > 1) {
+      return popInner() != null;
     }
-    clear();
-  }
-  
-  /// ✅ Find multiple routers by pattern
-  List<BaseRouter> findRoutersByPattern(bool Function(BaseRouter) predicate) {
-    return where(predicate).toList();
-  }
-  
-  /// ✅ Get router names efficiently
-  List<String> getRouterNames() {
-    return map((router) => router.routerName).toList(growable: false);
-  }
-  
-  /// ✅ Validate router list (no duplicate names)
-  bool validateRouters() {
-    final names = <String>{};
-    for (final router in this) {
-      if (!names.add(router.routerName)) {
-        return false; // Duplicate found
-      }
-    }
-    return true;
+    return false; // Can't pop this router itself
   }
 }
-
-// /// ✅ Router builder utility for common patterns
-// class RouterBuilder {
-//   static BaseRouter createSimpleRouter({
-//     required String name,
-//     required Widget Function() widget,
-//     String? parentName,
-//     dynamic arguments,
-//   }) {
-//     return BaseRouter(
-//       routerName: name,
-//       widget: widget,
-//       parentName: parentName,
-//       arguments: arguments,
-//     );
-//   }
-  
-//   static BaseRouter createRouterWithInners({
-//     required String name,
-//     required Widget Function() widget,
-//     required List<BaseRouter> innerRouters,
-//     String? parentName,
-//     dynamic arguments,
-//   }) {
-//     final router = BaseRouter(
-//       routerName: name,
-//       widget: widget,
-//       parentName: parentName,
-//       arguments: arguments,
-//     );
-    
-//     for (final inner in innerRouters) {
-//       router.addInner(inner);
-//     }
-    
-//     return router;
-//   }
-// }

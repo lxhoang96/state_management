@@ -216,9 +216,9 @@ final class MainState implements MainStateInterface {
   }
 
   @override
-  void pop() {
+  void pop({String? parentName}) {
     _checkCanNavigate(() {
-      _navApp.pop();
+      _navApp.pop(parentName: parentName);
       _autoRemove();
     }, _HistoryOrder('pop', [_navApp.currentRouter]));
   }

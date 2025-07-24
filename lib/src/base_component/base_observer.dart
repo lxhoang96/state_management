@@ -13,9 +13,7 @@ base class InnerObserver<T> implements ObserverAbs<T> {
 
   InnerObserver({required T initValue}) {
     _object = initValue;
-    debugPrint('$this initialized with value: $_object');
     _streamController.sink.add(_object);
-    debugPrint('$this stream initialized');
   }
 
   @override

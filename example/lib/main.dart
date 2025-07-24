@@ -14,6 +14,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       routerDelegate: HomeRouterDelegate(
           listPages: routerNewList, homeRouter: RouteName.screen1),
+          builder: AppBuilderFactory.createCupertinoAppBuilder(
+            useSnackbar: true,
+            useLoading: true,
+            isDesktop: true,
+          ),
       routeInformationParser: HomeRouteInformationParser(),
       theme: ThemeData(
           pageTransitionsTheme: PageTransitionsTheme(
